@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#F0F0F0" />
+  
+  <!-- Outer Bauhaus Border -->
+  <rect x="24" y="24" width="1152" height="582" fill="none" stroke="#121212" stroke-width="8" />
+
+  <!-- Decorative Corner Primary Color Blocks -->
+  <rect x="24" y="24" width="48" height="48" fill="#D02020" />
+  <rect x="1128" y="24" width="48" height="48" fill="#1040C0" />
+  <rect x="24" y="558" width="48" height="48" fill="#F0C020" />
+  <rect x="1128" y="558" width="48" height="48" fill="#121212" />
+
+  <!-- Top Accent Bar -->
+  <rect x="80" y="80" width="1040" height="12" fill="#121212" />
+
+  <!-- Brand Subtitle -->
+  <text x="80" y="140" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="900" letter-spacing="4" fill="#D02020">INTERACTIVE PRESENTATION DECKS // 16:9 FIXED CANVAS</text>
+
+  <!-- Main Title -->
+  <text x="80" y="230" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="74" font-weight="900" letter-spacing="-1" fill="#121212">SLIDES DIRECTORY</text>
+
+  <!-- Tagline / Topic -->
+  <text x="80" y="290" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="32" font-weight="700" fill="#1040C0">The Bias–Variance Tradeoff &bull; 3 Master Editions</text>
+
+  <!-- 3 Geometric Preview Cards Representation -->
+  <g transform="translate(80, 340)">
+    <!-- Card 1 -->
+    <rect x="0" y="0" width="320" height="180" fill="#FFFFFF" stroke="#121212" stroke-width="5" />
+    <rect x="8" y="8" width="304" height="28" fill="#1F2BE0" />
+    <text x="16" y="28" font-family="-apple-system, sans-serif" font-size="14" font-weight="bold" fill="#FFFFFF">01. COBALT GRID SPEC</text>
+    <circle cx="160" cy="110" r="35" fill="none" stroke="#1F2BE0" stroke-width="4" stroke-dasharray="6,4"/>
+    <rect x="0" y="148" width="320" height="32" fill="#F0EBDE" stroke="#121212" stroke-width="4" />
+    <text x="160" y="169" font-family="-apple-system, sans-serif" font-size="13" font-weight="900" fill="#1F2BE0" text-anchor="middle">ACADEMIC RISOGRAPH</text>
+
+    <!-- Card 2 -->
+    <rect x="360" y="0" width="320" height="180" fill="#FFFFFF" stroke="#121212" stroke-width="5" />
+    <rect x="368" y="8" width="304" height="28" fill="#C85A3A" />
+    <text x="376" y="28" font-family="-apple-system, sans-serif" font-size="14" font-weight="bold" fill="#FFFFFF">02. SOFT EDITORIAL SPEC</text>
+    <rect x="440" y="70" width="160" height="50" fill="#E4ECE0" stroke="#3B7243" stroke-width="2" />
+    <rect x="360" y="148" width="320" height="32" fill="#F6F3EB" stroke="#121212" stroke-width="4" />
+    <text x="520" y="169" font-family="-apple-system, sans-serif" font-size="13" font-weight="900" fill="#C85A3A" text-anchor="middle">WARM CERAMIC &amp; SAGE</text>
+
+    <!-- Card 3 -->
+    <rect x="720" y="0" width="320" height="180" fill="#FFFFFF" stroke="#121212" stroke-width="5" />
+    <rect x="728" y="8" width="304" height="28" fill="#121212" />
+    <text x="736" y="28" font-family="-apple-system, sans-serif" font-size="14" font-weight="bold" fill="#E6FF3D">03. NEO-GRID BOLD SPEC</text>
+    <line x1="750" y1="95" x2="1010" y2="95" stroke="#121212" stroke-width="6" />
+    <rect x="720" y="148" width="320" height="32" fill="#E6FF3D" stroke="#121212" stroke-width="4" />
+    <text x="880" y="169" font-family="-apple-system, sans-serif" font-size="13" font-weight="900" fill="#121212" text-anchor="middle">SWISS BRUTALIST ECRU</text>
+  </g>
+</svg>

@@ -1,5 +1,21 @@
+# Operating System Files
 .DS_Store
-.claude-design/
+Thumbs.db
+
+# Dependencies & Build Artifacts
 node_modules/
+dist/
+.output/
+
+# Vercel Local Cache
 .vercel/
+
+# Logs & Environment
 *.log
+*.tmp
+.env*.local
+
+# IDE & Editor Settings
+.vscode/
+.idea/
+.claude-design/

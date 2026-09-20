@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slides Directory</title>
+    <meta name="description" content="High-fidelity, responsive HTML5 slide decks with interactive mathematics HUDs, parameter sliders, and 16:9 fixed-canvas architecture.">
+
+    <!-- OpenGraph & Social Media Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Slides Directory — Interactive Presentation Decks">
+    <meta property="og:description" content="High-fidelity, responsive HTML5 slide decks with interactive mathematics HUDs, parameter sliders, and 16:9 fixed-canvas architecture.">
+    <meta property="og:image" content="assets/og-preview.svg">
+    <meta property="og:image:type" content="image/svg+xml">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Slides Directory — Interactive Presentation Decks">
+    <meta name="twitter:description" content="High-fidelity, responsive HTML5 slide decks with interactive mathematics HUDs and parameter sliders.">
+    <meta name="twitter:image" content="assets/og-preview.svg">
+    
+    <!-- Google Fonts: Outfit (Bauhaus Geometric Sans) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* ===========================================
+           BAUHAUS DESIGN SYSTEM
+           =========================================== */
+        :root {
+            --bg: #F0F0F0;
+            --fg: #121212;
+            --border: #121212;
+            --red: #D02020;
+            --blue: #1040C0;
+            --yellow: #F0C020;
+            --muted: #E0E0E0;
+            --white: #FFFFFF;
+            
+            --font-main: 'Outfit', -apple-system, sans-serif;
+            --border-w: 3px;
+            --shadow-hard: 6px 6px 0px 0px #121212;
+            --shadow-btn: 3px 3px 0px 0px #121212;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            border-radius: 0px !important;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--fg);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            padding: 32px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Container */
+        .bauhaus-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            min-height: calc(100vh - 64px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Minimal Strip */
+        .bauhaus-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: var(--border-w) solid var(--border);
+            padding-bottom: 16px;
+            margin-bottom: 32px;
+        }
+
+        .brand-text {
+            font-size: 20px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Presentation Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 32px;
+            align-content: start;
+            flex: 1;
+            min-height: 720px;
+        }
+
+        /* Rectangular Slide Card */
+        .slide-card {
+            background: var(--white);
+            border: var(--border-w) solid var(--border);
+            box-shadow: var(--shadow-hard);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .slide-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 8px 8px 0px 0px #121212;
+        }
+
+        .card-main-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            cursor: pointer;
+        }
+
+        .card-main-link:hover .card-topbar {
+            background: #E8E8E8;
+            color: var(--blue);
+        }
+
+        /* Card Top Info Bar */
+        .card-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border-bottom: var(--border-w) solid var(--border);
+            background: var(--white);
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            transition: background-color 0.1s ease, color 0.1s ease;
+        }
+
+        /* 16:9 Rectangular Slide Viewport */
+        .slide-viewport-box {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #0A0A0A;
+            overflow: hidden;
+            border-bottom: var(--border-w) solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide-iframe-preview {
+            width: 1920px;
+            height: 1080px;
+            position: absolute;
+            transform: scale(0.208);
+            transform-origin: center center;
+            border: none;
+            pointer-events: none;
+        }
+
+        /* Card Bottom Action Strip (3 Buttons) */
+        .card-bottom-strip {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            background: var(--white);
+            border-top: none;
+        }
+
+        /* Bauhaus Buttons */
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px 10px;
+            font-family: var(--font-main);
+            font-size: 13px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.1s ease, transform 0.05s ease;
+            user-select: none;
+        }
+
+        .btn-open {
+            background: var(--fg);
+            color: var(--white);
+            border-right: var(--border-w) solid var(--border);
+        }
+
+        .btn-open:hover {
+            background: var(--blue);
+        }
+
+        .btn-open:active {
+            background: #000;
+        }
+
+        .btn-download {
+            background: var(--yellow);
+            color: var(--fg);
+            border-right: var(--border-w) solid var(--border);
+        }
+
+        .btn-download:hover {
+            background: #FFD84D;
+        }
+
+        .btn-download:active {
+            background: #E0B010;
+        }
+
+        .btn-share {
+            background: var(--white);
+            color: var(--fg);
+        }
+
+        .btn-share:hover {
+            background: var(--red);
+            color: var(--white);
+        }
+
+        .btn-share:active {
+            background: #A01010;
+            color: var(--white);
+        }
+
+        /* Bauhaus Pagination Controls */
+        .pagination-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: auto;
+            padding-top: 28px;
+            border-top: var(--border-w) solid var(--border);
+        }
+
+        .page-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 44px;
+            height: 44px;
+            padding: 0 16px;
+            background: var(--white);
+            color: var(--fg);
+            border: var(--border-w) solid var(--border);
+            box-shadow: var(--shadow-btn);
+            font-family: var(--font-main);
+            font-size: 15px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            transition: transform 0.05s ease, background-color 0.1s ease, box-shadow 0.05s ease;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: var(--yellow);
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0px 0px #121212;
+        }
+
+        .page-btn:active:not(:disabled) {
+            transform: translate(2px, 2px);
+            box-shadow: none;
+        }
+
+        .page-btn.active {
+            background: var(--fg);
+            color: var(--white);
+            cursor: default;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            box-shadow: none;
+            background: var(--muted);
+        }
+
+        /* Bauhaus Toast Notification */
+        .bauhaus-toast {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: var(--fg);
+            color: var(--yellow);
+            border: var(--border-w) solid var(--border);
+            box-shadow: 6px 6px 0px 0px #121212;
+            padding: 14px 22px;
+            font-family: var(--font-main);
+            font-size: 14px;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(120px);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+            z-index: 1000;
+        }
+
+        .bauhaus-toast.show {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+            .cards-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            .pagination-container {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .page-btn {
+                min-width: 38px;
+                height: 38px;
+                padding: 0 10px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bauhaus-container">
+
+        <!-- Top Minimal Bauhaus Header (No Shapes) -->
+        <header class="bauhaus-header">
+            <span class="brand-text">Slides Directory</span>
+        </header>
+
+        <!-- Rectangular Slide Cards Grid (3 Presentation Decks) -->
+        <main class="cards-grid">
+
+            <!-- CARD 01 -->
+            <div class="slide-card">
+                <a href="decks/bias-variance-cobalt/index.html" class="card-main-link" title="Open 01. The Bias–Variance Tradeoff (Cobalt Grid)">
+                    <div class="card-topbar">
+                        <span>01. The Bias–Variance Tradeoff (Cobalt Grid)</span>
+                    </div>
+                    <div class="slide-viewport-box">
+                        <iframe src="decks/bias-variance-cobalt/index.html" class="slide-iframe-preview" loading="lazy" tabindex="-1"></iframe>
+                    </div>
+                </a>
+                <div class="card-bottom-strip">
+                    <a href="decks/bias-variance-cobalt/index.html" class="btn-action btn-open">Open</a>
+                    <a href="decks/bias-variance-cobalt/index.html" download="bias-variance-cobalt-deck.html" class="btn-action btn-download">Download</a>
+                    <button class="btn-action btn-share" onclick="shareSlideLink('decks/bias-variance-cobalt/index.html')">Share</button>
+                </div>
+            </div>
+
+            <!-- CARD 02 -->
+            <div class="slide-card">
+                <a href="decks/bias-variance-editorial/index.html" class="card-main-link" title="Open 02. The Bias–Variance Tradeoff (Soft Editorial)">
+                    <div class="card-topbar">
+                        <span>02. The Bias–Variance Tradeoff (Soft Editorial)</span>
+                    </div>
+                    <div class="slide-viewport-box">
+                        <iframe src="decks/bias-variance-editorial/index.html" class="slide-iframe-preview" loading="lazy" tabindex="-1"></iframe>
+                    </div>
+                </a>
+                <div class="card-bottom-strip">
+                    <a href="decks/bias-variance-editorial/index.html" class="btn-action btn-open">Open</a>
+                    <a href="decks/bias-variance-editorial/index.html" download="bias-variance-editorial-deck.html" class="btn-action btn-download">Download</a>
+                    <button class="btn-action btn-share" onclick="shareSlideLink('decks/bias-variance-editorial/index.html')">Share</button>
+                </div>
+            </div>
+
+            <!-- CARD 03 -->
+            <div class="slide-card">
+                <a href="decks/bias-variance-neogrid/index.html" class="card-main-link" title="Open 03. The Bias–Variance Tradeoff (Neo-Grid Bold)">
+                    <div class="card-topbar">
+                        <span>03. The Bias–Variance Tradeoff (Neo-Grid Bold)</span>
+                    </div>
+                    <div class="slide-viewport-box">
+                        <iframe src="decks/bias-variance-neogrid/index.html" class="slide-iframe-preview" loading="lazy" tabindex="-1"></iframe>
+                    </div>
+                </a>
+                <div class="card-bottom-strip">
+                    <a href="decks/bias-variance-neogrid/index.html" class="btn-action btn-open">Open</a>
+                    <a href="decks/bias-variance-neogrid/index.html" download="bias-variance-neogrid-deck.html" class="btn-action btn-download">Download</a>
+                    <button class="btn-action btn-share" onclick="shareSlideLink('decks/bias-variance-neogrid/index.html')">Share</button>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Bauhaus Pagination Controls (Appears automatically when > 6 decks exist) -->
+        <nav class="pagination-container" aria-label="Slide Pagination" id="paginationNav" style="display: none;">
+            <button class="page-btn" id="prevPageBtn" onclick="changePage(currentPage - 1)">&larr; Prev</button>
+            <div id="pageNumbersGroup" style="display: flex; gap: 10px;"></div>
+            <button class="page-btn" id="nextPageBtn" onclick="changePage(currentPage + 1)">Next &rarr;</button>
+        </nav>
+
+    </div>
+
+    <!-- Bauhaus Toast Notification -->
+    <div class="bauhaus-toast" id="bauhausToast">
+        <span id="toastMsg">✓ Link Copied to Clipboard!</span>
+    </div>
+
+    <!-- Script: Share Links & Dynamic Pagination -->
+    <script>
+        // Share to Clipboard with Toast Notification
+        function shareSlideLink(subpath) {
+            const fullUrl = new URL(subpath, window.location.href).href;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(fullUrl).then(() => {
+                    showToast("✓ Link Copied to Clipboard!");
+                }).catch(() => {
+                    fallbackCopy(fullUrl);
+                });
+            } else {
+                fallbackCopy(fullUrl);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            showToast("✓ Link Copied to Clipboard!");
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('bauhausToast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        // Pagination Logic (6 Slides Per Page)
+        const itemsPerPage = 6;
+        let currentPage = 1;
+        const cards = document.querySelectorAll('.slide-card');
+        const totalPages = Math.ceil(cards.length / itemsPerPage);
+
+        function renderPage(page) {
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+            currentPage = page;
+
+            cards.forEach((card, index) => {
+                const start = (currentPage - 1) * itemsPerPage;
+                const end = start + itemsPerPage;
+                if (index >= start && index < end) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            renderPaginationButtons();
+        }
+
+        function renderPaginationButtons() {
+            const nav = document.getElementById('paginationNav');
+            if (totalPages <= 1) {
+                nav.style.display = 'none';
+                return;
+            } else {
+                nav.style.display = 'flex';
+            }
+
+            const group = document.getElementById('pageNumbersGroup');
+            group.innerHTML = '';
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                btn.innerText = i;
+                btn.title = `Go to Page ${i}`;
+                btn.onclick = () => {
+                    renderPage(i);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                };
+                group.appendChild(btn);
+            }
+
+            document.getElementById('prevPageBtn').disabled = (currentPage === 1);
+            document.getElementById('nextPageBtn').disabled = (currentPage === totalPages);
+        }
+
+        function changePage(page) {
+            renderPage(page);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPage(1);
+        });
+    </script>
+
+</body>
+</html>

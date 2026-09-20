@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Bias–Variance Tradeoff — Cobalt Grid Master Edition</title>
+    <meta name="description" content="A 10-slide 3-person interactive lecture on model complexity, underfitting, overfitting, and regularization in academic risograph style.">
+
+    <!-- OpenGraph & Twitter Social Meta Tags -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="The Bias–Variance Tradeoff — Cobalt Grid Master Edition">
+    <meta property="og:description" content="A 10-slide 3-person interactive lecture on model complexity, underfitting, overfitting, and regularization in academic risograph style.">
+    <meta property="og:image" content="../../assets/og-preview.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="The Bias–Variance Tradeoff — Cobalt Grid Master Edition">
+    <meta name="twitter:description" content="A 10-slide 3-person interactive lecture on model complexity with interactive math HUDs.">
+    <meta name="twitter:image" content="../../assets/og-preview.svg">
+
+    <!-- Google Fonts: Newsreader (400/500/italic), Hanken Grotesk (400/600/700), DM Mono (400/500) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400;1,500&family=Hanken+Grotesk:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+
+    <style>
+        /* ===========================================
+           1. DESIGN SYSTEM: COBALT GRID SPECIFICATION
+           =========================================== */
+        :root {
+            --color-paper: #F0EBDE;
+            --color-paper-card: #E6E0CE;
+            --color-paper-dark: #DDD5C0;
+            --color-paper-highlight: #E0E8D2;
+            --color-ink: #1F2BE0;
+            --color-ink-soft: #5560E5;
+            --color-ink-faint: rgba(31, 43, 224, 0.18);
+            --color-grid: rgba(31, 43, 224, 0.09);
+            --color-alert-red: #D9383A;
+            --color-alert-cyan: #0284C7;
+            --color-alert-green: #15803D;
+            
+            --font-display: 'Newsreader', Georgia, serif;
+            --font-body: 'Hanken Grotesk', -apple-system, sans-serif;
+            --font-mono: 'DM Mono', ui-monospace, monospace;
+            
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --duration-normal: 0.45s;
+
+            --edge-pad-x: 100px;
+            --edge-pad-y: 60px;
+        }
+
+        /* ===========================================
+           2. VIEWPORT & MANDATORY 16:9 FIXED STAGE
+           =========================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            border-radius: 0 !important;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: #090B12;
+            font-family: var(--font-body);
+            color: var(--color-ink);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .deck-viewport {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            background: #090B12;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .deck-stage {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            transform-origin: 0 0;
+            background: var(--color-paper);
+            color: var(--color-ink);
+        }
+
+        /* Permanent 9% Opacity Graph Paper Grid */
+        .deck-stage::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(to right, var(--color-grid) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--color-grid) 1px, transparent 1px);
+            background-size: 36px 36px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Persistent Top and Bottom 1.5px Hairline Rules */
+        .stage-hairline-top {
+            position: absolute;
+            top: 26px;
+            left: var(--edge-pad-x);
+            right: var(--edge-pad-x);
+            height: 1.5px;
+            background: var(--color-ink);
+            z-index: 10;
+        }
+
+        .stage-hairline-bottom {
+            position: absolute;
+            bottom: 26px;
+            left: var(--edge-pad-x);
+            right: var(--edge-pad-x);
+            height: 1.5px;
+            background: var(--color-ink);
+            z-index: 10;
+        }
+
+        /* Top Progress Navigation Indicator */
+        .top-deck-progress-bar {
+            position: absolute;
+            top: 32px;
+            left: var(--edge-pad-x);
+            right: var(--edge-pad-x);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 15;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .progress-acts {
+            display: flex;
+            gap: 20px;
+        }
+
+        .progress-act {
+            opacity: 0.4;
+            transition: opacity 0.3s ease, color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .progress-act.active {
+            opacity: 1;
+            font-weight: 700;
+            text-decoration: underline;
+        }
+
+        /* Slide Stacking Invariant */
+        .slide {
+            position: absolute;
+            inset: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: var(--edge-pad-y) var(--edge-pad-x);
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1;
+            transition: opacity 0.35s ease, visibility 0.35s ease;
+        }
+
+        .slide.active,
+        .slide.visible {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 2;
+        }
+
+        /* ===========================================
+           3. TYPOGRAPHY & HOVER ATOMS
+           =========================================== */
+        h1, h2, h3, .serif-font {
+            font-family: var(--font-display);
+            font-weight: 400;
+            color: var(--color-ink);
+            letter-spacing: -0.015em;
+        }
+
+        .mono-text {
+            font-family: var(--font-mono);
+            letter-spacing: 0.05em;
+            color: var(--color-ink);
+        }
+
+        .mono-tag {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-ink);
+        }
+
+        .micro-label {
+            font-family: var(--font-body);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--color-ink);
+        }
+
+        /* Slide Topbar Header */
+        .slide-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 1.5px solid var(--color-ink);
+            padding-bottom: 12px;
+            margin-top: 10px;
+            margin-bottom: 24px;
+            z-index: 3;
+            position: relative;
+        }
+
+        .slide-topbar-left {
+            display: flex;
+            align-items: baseline;
+            gap: 20px;
+        }
+
+        .presenter-pill {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            background: var(--color-ink);
+            color: var(--color-paper);
+            padding: 4px 12px;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+        }
+
+        .presenter-pill:hover {
+            box-shadow: 3px 3px 0px var(--color-ink-soft);
+        }
+
+        .slide-title {
+            font-size: 44px;
+            line-height: 1.05;
+        }
+
+        .slide-topbar-right {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--color-ink-soft);
+            letter-spacing: 0.08em;
+        }
+
+        /* Slide Main Body Container */
+        .slide-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 2;
+            position: relative;
+        }
+
+        /* Slide Bottom Footer */
+        .slide-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-top: 12px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            letter-spacing: 0.06em;
+            color: var(--color-ink);
+            z-index: 3;
+            position: relative;
+        }
+
+        .footer-nav-hint {
+            opacity: 0.65;
+        }
+
+        .footer-pagenum {
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        /* QR Block 8x8 Mosaic with Micro Hover */
+        .qr-block-patch {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            width: 72px;
+            height: 72px;
+            gap: 2px;
+            background: var(--color-paper);
+            padding: 4px;
+            border: 1.5px solid var(--color-ink);
+            box-shadow: 0 0 0 2px var(--color-paper);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .qr-block-patch:hover {
+            transform: scale(1.06);
+        }
+
+        .qr-cell { background: var(--color-paper); transition: background 0.15s ease; }
+        .qr-cell.on { background: var(--color-ink); }
+        .qr-block-patch:hover .qr-cell:not(.on):hover { background: var(--color-ink-soft); }
+
+        /* Pixel-Glitch Scanline SVG */
+        .pixel-glitch-column {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 70px;
+            pointer-events: none;
+            opacity: 0.75;
+            z-index: 1;
+        }
+
+        /* Reveal Transitions */
+        .reveal {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity var(--duration-normal) var(--ease-out-expo),
+                        transform var(--duration-normal) var(--ease-out-expo);
+        }
+
+        .slide.visible .reveal {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-delay-1 { transition-delay: 0.08s; }
+        .reveal-delay-2 { transition-delay: 0.16s; }
+        .reveal-delay-3 { transition-delay: 0.24s; }
+        .reveal-delay-4 { transition-delay: 0.32s; }
+
+        /* ===========================================
+           4. ASYMMETRIC LAYOUTS & INTERACTIVE HUDS
+           =========================================== */
+
+        /* SLIDE 1: Cover */
+        .cover-asymmetric-layout {
+            display: grid;
+            grid-template-columns: 1.3fr 0.7fr;
+            gap: 70px;
+            align-items: center;
+            height: 100%;
+        }
+
+        .cover-headline-block {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .cover-h1 {
+            font-size: 94px;
+            line-height: 0.94;
+            letter-spacing: -2.5px;
+        }
+
+        .cover-h1 em {
+            font-style: italic;
+            color: var(--color-ink);
+        }
+
+        .cover-lede {
+            font-size: 25px;
+            line-height: 1.45;
+            max-width: 840px;
+        }
+
+        .cover-agenda-ledger {
+            background: var(--color-paper-card);
+            border: 1.5px solid var(--color-ink);
+            box-shadow: 10px 10px 0px var(--color-ink);
+            padding: 34px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+        }
+
+        .agenda-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1.5px solid var(--color-ink);
+            padding-bottom: 12px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        .agenda-row {
+            display: grid;
+            grid-template-columns: 75px 1fr;
+            gap: 16px;
+            align-items: baseline;
+            border-bottom: 1px dashed var(--color-ink-faint);
+            padding-bottom: 12px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .agenda-row:hover {
+            transform: translateX(8px);
+            border-bottom-color: var(--color-ink);
+        }
+
+        .agenda-row-num {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--color-ink-soft);
+        }
+
+        .agenda-row-title {
+            font-family: var(--font-display);
+            font-size: 22px;
+            font-style: italic;
+        }
+
+        .agenda-row-speaker {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--color-ink-soft);
+            margin-top: 2px;
+        }
+
+        /* SLIDE 2: Interactive Equation Breakdown */
+        .decomp-equation-hero {
+            background: var(--color-ink);
+            color: var(--color-paper);
+            padding: 20px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1.5px solid var(--color-ink);
+            margin-bottom: 24px;
+            box-shadow: 6px 6px 0px rgba(0,0,0,0.15);
+        }
+
+        .equation-term {
+            cursor: pointer;
+            padding: 2px 8px;
+            transition: all 0.2s ease;
+            border-bottom: 2px solid transparent;
+        }
+
+        .equation-term:hover, .equation-term.active {
+            background: var(--color-paper);
+            color: var(--color-ink);
+            border-bottom-color: var(--color-alert-red);
+        }
+
+        .decomp-equation-formula {
+            font-family: var(--font-display);
+            font-size: 32px;
+            font-style: italic;
+            letter-spacing: 0.02em;
+        }
+
+        .decomp-3tier-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+
+        .tier-card {
+            background: var(--color-paper-card);
+            border: 1.5px solid var(--color-ink);
+            padding: 30px 26px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            position: relative;
+            box-shadow: 6px 6px 0px var(--color-ink);
+            transition: all 0.25s var(--ease-out-expo);
+            cursor: pointer;
+        }
+
+        .tier-card:hover, .tier-card.highlighted {
+            transform: translateY(-4px);
+            box-shadow: 10px 10px 0px var(--color-ink);
+            background: #EAE4D4;
+        }
+
+        .tier-tag-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1.5px solid var(--color-ink);
+            padding-bottom: 8px;
+        }
+
+        .tier-name {
+            font-size: 32px;
+        }
+
+        .tier-desc {
+            font-size: 16px;
+            line-height: 1.48;
+        }
+
+        .pixel-stack-container {
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px dashed var(--color-ink-faint);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pixel-stack-bars {
+            display: flex;
+            gap: 4px;
+        }
+
+        .p-bar-cell {
+            width: 14px;
+            height: 20px;
+            background: var(--color-grid);
+            border: 1px solid var(--color-ink-faint);
+            transition: background 0.2s ease;
+        }
+
+        .p-bar-cell.on {
+            background: var(--color-ink);
+        }
+
+        .tier-card:hover .p-bar-cell.on {
+            background: var(--color-alert-red);
+        }
+
+        /* SLIDE 3 & 4: Interactive Simulators */
+        .interactive-sim-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 48px;
+            align-items: center;
+        }
+
+        .sim-meta-col {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .callout-box {
+            border-left: 4px solid var(--color-ink);
+            background: var(--color-paper-card);
+            padding: 18px 22px;
+            font-family: var(--font-display);
+            font-size: 23px;
+            font-style: italic;
+            line-height: 1.4;
+        }
+
+        .sim-canvas-card {
+            background: var(--color-paper-card);
+            border: 1.5px solid var(--color-ink);
+            box-shadow: 10px 10px 0px var(--color-ink);
+            padding: 26px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .sim-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1.5px solid var(--color-ink);
+            padding-bottom: 10px;
+        }
+
+        .sim-button-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .sim-btn {
+            background: var(--color-paper);
+            border: 1px solid var(--color-ink);
+            color: var(--color-ink);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.15s ease;
+            text-transform: uppercase;
+        }
+
+        .sim-btn.active, .sim-btn:hover {
+            background: var(--color-ink);
+            color: var(--color-paper);
+            box-shadow: 2px 2px 0px var(--color-ink-soft);
+        }
+
+        .svg-canvas-box {
+            width: 100%;
+            height: 320px;
+            background: var(--color-paper);
+            border: 1px solid var(--color-ink-faint);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .sim-metrics-bar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            background: var(--color-paper);
+            border: 1px solid var(--color-ink);
+            padding: 10px 16px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+        }
+
+        /* SLIDE 5: 2x2 Target Matrix */
+        .target-matrix-2x2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 28px;
+        }
+
+        .target-card {
+            background: var(--color-paper-card);
+            border: 1.5px solid var(--color-ink);
+            padding: 22px 26px;
+            display: grid;
+            grid-template-columns: 130px 1fr;
+            gap: 24px;
+            align-items: center;
+            box-shadow: 6px 6px 0px var(--color-ink);
+            transition: all 0.25s var(--ease-out-expo);
+            cursor: pointer;
+        }
+
+        .target-card:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 10px 10px 0px var(--color-ink);
+        }
+
+        .target-card.ideal {
+            background: var(--color-paper-highlight);
+            border: 2px solid var(--color-ink);
+            box-shadow: 8px 8px 0px var(--color-ink);
+        }
+
+        .target-badge {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            padding: 3px 8px;
+            border: 1px solid var(--color-ink);
+            width: fit-content;
+            text-transform: uppercase;
+        }
+
+        .target-badge.ideal-badge {
+            background: var(--color-ink);
+            color: var(--color-paper);
+            font-weight: 700;
+        }
+
+        /* SLIDE 6: Complexity Lab */
+        .complexity-lab-grid {
+            display: grid;
+            grid-template-columns: 0.95fr 1.05fr;
+            gap: 48px;
+            align-items: center;
+        }
+
+        .lab-control-panel {
+            background: var(--color-paper-card);
+            border: 1.5px solid var(--color-ink);
+            box-shadow: 10px 10px 0px var(--color-ink);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .styled-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 10px;
+            background: var(--color-paper);
+            border: 1.5px solid var(--color-ink);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .styled-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 26px;
+            height: 26px;
+            background: var(--color-ink);
+            border: 2px solid var(--color-paper);
+            cursor: pointer;
+            box-shadow: 0 0 0 1.5px var(--color-ink);
+            transition: transform 0.15s ease;
+        }
+
+        .styled-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        .lab-state-badge {
+            background: var(--color-paper);
+            border: 1.5px solid var(--color-ink);
+            padding: 14px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        /* SLIDE 7: Master U-Curve with Crosshair */
+        .master-ucurve-grid {
+            display: grid;
+            grid-template-columns: 1.35fr 0.65fr;
+            gap: 36px;
+            align-items: center;
+        }
+
+        .ucurve-canvas-box {
+            background: var(--color-paper-card);
+            border: 1.5px solid var(--color-ink);
+            box-shadow: 10px 10px 0px var(--color-ink);
+            padding: 26px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .ucurve-svg-container {
+            width: 100%;
+            height: 350px;
+            background: var(--color-paper);
+            border: 1px solid var(--color-ink-faint);
+            position: relative;
+            cursor: crosshair;
+        }
+
+        .ucurve-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .zone-analysis-card {
+            background: var(--color-paper-card);
+            border: 1.5px solid var(--color-ink);
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            box-shadow: 4px 4px 0px var(--color-ink);
+            transition: transform 0.2s ease;
+            cursor: pointer;
+        }
+
+        .zone-analysis-card:hover, .zone-analysis-card.active {
+            transform: translateX(4px);
+            box-shadow: 6px 6px 0px var(--color-ink);
+        }
+
+        .zone-analysis-card.zone-optimal {
+            background: var(--color-paper-highlight);
+            border: 2px solid var(--color-ink);
+        }
+
+        /* SLIDE 8 & 9: Blueprints & Toolkit */
+        .blueprint-3col-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 28px;
+        }
+
+        .blueprint-card {
+            background: var(--color-paper-card);
+            border: 1.5px solid var(--color-ink);
+            box-shadow: 6px 6px 0px var(--color-ink);
+            padding: 26px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            transition: transform 0.2s ease;
+        }
+
+        .blueprint-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 8px 8px 0px var(--color-ink);
+        }
+
+        .toolkit-ledger-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .ledger-item-card {
+            background: var(--color-paper-card);
+            border: 1.5px solid var(--color-ink);
+            box-shadow: 6px 6px 0px var(--color-ink);
+            padding: 22px 26px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .ledger-item-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 8px 8px 0px var(--color-ink);
+            background: #EAE4D4;
+        }
+
+        /* SLIDE 10: Generalization Manifesto */
+        .manifesto-grand-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 28px;
+        }
+
+        .grand-quote-banner {
+            border: 2px solid var(--color-ink);
+            background: var(--color-paper-card);
+            box-shadow: 12px 12px 0px var(--color-ink);
+            padding: 36px 46px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            position: relative;
+        }
+
+        .grand-quote-text {
+            font-family: var(--font-display);
+            font-size: 40px;
+            line-height: 1.22;
+            font-style: italic;
+        }
+
+        .grand-quote-text strong {
+            font-style: normal;
+            text-decoration: underline;
+        }
+
+        .conclusion-3points {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .concl-card {
+            background: var(--color-paper);
+            border: 1.5px solid var(--color-ink);
+            padding: 18px 22px;
+            box-shadow: 4px 4px 0px var(--color-ink);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: transform 0.2s ease;
+        }
+
+        .concl-card:hover {
+            transform: translateY(-3px);
+        }
+
+        /* ===========================================
+           5. PRESENTATION CONTROLS & EDIT HOTZONE
+           =========================================== */
+        .deck-controls {
+            position: fixed;
+            left: 50%;
+            bottom: 16px;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--color-paper);
+            border: 1.5px solid var(--color-ink);
+            padding: 6px 16px;
+            z-index: 1000;
+            box-shadow: 4px 4px 0px var(--color-ink);
+        }
+
+        .ctrl-btn {
+            background: none;
+            border: 1px solid var(--color-ink);
+            color: var(--color-ink);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.15s ease;
+        }
+
+        .ctrl-btn:hover {
+            background: var(--color-ink);
+            color: var(--color-paper);
+        }
+
+        .slide-progress-text {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 500;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        /* Inline Edit Affordance */
+        .edit-hotzone {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 80px;
+            height: 80px;
+            z-index: 10000;
+            cursor: pointer;
+        }
+
+        .edit-toggle {
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            background: var(--color-ink);
+            color: var(--color-paper);
+            border: 1.5px solid var(--color-paper);
+            padding: 8px 14px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 10001;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.3);
+        }
+
+        .edit-toggle.show,
+        .edit-toggle.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        [contenteditable="true"] {
+            outline: 2px dashed var(--color-ink-soft) !important;
+            background: rgba(31, 43, 224, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="deck-viewport">
+        <!-- Main Fixed Stage Canvas (1920x1080) -->
+        <main class="deck-stage" id="deckStage">
+            <div class="stage-hairline-top"></div>
+            <div class="stage-hairline-bottom"></div>
+
+            <!-- Top Act Progression Breadcrumbs -->
+            <div class="top-deck-progress-bar">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <a href="../../index.html" style="color:var(--color-ink); text-decoration:none; border:1px solid var(--color-ink); padding:2px 8px; font-weight:700; background:rgba(31,43,224,0.06);">← HUB</a>
+                    <span class="mono-text" style="font-weight:700;">ML THEORY SERIES &bull; 3-PRESENTER LECTURE</span>
+                </div>
+                <div class="progress-acts">
+                    <span class="progress-act active" id="act1Tab" data-start="0">ACT I: UNDERSTANDING ERROR</span>
+                    <span class="progress-act" id="act2Tab" data-start="4">ACT II: THE TRADEOFF &amp; U-CURVE</span>
+                    <span class="progress-act" id="act3Tab" data-start="7">ACT III: ENGINEERING GENERALIZATION</span>
+                </div>
+                <span class="mono-text" id="liveTopicTag">DECK OVERVIEW</span>
+            </div>
+
+            <!-- Decorative Pixel Glitch Column Accent -->
+            <svg class="pixel-glitch-column" viewBox="0 0 70 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <pattern id="scanlines" width="4" height="4" patternUnits="userSpaceOnUse">
+                        <line x1="0" y1="0" x2="0" y2="4" stroke="#1F2BE0" stroke-width="1.5" opacity="0.35"/>
+                    </pattern>
+                </defs>
+                <rect x="0" y="0" width="70" height="240" fill="url(#scanlines)"/>
+                <rect x="22" y="240" width="48" height="280" fill="url(#scanlines)"/>
+                <rect x="38" y="520" width="32" height="300" fill="url(#scanlines)"/>
+                <rect x="52" y="820" width="18" height="260" fill="url(#scanlines)"/>
+            </svg>
+
+            <!-- SLIDE 1: Cover / Editorial Manifesto -->
+            <section class="slide active visible" data-slide="0" data-act="1" data-topic="DECK OVERVIEW">
+                <div class="slide-topbar reveal">
+                    <div class="slide-topbar-left">
+                        <span class="presenter-pill">ALL PRESENTERS</span>
+                        <div class="mono-tag">STATISTICAL LEARNING THEORY &bull; THREE-PRESENTER LECTURE</div>
+                    </div>
+                    <div class="slide-topbar-right">SECTION 01 / 10</div>
+                </div>
+
+                <div class="slide-body">
+                    <div class="cover-asymmetric-layout">
+                        <div class="cover-headline-block">
+                            <div class="micro-label reveal reveal-delay-1">FOUNDATIONAL MACHINE LEARNING</div>
+                            <h1 class="cover-h1 reveal reveal-delay-2">The Bias–Variance<br><em>Tradeoff</em></h1>
+                            <p class="cover-lede reveal reveal-delay-3">A systematic mathematical and empirical guide to model complexity, underfitting, overfitting, and the quest for true generalization.</p>
+                        </div>
+
+                        <div class="cover-agenda-ledger reveal reveal-delay-4">
+                            <div class="agenda-header">
+                                <span>3-Act Presentation Structure</span>
+                                <div class="qr-block-patch" title="Interactive Mosaic">
+                                    <div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div>
+                                    <div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div>
+                                    <div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div>
+                                    <div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div>
+                                    <div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div>
+                                    <div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div>
+                                    <div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div>
+                                    <div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div>
+                                </div>
+                            </div>
+
+                            <div class="agenda-row" onclick="window.deck.showSlide(1)">
+                                <span class="agenda-row-num">ACT I</span>
+                                <div>
+                                    <div class="agenda-row-title">The Two Sources of Error</div>
+                                    <div class="agenda-row-speaker">Student 1 &bull; Defining Bias, Variance &amp; Noise</div>
+                                </div>
+                            </div>
+
+                            <div class="agenda-row" onclick="window.deck.showSlide(5)">
+                                <span class="agenda-row-num">ACT II</span>
+                                <div>
+                                    <div class="agenda-row-title">The Inherent Tension</div>
+                                    <div class="agenda-row-speaker">Student 2 &bull; The U-Shaped Complexity Curve</div>
+                                </div>
+                            </div>
+
+                            <div class="agenda-row" style="border:none;" onclick="window.deck.showSlide(7)">
+                                <span class="agenda-row-num">ACT III</span>
+                                <div>
+                                    <div class="agenda-row-title">Engineering Generalization</div>
+                                    <div class="agenda-row-speaker">Student 3 &bull; Regularization &amp; Cross-Validation</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide-footer reveal">
+                    <div class="footer-nav-hint">Presented by Student 1 &bull; Student 2 &bull; Student 3</div>
+                    <div class="footer-pagenum">01 / 10</div>
+                </div>
+            </section>
+
+            <!-- SLIDE 2: Error Decomposition (Student 1) -->
+            <section class="slide" data-slide="1" data-act="1" data-topic="ERROR DECOMPOSITION">
+                <div class="slide-topbar">
+                    <div class="slide-topbar-left">
+                        <span class="presenter-pill">STUDENT 1</span>
+                        <h2 class="slide-title">The Big Picture: Anatomy of Model Error</h2>
+                    </div>
+                    <div class="slide-topbar-right">HOVER TERMS TO EXPLORE</div>
+                </div>
+
+                <div class="slide-body">
+                    <div class="decomp-equation-hero reveal">
+                        <span class="micro-label" style="color:var(--color-paper-card);">EXPECTED GENERALIZATION LOSS</span>
+                        <div class="decomp-equation-formula">
+                            <span>&Epsilon;[(y &minus; &fnof;&#770;(x))&sup2;] = </span>
+                            <span class="equation-term" id="eqTermBias" data-target="cardBias">Bias&sup2;[&fnof;&#770;(x)]</span>
+                            <span> + </span>
+                            <span class="equation-term" id="eqTermVar" data-target="cardVar">Var[&fnof;&#770;(x)]</span>
+                            <span> + </span>
+                            <span class="equation-term" id="eqTermNoise" data-target="cardNoise">&sigma;&sup2;</span>
+                        </div>
+                        <span class="mono-tag" style="color:var(--color-paper-card);">MSE THEOREM</span>
+                    </div>
+
+                    <div class="decomp-3tier-grid">
+                        <div class="tier-card reveal reveal-delay-1" id="cardBias">
+                            <div class="tier-tag-row">
+                                <span class="mono-tag" style="color:var(--color-alert-red);">COMPONENT 01</span>
+                                <span class="micro-label">UNDERFITTING</span>
+                            </div>
+                            <h3 class="tier-name">Bias</h3>
+                            <p class="tier-desc">Error introduced by approximating complex real-world relationships with overly simplistic mathematical assumptions.</p>
+                            
+                            <div class="pixel-stack-container">
+                                <span class="mono-tag">IMPACT: RIGIDITY</span>
+                                <div class="pixel-stack-bars">
+                                    <div class="p-bar-cell on"></div><div class="p-bar-cell on"></div><div class="p-bar-cell on"></div><div class="p-bar-cell"></div><div class="p-bar-cell"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tier-card reveal reveal-delay-2" id="cardVar">
+                            <div class="tier-tag-row">
+                                <span class="mono-tag" style="color:var(--color-alert-cyan);">COMPONENT 02</span>
+                                <span class="micro-label">OVERFITTING</span>
+                            </div>
+                            <h3 class="tier-name">Variance</h3>
+                            <p class="tier-desc">Error caused by excessive sensitivity to sample noise, outliers, and random fluctuations in the training dataset.</p>
+                            
+                            <div class="pixel-stack-container">
+                                <span class="mono-tag">IMPACT: VOLATILITY</span>
+                                <div class="pixel-stack-bars">
+                                    <div class="p-bar-cell on"></div><div class="p-bar-cell on"></div><div class="p-bar-cell on"></div><div class="p-bar-cell on"></div><div class="p-bar-cell"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tier-card reveal reveal-delay-3" id="cardNoise">
+                            <div class="tier-tag-row">
+                                <span class="mono-tag" style="color:var(--color-ink-soft);">COMPONENT 03</span>
+                                <span class="micro-label">IRREDUCIBLE</span>
+                            </div>
+                            <h3 class="tier-name">Noise (&sigma;&sup2;)</h3>
+                            <p class="tier-desc">Inherent statistical randomness, unmeasured confounding variables, and sensor noise that cannot be eliminated by any algorithm.</p>
+                            
+                            <div class="pixel-stack-container">
+                                <span class="mono-tag">LOWER ERROR BOUND</span>
+                                <div class="pixel-stack-bars">
+                                    <div class="p-bar-cell on"></div><div class="p-bar-cell"></div><div class="p-bar-cell"></div><div class="p-bar-cell"></div><div class="p-bar-cell"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide-footer">
+                    <div class="footer-nav-hint">Student 1 &bull; Mathematical Decomposition of Expected Error</div>
+                    <div class="footer-pagenum">02 / 10</div>
+                </div>
+            </section>
+
+            <!-- SLIDE 3: What is Bias? (Student 1) -->
+            <section class="slide" data-slide="2" data-act="1" data-topic="WHAT IS BIAS?">
+                <div class="slide-topbar">
+                    <div class="slide-topbar-left">
+                        <span class="presenter-pill">STUDENT 1</span>
+                        <h2 class="slide-title">What is Bias? When the Model is Too Simple</h2>
+                    </div>
+                    <div class="slide-topbar-right">UNDERFITTING SIMULATOR</div>
+                </div>
+
+                <div class="slide-body">
+                    <div class="interactive-sim-grid">
+                        <div class="sim-meta-col reveal">
+                            <div class="callout-box">
+                                "Bias is the error from overly simplistic assumptions. The algorithm systematically misses the true relationship between features and targets."
+                            </div>
+
+                            <div style="display:flex; flex-direction:column; gap:12px; font-size:17px; line-height:1.45;">
+                                <div><strong>&bull; Inflexible Hypothesis:</strong> Forcing a linear line through non-linear physical phenomena.</div>
+                                <div><strong>&bull; High Training Error:</strong> Fails to achieve high accuracy even on the data used to train it.</div>
+                                <div><strong>&bull; Real-World Example:</strong> Predicting house price using only square footage while ignoring location, age, and schools.</div>
+                            </div>
+                        </div>
+
+                        <div class="sim-canvas-card reveal reveal-delay-2">
+                            <div class="sim-header-bar">
+                                <span class="mono-tag" style="color:var(--color-alert-red); font-weight:700;">RIGID LINEAR FIT ON QUADRATIC MANIFOLD</span>
+                                <div class="sim-button-group">
+                                    <button class="sim-btn active" id="btnBiasRigid">Linear Fit</button>
+                                    <button class="sim-btn" id="btnBiasTrue">True Trend</button>
+                                </div>
+                            </div>
+
+                            <div class="svg-canvas-box" id="biasSvgWrap" title="Click to inspect residual errors">
+                                <svg width="100%" height="100%" viewBox="0 0 540 280">
+                                    <line x1="50" y1="240" x2="500" y2="240" stroke="#1F2BE0" stroke-width="1.5"/>
+                                    <line x1="50" y1="20" x2="500" y2="20" stroke="#1F2BE0" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.3"/>
+                                    <line x1="50" y1="20" x2="50" y2="240" stroke="#1F2BE0" stroke-width="1.5"/>
+
+                                    <!-- Parabolic Data Points with hover -->
+                                    <g id="biasPointsGroup">
+                                        <circle cx="80" cy="200" r="5.5" fill="#1F2BE0"/>
+                                        <circle cx="120" cy="150" r="5.5" fill="#1F2BE0"/>
+                                        <circle cx="170" cy="100" r="5.5" fill="#1F2BE0"/>
+                                        <circle cx="220" cy="70" r="5.5" fill="#1F2BE0"/>
+                                        <circle cx="270" cy="60" r="5.5" fill="#1F2BE0"/>
+                                        <circle cx="320" cy="75" r="5.5" fill="#1F2BE0"/>
+                                        <circle cx="370" cy="115" r="5.5" fill="#1F2BE0"/>
+                                        <circle cx="420" cy="170" r="5.5" fill="#1F2BE0"/>
+                                        <circle cx="470" cy="230" r="5.5" fill="#1F2BE0"/>
+                                    </g>
+
+                                    <!-- Residual lines -->
+                                    <g id="biasResiduals">
+                                        <line x1="80" y1="200" x2="80" y2="135" stroke="#D9383A" stroke-width="1.5" stroke-dasharray="2 2"/>
+                                        <line x1="270" y1="60" x2="270" y2="135" stroke="#D9383A" stroke-width="1.5" stroke-dasharray="2 2"/>
+                                        <line x1="470" y1="230" x2="470" y2="135" stroke="#D9383A" stroke-width="1.5" stroke-dasharray="2 2"/>
+                                    </g>
+
+                                    <!-- High Bias Linear Model Fit -->
+                                    <line id="biasModelLine" x1="60" y1="135" x2="490" y2="135" stroke="#D9383A" stroke-width="3.5"/>
+                                    <path id="biasTrueCurve" d="M 60 220 Q 270 20 490 240" fill="none" stroke="#15803D" stroke-width="3" stroke-dasharray="4 4" style="display:none;"/>
+                                </svg>
+                            </div>
+
+                            <div class="sim-metrics-bar">
+                                <div><strong>TRAIN LOSS:</strong> <span style="color:var(--color-alert-red); font-weight:700;">38.4% (HIGH)</span></div>
+                                <div><strong>TEST LOSS:</strong> <span style="color:var(--color-alert-red); font-weight:700;">41.2% (HIGH)</span></div>
+                                <div><strong>DIAGNOSIS:</strong> <span>UNDERFITTING</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide-footer">
+                    <div class="footer-nav-hint">Student 1 &bull; Underfitting Dynamics &amp; Inflexible Models</div>
+                    <div class="footer-pagenum">03 / 10</div>
+                </div>
+            </section>
+
+            <!-- SLIDE 4: What is Variance? (Student 1) -->
+            <section class="slide" data-slide="3" data-act="1" data-topic="WHAT IS VARIANCE?">
+                <div class="slide-topbar">
+                    <div class="slide-topbar-left">
+                        <span class="presenter-pill">STUDENT 1</span>
+                        <h2 class="slide-title">What is Variance? When the Model is Too Sensitive</h2>
+                    </div>
+                    <div class="slide-topbar-right">OVERFITTING SIMULATOR</div>
+                </div>
+
+                <div class="slide-body">
+                    <div class="interactive-sim-grid">
+                        <div class="sim-meta-col reveal">
+                            <div class="callout-box">
+                                "Variance is the error caused by sensitivity to small fluctuations. The model memorizes training noise rather than discovering general laws."
+                            </div>
+
+                            <div style="display:flex; flex-direction:column; gap:12px; font-size:17px; line-height:1.45;">
+                                <div><strong>&bull; Over-Parametrization:</strong> Too many degrees of freedom, parameters, or tree depth.</div>
+                                <div><strong>&bull; The Generalization Trap:</strong> Near 100% training accuracy but catastrophic failure on new data.</div>
+                                <div><strong>&bull; High Instability:</strong> Retraining on a slightly different subset produces completely different predictions.</div>
+                            </div>
+                        </div>
+
+                        <div class="sim-canvas-card reveal reveal-delay-2">
+                            <div class="sim-header-bar">
+                                <span class="mono-tag" style="color:var(--color-alert-cyan); font-weight:700;">15-DEGREE POLYNOMIAL OVERFIT</span>
+                                <div class="sim-button-group">
+                                    <button class="sim-btn active" id="btnVarOverfit">Overfit Wave</button>
+                                    <button class="sim-btn" id="btnVarTrue">General Law</button>
+                                </div>
+                            </div>
+
+                            <div class="svg-canvas-box" id="varSvgWrap" title="Click anywhere to dynamically warp the curve!">
+                                <svg width="100%" height="100%" viewBox="0 0 540 280" id="varSvg">
+                                    <line x1="50" y1="240" x2="500" y2="240" stroke="#1F2BE0" stroke-width="1.5"/>
+                                    <line x1="50" y1="20" x2="50" y2="240" stroke="#1F2BE0" stroke-width="1.5"/>
+
+                                    <!-- Points with Noise -->
+                                    <g id="varPointsGroup">
+                                        <circle cx="80" cy="190" r="5.5" fill="#1F2BE0"/>
+                                        <circle cx="130" cy="140" r="5.5" fill="#1F2BE0"/>
+                                        <circle cx="180" cy="170" r="5.5" fill="#1F2BE0"/>
+                                        <circle cx="230" cy="70" r="5.5" fill="#1F2BE0"/>
+                                        <circle cx="280" cy="120" r="5.5" fill="#1F2BE0"/>
+                                        <circle cx="330" cy="60" r="5.5" fill="#1F2BE0"/>
+                                        <circle cx="380" cy="160" r="5.5" fill="#1F2BE0"/>
+                                        <circle cx="430" cy="180" r="5.5" fill="#1F2BE0"/>
+                                        <circle cx="470" cy="80" r="5.5" fill="#1F2BE0"/>
+                                    </g>
+
+                                    <!-- Overfitting Curve -->
+                                    <path id="varOverfitPath" d="M 60 220 Q 80 190 105 110 T 130 140 T 180 170 T 230 70 T 280 120 T 330 60 T 380 160 T 430 180 T 470 80 T 490 20" fill="none" stroke="#0284C7" stroke-width="3.5"/>
+                                    <path id="varTruePath" d="M 60 210 Q 280 40 490 190" fill="none" stroke="#15803D" stroke-width="3" stroke-dasharray="4 4" style="display:none;"/>
+                                </svg>
+                            </div>
+
+                            <div class="sim-metrics-bar">
+                                <div><strong>TRAIN LOSS:</strong> <span style="color:var(--color-alert-green); font-weight:700;">1.2% (PERFECT)</span></div>
+                                <div><strong>TEST LOSS:</strong> <span style="color:var(--color-alert-red); font-weight:700;">64.8% (DISASTER)</span></div>
+                                <div><strong>DIAGNOSIS:</strong> <span>OVERFITTING</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide-footer">
+                    <div class="footer-nav-hint">Student 1 &bull; Overfitting Dynamics &amp; Memorization</div>
+                    <div class="footer-pagenum">04 / 10</div>
+                </div>
+            </section>
+
+            <!-- SLIDE 5: 2x2 Target Matrix (Transition) -->
+            <section class="slide" data-slide="4" data-act="2" data-topic="2x2 TARGET MATRIX">
+                <div class="slide-topbar">
+                    <div class="slide-topbar-left">
+                        <span class="presenter-pill">STUDENT 1 &rarr; STUDENT 2</span>
+                        <h2 class="slide-title">Bias vs. Variance: The 2&times;2 Target Matrix</h2>
+                    </div>
+                    <div class="slide-topbar-right">GEOMETRIC INTUITION</div>
+                </div>
+
+                <div class="slide-body">
+                    <div class="target-matrix-2x2">
+                        <!-- Q1: Low Bias + Low Variance (Ideal) -->
+                        <div class="target-card ideal reveal reveal-delay-1" title="Ideal Generalization">
+                            <svg width="125" height="125" viewBox="0 0 130 130">
+                                <circle cx="65" cy="65" r="54" fill="#E6E0CE" stroke="#1F2BE0" stroke-width="1.5"/>
+                                <circle cx="65" cy="65" r="38" fill="#F0EBDE" stroke="#1F2BE0" stroke-width="1"/>
+                                <circle cx="65" cy="65" r="22" fill="#1F2BE0" opacity="0.15"/>
+                                <circle cx="65" cy="65" r="8" fill="#1F2BE0"/>
+                                <line x1="10" y1="65" x2="120" y2="65" stroke="#1F2BE0" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.4"/>
+                                <line x1="65" y1="10" x2="65" y2="120" stroke="#1F2BE0" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.4"/>
+                                <!-- Clustered Darts at Bullseye -->
+                                <circle cx="66" cy="63" r="4" fill="#D9383A"/>
+                                <circle cx="63" cy="67" r="4" fill="#D9383A"/>
+                                <circle cx="68" cy="68" r="4" fill="#D9383A"/>
+                                <circle cx="62" cy="62" r="4" fill="#D9383A"/>
+                            </svg>
+                            <div>
+                                <span class="target-badge ideal-badge">&star; LOW BIAS + LOW VARIANCE</span>
+                                <h3 style="font-size:28px; margin:6px 0;">The Ideal Bullseye</h3>
+                                <p style="font-size:16px; line-height:1.4;">Accurate on average, highly stable across datasets. Generalizes reliably.</p>
+                            </div>
+                        </div>
+
+                        <!-- Q2: Low Bias + High Variance (Overfitting) -->
+                        <div class="target-card reveal reveal-delay-2" title="High Sensitivity">
+                            <svg width="125" height="125" viewBox="0 0 130 130">
+                                <circle cx="65" cy="65" r="54" fill="#E6E0CE" stroke="#1F2BE0" stroke-width="1.5"/>
+                                <circle cx="65" cy="65" r="38" fill="#F0EBDE" stroke="#1F2BE0" stroke-width="1"/>
+                                <circle cx="65" cy="65" r="8" fill="#1F2BE0"/>
+                                <line x1="10" y1="65" x2="120" y2="65" stroke="#1F2BE0" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.4"/>
+                                <line x1="65" y1="10" x2="65" y2="120" stroke="#1F2BE0" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.4"/>
+                                <!-- Scattered Darts -->
+                                <circle cx="46" cy="42" r="4" fill="#D9383A"/>
+                                <circle cx="84" cy="38" r="4" fill="#D9383A"/>
+                                <circle cx="88" cy="88" r="4" fill="#D9383A"/>
+                                <circle cx="42" cy="82" r="4" fill="#D9383A"/>
+                            </svg>
+                            <div>
+                                <span class="target-badge">LOW BIAS + HIGH VARIANCE</span>
+                                <h3 style="font-size:28px; margin:6px 0;">Overfitting</h3>
+                                <p style="font-size:16px; line-height:1.4;">Centered around the truth on average, but wildly unstable per training sample.</p>
+                            </div>
+                        </div>
+
+                        <!-- Q3: High Bias + Low Variance (Underfitting) -->
+                        <div class="target-card reveal reveal-delay-3" title="Systematic Error">
+                            <svg width="125" height="125" viewBox="0 0 130 130">
+                                <circle cx="65" cy="65" r="54" fill="#E6E0CE" stroke="#1F2BE0" stroke-width="1.5"/>
+                                <circle cx="65" cy="65" r="38" fill="#F0EBDE" stroke="#1F2BE0" stroke-width="1"/>
+                                <circle cx="65" cy="65" r="8" fill="#1F2BE0"/>
+                                <line x1="10" y1="65" x2="120" y2="65" stroke="#1F2BE0" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.4"/>
+                                <line x1="65" y1="10" x2="65" y2="120" stroke="#1F2BE0" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.4"/>
+                                <!-- Off-target Cluster -->
+                                <circle cx="32" cy="30" r="4" fill="#D9383A"/>
+                                <circle cx="36" cy="26" r="4" fill="#D9383A"/>
+                                <circle cx="28" cy="35" r="4" fill="#D9383A"/>
+                                <circle cx="38" cy="34" r="4" fill="#D9383A"/>
+                            </svg>
+                            <div>
+                                <span class="target-badge">HIGH BIAS + LOW VARIANCE</span>
+                                <h3 style="font-size:28px; margin:6px 0;">Underfitting</h3>
+                                <p style="font-size:16px; line-height:1.4;">Consistently wrong. Inflexible assumptions lead to predictable systematic error.</p>
+                            </div>
+                        </div>
+
+                        <!-- Q4: High Bias + High Variance -->
+                        <div class="target-card reveal reveal-delay-4" title="Total Failure">
+                            <svg width="125" height="125" viewBox="0 0 130 130">
+                                <circle cx="65" cy="65" r="54" fill="#E6E0CE" stroke="#1F2BE0" stroke-width="1.5"/>
+                                <circle cx="65" cy="65" r="38" fill="#F0EBDE" stroke="#1F2BE0" stroke-width="1"/>
+                                <circle cx="65" cy="65" r="8" fill="#1F2BE0"/>
+                                <line x1="10" y1="65" x2="120" y2="65" stroke="#1F2BE0" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.4"/>
+                                <line x1="65" y1="10" x2="65" y2="120" stroke="#1F2BE0" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.4"/>
+                                <!-- Wild Scatter -->
+                                <circle cx="22" cy="35" r="4" fill="#D9383A"/>
+                                <circle cx="38" cy="95" r="4" fill="#D9383A"/>
+                                <circle cx="95" cy="28" r="4" fill="#D9383A"/>
+                                <circle cx="105" cy="78" r="4" fill="#D9383A"/>
+                            </svg>
+                            <div>
+                                <span class="target-badge" style="background:var(--color-alert-red); color:#FFF;">HIGH BIAS + HIGH VARIANCE</span>
+                                <h3 style="font-size:28px; margin:6px 0;">Total Failure</h3>
+                                <p style="font-size:16px; line-height:1.4;">Both off-target and wildly erratic. Worst possible modeling outcome.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide-footer">
+                    <div class="footer-nav-hint">Student 1 &rarr; Student 2 Handover: "Why can't we simply minimize both?"</div>
+                    <div class="footer-pagenum">05 / 10</div>
+                </div>
+            </section>
+
+            <!-- SLIDE 6: Complexity Lab (Student 2) -->
+            <section class="slide" data-slide="5" data-act="2" data-topic="COMPLEXITY LAB">
+                <div class="slide-topbar">
+                    <div class="slide-topbar-left">
+                        <span class="presenter-pill">STUDENT 2</span>
+                        <h2 class="slide-title">The Tradeoff Dilemma: Live Complexity Lab</h2>
+                    </div>
+                    <div class="slide-topbar-right">DRAG SLIDER TO TEST</div>
+                </div>
+
+                <div class="slide-body">
+                    <div class="complexity-lab-grid">
+                        <div class="sim-meta-col reveal">
+                            <h3 style="font-size:38px;">Model Capacity is the Single Control Lever</h3>
+                            <p style="font-size:19px; line-height:1.5;">When we expand model capacity to reduce bias, we inevitably expose it to higher variance. Reducing one causes the other to increase.</p>
+                            
+                            <div class="callout-box" style="margin-top:8px;">
+                                "You cannot simultaneously reduce both errors without changing the data distribution or using regularization techniques."
+                            </div>
+                        </div>
+
+                        <div class="lab-control-panel reveal reveal-delay-2">
+                            <div class="sim-header-bar">
+                                <span class="mono-tag" style="font-weight:700;">DYNAMIC POLYNOMIAL MORPHING</span>
+                                <span class="mono-tag" id="degreeDisplay" style="background:var(--color-ink); color:var(--color-paper); padding:2px 8px;">DEGREE d = 3</span>
+                            </div>
+
+                            <div style="display:flex; flex-direction:column; gap:8px;">
+                                <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:13px; font-weight:700;">
+                                    <span>Model Capacity</span>
+                                    <span id="sliderValLabel" style="color:var(--color-ink);">Sweet Spot (d=3)</span>
+                                </div>
+                                <input type="range" min="1" max="10" value="3" class="styled-slider" id="labComplexitySlider">
+                                <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:12px; color:var(--color-ink-soft);">
+                                    <span>d=1 (Linear)</span>
+                                    <span>d=3 (Optimal)</span>
+                                    <span>d=10 (Complex)</span>
+                                </div>
+                            </div>
+
+                            <div style="width:100%; height:180px; background:var(--color-paper); border:1.5px solid var(--color-ink); position:relative;">
+                                <svg width="100%" height="100%" viewBox="0 0 440 180" id="labSvg">
+                                    <line x1="30" y1="155" x2="410" y2="155" stroke="#1F2BE0" stroke-width="1.5"/>
+                                    <line x1="30" y1="15" x2="30" y2="155" stroke="#1F2BE0" stroke-width="1.5"/>
+
+                                    <!-- Points -->
+                                    <circle cx="60" cy="130" r="4.5" fill="#1F2BE0"/>
+                                    <circle cx="110" cy="95" r="4.5" fill="#1F2BE0"/>
+                                    <circle cx="170" cy="55" r="4.5" fill="#1F2BE0"/>
+                                    <circle cx="230" cy="45" r="4.5" fill="#1F2BE0"/>
+                                    <circle cx="290" cy="65" r="4.5" fill="#1F2BE0"/>
+                                    <circle cx="350" cy="110" r="4.5" fill="#1F2BE0"/>
+                                    <circle cx="390" cy="140" r="4.5" fill="#1F2BE0"/>
+
+                                    <!-- Fitted Curve Path -->
+                                    <path id="labFittedCurve" d="M 40 145 Q 230 15 410 150" fill="none" stroke="#1F2BE0" stroke-width="3.5"/>
+                                </svg>
+                            </div>
+
+                            <div class="lab-state-badge" id="labStateBox">
+                                <span class="mono-tag" style="font-weight:700; color:var(--color-ink);" id="labRegimeText">&star; BALANCED SWEET SPOT (MINIMUM TEST ERROR)</span>
+                                <p style="font-size:14px; margin-top:2px;" id="labDescText">The 3rd-degree model captures the natural quadratic curvature without fitting random point noise.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide-footer">
+                    <div class="footer-nav-hint">Student 2 &bull; Interactive Model Capacity Control</div>
+                    <div class="footer-pagenum">06 / 10</div>
+                </div>
+            </section>
+
+            <!-- SLIDE 7: Master U-Curve with Crosshair Tracker (Student 2) -->
+            <section class="slide" data-slide="6" data-act="2" data-topic="U-SHAPED ERROR CURVE">
+                <div class="slide-topbar">
+                    <div class="slide-topbar-left">
+                        <span class="presenter-pill">STUDENT 2</span>
+                        <h2 class="slide-title">Model Complexity vs. Prediction Error</h2>
+                    </div>
+                    <div class="slide-topbar-right">HOVER OVER GRAPH TO TRACK LOSS</div>
+                </div>
+
+                <div class="slide-body">
+                    <div class="master-ucurve-grid">
+                        <div class="ucurve-canvas-box reveal">
+                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid var(--color-ink); padding-bottom:10px;">
+                                <div style="display:flex; gap:16px; font-family:var(--font-mono); font-size:13px;">
+                                    <span style="display:flex; align-items:center; gap:6px;"><span style="width:16px; height:3px; background:#D9383A; display:inline-block;"></span> Bias&sup2;</span>
+                                    <span style="display:flex; align-items:center; gap:6px;"><span style="width:16px; height:3px; background:#0284C7; display:inline-block;"></span> Variance</span>
+                                    <span style="display:flex; align-items:center; gap:6px;"><span style="width:16px; height:4px; background:#1F2BE0; display:inline-block;"></span> Total Test Error</span>
+                                </div>
+                                <span class="mono-tag" id="hudTrackerReadout">COMPLEXITY: 50% &bull; OPTIMAL</span>
+                            </div>
+
+                            <div class="ucurve-svg-container" id="ucurveTrackBox">
+                                <svg width="100%" height="100%" viewBox="0 0 640 340" id="ucurveSvg">
+                                    <line x1="60" y1="290" x2="600" y2="290" stroke="#1F2BE0" stroke-width="1.5"/>
+                                    <line x1="60" y1="30" x2="60" y2="290" stroke="#1F2BE0" stroke-width="1.5"/>
+                                    
+                                    <text x="330" y="325" text-anchor="middle" font-family="'DM Mono', monospace" font-size="13" fill="#1F2BE0">MODEL COMPLEXITY &rarr;</text>
+                                    <text x="25" y="160" text-anchor="middle" font-family="'DM Mono', monospace" font-size="13" fill="#1F2BE0" transform="rotate(-90 25 160)">TOTAL ERROR &rarr;</text>
+
+                                    <!-- Bias^2 Curve (Red) -->
+                                    <path d="M 70 50 Q 180 230 590 270" fill="none" stroke="#D9383A" stroke-width="2.5" stroke-dasharray="5 5"/>
+                                    
+                                    <!-- Variance Curve (Cyan) -->
+                                    <path d="M 70 280 Q 420 260 590 40" fill="none" stroke="#0284C7" stroke-width="2.5" stroke-dasharray="5 5"/>
+
+                                    <!-- Irreducible Noise Line -->
+                                    <line x1="60" y1="270" x2="600" y2="270" stroke="#1F2BE0" stroke-width="1" stroke-dasharray="3 3" opacity="0.4"/>
+                                    <text x="520" y="262" font-family="'DM Mono', monospace" font-size="11" fill="#1F2BE0" opacity="0.7">Noise (&sigma;&sup2;)</text>
+
+                                    <!-- Total Error U-Curve (Solid Blue thick) -->
+                                    <path d="M 70 85 Q 295 270 590 75" fill="none" stroke="#1F2BE0" stroke-width="4"/>
+
+                                    <!-- Sweet Spot Marker -->
+                                    <line x1="295" y1="30" x2="295" y2="290" stroke="#1F2BE0" stroke-width="1" stroke-dasharray="3 3"/>
+                                    <circle cx="295" cy="180" r="8" fill="#D9383A" stroke="#1F2BE0" stroke-width="2"/>
+                                    <rect x="240" y="198" width="110" height="26" fill="#1F2BE0"/>
+                                    <text x="295" y="215" text-anchor="middle" font-family="'DM Mono', monospace" font-size="11" font-weight="700" fill="#F0EBDE">&star; SWEET SPOT</text>
+
+                                    <!-- Interactive Guideline (Follows mouse) -->
+                                    <line id="uGuideline" x1="295" y1="30" x2="295" y2="290" stroke="#D9383A" stroke-width="1.5" stroke-dasharray="2 2" style="display:none;"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="ucurve-sidebar reveal reveal-delay-2">
+                            <div class="zone-analysis-card" id="cardZoneUnderfit">
+                                <span class="micro-label" style="color:var(--color-alert-red);">ZONE 01 // UNDERFITTING</span>
+                                <p style="font-size:15px; line-height:1.4;">High bias dominates. Model is too rigid to capture the natural data pattern.</p>
+                            </div>
+
+                            <div class="zone-analysis-card zone-optimal active" id="cardZoneOpt">
+                                <span class="micro-label" style="color:var(--color-ink);">&star; ZONE 02 // OPTIMAL GENERALIZATION</span>
+                                <p style="font-size:15px; line-height:1.4; font-weight:600;">Global minimum of Total Test Error. Model captures signals and ignores noise.</p>
+                            </div>
+
+                            <div class="zone-analysis-card" id="cardZoneOverfit">
+                                <span class="micro-label" style="color:var(--color-alert-cyan);">ZONE 03 // OVERFITTING</span>
+                                <p style="font-size:15px; line-height:1.4;">High variance dominates. Model memorizes idiosyncratic training noise.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide-footer">
+                    <div class="footer-nav-hint">Student 2 &bull; Total Generalization Error Minimization</div>
+                    <div class="footer-pagenum">07 / 10</div>
+                </div>
+            </section>
+
+            <!-- SLIDE 8: Balancing Strategies (Student 3) -->
+            <section class="slide" data-slide="7" data-act="3" data-topic="ENGINEERING STRATEGIES">
+                <div class="slide-topbar">
+                    <div class="slide-topbar-left">
+                        <span class="presenter-pill">STUDENT 3</span>
+                        <h2 class="slide-title">How Do We Balance Bias &amp; Variance?</h2>
+                    </div>
+                    <div class="slide-topbar-right">PRACTICAL BLUEPRINTS</div>
+                </div>
+
+                <div class="slide-body">
+                    <div class="blueprint-3col-grid">
+                        <!-- Pillar 1: Cross-Validation with Step Button -->
+                        <div class="blueprint-card reveal reveal-delay-1">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span class="mono-tag" style="color:var(--color-ink-soft);">PILLAR 01 // ESTIMATION</span>
+                                <button class="sim-btn" id="btnStepFold" style="padding:2px 8px; font-size:11px;">Next Fold &rarr;</button>
+                            </div>
+                            <h3 style="font-size:30px;">Cross-Validation</h3>
+                            <p style="font-size:15px; line-height:1.45;">Evaluate model stability across $K$ independent splits to estimate true test error before deployment.</p>
+                            
+                            <svg class="kfold-svg-diagram" viewBox="0 0 260 80" id="kfoldSvg">
+                                <g id="foldRow1">
+                                    <rect x="10" y="15" width="44" height="22" fill="#D9383A"/>
+                                    <rect x="58" y="15" width="44" height="22" fill="#1F2BE0"/>
+                                    <rect x="106" y="15" width="44" height="22" fill="#1F2BE0"/>
+                                    <rect x="154" y="15" width="44" height="22" fill="#1F2BE0"/>
+                                    <rect x="202" y="15" width="44" height="22" fill="#1F2BE0"/>
+                                </g>
+                                <g id="foldRow2">
+                                    <rect x="10" y="44" width="44" height="22" fill="#1F2BE0"/>
+                                    <rect x="58" y="44" width="44" height="22" fill="#D9383A"/>
+                                    <rect x="106" y="44" width="44" height="22" fill="#1F2BE0"/>
+                                    <rect x="154" y="44" width="44" height="22" fill="#1F2BE0"/>
+                                    <rect x="202" y="44" width="44" height="22" fill="#1F2BE0"/>
+                                </g>
+                            </svg>
+                            <span class="mono-tag" style="font-size:11px;" id="kfoldStateText">ROTATING VALIDATION SPLITS (FOLD 1)</span>
+                        </div>
+
+                        <!-- Pillar 2: Regularization -->
+                        <div class="blueprint-card reveal reveal-delay-2">
+                            <span class="mono-tag" style="color:var(--color-ink-soft);">PILLAR 02 // CONSTRAINT</span>
+                            <h3 style="font-size:30px;">Regularization</h3>
+                            <p style="font-size:15px; line-height:1.45;">Penalize excessively large weight coefficients to constrain hypothesis space and suppress variance.</p>
+                            
+                            <div style="background:var(--color-paper); border:1px solid var(--color-ink); padding:12px; font-family:var(--font-mono); font-size:13px; margin:auto 0 0 0;">
+                                <div><strong>L1 (Lasso):</strong> Loss + &lambda;&Sigma;|w|</div>
+                                <div style="margin-top:4px;"><strong>L2 (Ridge):</strong> Loss + &lambda;&Sigma;w&sup2;</div>
+                            </div>
+                        </div>
+
+                        <!-- Pillar 3: Structural Tuning -->
+                        <div class="blueprint-card reveal reveal-delay-3">
+                            <span class="mono-tag" style="color:var(--color-ink-soft);">PILLAR 03 // ARCHITECTURE</span>
+                            <h3 style="font-size:30px;">Structural Pruning</h3>
+                            <p style="font-size:15px; line-height:1.45;">Enforce hard upper limits on model depth, early stopping epochs, and minimum samples per leaf.</p>
+                            
+                            <div style="background:var(--color-paper); border:1px solid var(--color-ink); padding:12px; font-family:var(--font-mono); font-size:13px; margin:auto 0 0 0;">
+                                <div>&bull; Max Tree Depth: 4–6</div>
+                                <div style="margin-top:4px;">&bull; Dropout Rate: 0.2–0.5</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide-footer">
+                    <div class="footer-nav-hint">Student 3 &bull; Practical Engineering Solutions</div>
+                    <div class="footer-pagenum">08 / 10</div>
+                </div>
+            </section>
+
+            <!-- SLIDE 9: Practitioner's Toolkit (Student 3) -->
+            <section class="slide" data-slide="8" data-act="3" data-topic="PRACTITIONER TOOLKIT">
+                <div class="slide-topbar">
+                    <div class="slide-topbar-left">
+                        <span class="presenter-pill">STUDENT 3</span>
+                        <h2 class="slide-title">The ML Practitioner's Control Toolkit</h2>
+                    </div>
+                    <div class="slide-topbar-right">ACTIONABLE METHODS</div>
+                </div>
+
+                <div class="slide-body">
+                    <div class="toolkit-ledger-grid">
+                        <div class="ledger-item-card reveal reveal-delay-1">
+                            <span class="mono-tag">METHOD 01 // SHRINKAGE</span>
+                            <h3 style="font-size:26px;">L1 / L2 Penalty Adjustment (&lambda;)</h3>
+                            <p style="font-size:15px; line-height:1.45;">Tuning hyperparameter &lambda; controls the tradeoff directly. Higher &lambda; drives variance down while tolerating slightly higher bias.</p>
+                        </div>
+
+                        <div class="ledger-item-card reveal reveal-delay-2">
+                            <span class="mono-tag">METHOD 02 // ENSEMBLE LEARNING</span>
+                            <h3 style="font-size:26px;">Bagging vs. Boosting</h3>
+                            <p style="font-size:15px; line-height:1.45;"><strong>Bagging</strong> (Random Forest) reduces variance by averaging diverse trees. <strong>Boosting</strong> (XGBoost) reduces bias sequentially.</p>
+                        </div>
+
+                        <div class="ledger-item-card reveal reveal-delay-3">
+                            <span class="mono-tag">METHOD 03 // EARLY STOPPING</span>
+                            <h3 style="font-size:26px;">Validation-Based Halting</h3>
+                            <p style="font-size:15px; line-height:1.45;">Halt neural network training the exact epoch validation loss begins climbing, even if training loss continues plummeting.</p>
+                        </div>
+
+                        <div class="ledger-item-card reveal reveal-delay-4">
+                            <span class="mono-tag">METHOD 04 // DATA EXPANSION</span>
+                            <h3 style="font-size:26px;">Gather More Training Data</h3>
+                            <p style="font-size:15px; line-height:1.45;">More diverse training examples directly shrinks variance without increasing bias — the only free lunch in statistical learning.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide-footer">
+                    <div class="footer-nav-hint">Student 3 &bull; Production Implementation Best Practices</div>
+                    <div class="footer-pagenum">09 / 10</div>
+                </div>
+            </section>
+
+            <!-- SLIDE 10: Conclusion & Manifesto (All Presenters) -->
+            <section class="slide" data-slide="9" data-act="3" data-topic="CONCLUSION & MANIFESTO">
+                <div class="slide-topbar">
+                    <div class="slide-topbar-left">
+                        <span class="presenter-pill">ALL PRESENTERS</span>
+                        <h2 class="slide-title">Conclusion: The Goal is Generalization</h2>
+                    </div>
+                    <div class="slide-topbar-right">SUMMARY &bull; Q&amp;A</div>
+                </div>
+
+                <div class="slide-body">
+                    <div class="manifesto-grand-layout">
+                        <div class="grand-quote-banner reveal">
+                            <span class="micro-label">THE FUNDAMENTAL LAW OF MACHINE LEARNING</span>
+                            <div class="grand-quote-text">
+                                "The ultimate objective of machine learning is <strong>never</strong> to achieve 100% training accuracy. It is to find the optimal complexity that generalizes accurately to unseen future data."
+                            </div>
+                        </div>
+
+                        <div class="conclusion-3points reveal reveal-delay-2">
+                            <div class="concl-card">
+                                <span class="mono-tag" style="color:var(--color-alert-red); font-weight:700;">1. HIGH BIAS</span>
+                                <p style="font-size:15px; line-height:1.4;">Model is too rigid. Fix by adding features, relaxing constraints, or increasing capacity.</p>
+                            </div>
+
+                            <div class="concl-card">
+                                <span class="mono-tag" style="color:var(--color-alert-cyan); font-weight:700;">2. HIGH VARIANCE</span>
+                                <p style="font-size:15px; line-height:1.4;">Model is over-sensitive. Fix with cross-validation, regularization, and gathering more data.</p>
+                            </div>
+
+                            <div class="concl-card" style="background:var(--color-paper-highlight); border:2px solid var(--color-ink);">
+                                <span class="mono-tag" style="color:var(--color-ink); font-weight:700;">&star; 3. THE SWEET SPOT</span>
+                                <p style="font-size:15px; line-height:1.4; font-weight:600;">The empirical balance that minimizes total test loss on real-world unseen distributions.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide-footer">
+                    <div class="footer-nav-hint">Thank You &bull; Questions &amp; Discussion</div>
+                    <div class="footer-pagenum">10 / 10</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- On-screen Navigation Controls -->
+    <div class="deck-controls">
+        <button class="ctrl-btn" id="prevBtn" title="Previous Slide (Left Arrow)">&larr; Prev</button>
+        <span class="slide-progress-text" id="progressIndicator">1 / 10</span>
+        <button class="ctrl-btn" id="nextBtn" title="Next Slide (Right Arrow, Space)">Next &rarr;</button>
+    </div>
+
+    <!-- Inline Editing Hotzone & Toggle -->
+    <div class="edit-hotzone" id="editHotzone" title="Hover or press E to edit text"></div>
+    <button class="edit-toggle" id="editToggle" title="Edit Mode (Shortcut: E)">&#9998; Edit Mode</button>
+
+    <!-- ===========================================
+       6. SLIDE PRESENTATION CONTROLLER JS
+       =========================================== -->
+    <script>
+        class PresentationController {
+            constructor() {
+                this.slides = document.querySelectorAll('.slide');
+                this.currentSlide = 0;
+                this.stage = document.getElementById('deckStage');
+                this.progressText = document.getElementById('progressIndicator');
+                this.prevBtn = document.getElementById('prevBtn');
+                this.nextBtn = document.getElementById('nextBtn');
+                this.topicTag = document.getElementById('liveTopicTag');
+                this.act1Tab = document.getElementById('act1Tab');
+                this.act2Tab = document.getElementById('act2Tab');
+                this.act3Tab = document.getElementById('act3Tab');
+                
+                this.isEditing = false;
+
+                this.initScaling();
+                this.initNavigation();
+                this.initInteractiveSimulators();
+                this.initEditor();
+                this.showSlide(0);
+            }
+
+            initScaling() {
+                const scale = () => {
+                    const factor = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+                    const x = (window.innerWidth - 1920 * factor) / 2;
+                    const y = (window.innerHeight - 1080 * factor) / 2;
+                    this.stage.style.transform = `translate(${x}px, ${y}px) scale(${factor})`;
+                };
+                scale();
+                window.addEventListener('resize', scale);
+            }
+
+            initNavigation() {
+                document.addEventListener('keydown', (e) => {
+                    if (this.isEditing && e.target.getAttribute('contenteditable')) return;
+
+                    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                        e.preventDefault();
+                        this.next();
+                    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                        e.preventDefault();
+                        this.prev();
+                    } else if (e.key === 'Home') {
+                        e.preventDefault();
+                        this.showSlide(0);
+                    } else if (e.key === 'End') {
+                        e.preventDefault();
+                        this.showSlide(this.slides.length - 1);
+                    }
+                });
+
+                this.prevBtn.addEventListener('click', () => this.prev());
+                this.nextBtn.addEventListener('click', () => this.next());
+
+                // Breadcrumb Clicks
+                [this.act1Tab, this.act2Tab, this.act3Tab].forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const targetSlide = parseInt(tab.getAttribute('data-start'));
+                        this.showSlide(targetSlide);
+                    });
+                });
+
+                let startX = 0, startY = 0;
+                document.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                    startY = e.touches[0].clientY;
+                }, { passive: true });
+
+                document.addEventListener('touchend', (e) => {
+                    const diffX = e.changedTouches[0].clientX - startX;
+                    const diffY = e.changedTouches[0].clientY - startY;
+                    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                        if (diffX < 0) this.next();
+                        else this.prev();
+                    }
+                }, { passive: true });
+            }
+
+            showSlide(index) {
+                this.currentSlide = Math.max(0, Math.min(index, this.slides.length - 1));
+                const currentSlideEl = this.slides[this.currentSlide];
+
+                this.slides.forEach((slide, i) => {
+                    const isActive = i === this.currentSlide;
+                    slide.classList.toggle('active', isActive);
+                    slide.classList.toggle('visible', isActive);
+                });
+
+                this.progressText.textContent = `${this.currentSlide + 1} / ${this.slides.length}`;
+                this.prevBtn.disabled = this.currentSlide === 0;
+                this.nextBtn.disabled = this.currentSlide === this.slides.length - 1;
+
+                // Update Breadcrumb & Act
+                const act = currentSlideEl.getAttribute('data-act');
+                const topic = currentSlideEl.getAttribute('data-topic');
+                if (this.topicTag) this.topicTag.textContent = topic || 'STATISTICAL LEARNING';
+
+                this.act1Tab.classList.toggle('active', act === '1');
+                this.act2Tab.classList.toggle('active', act === '2');
+                this.act3Tab.classList.toggle('active', act === '3');
+            }
+
+            next() {
+                if (this.currentSlide < this.slides.length - 1) {
+                    this.showSlide(this.currentSlide + 1);
+                }
+            }
+
+            prev() {
+                if (this.currentSlide > 0) {
+                    this.showSlide(this.currentSlide - 1);
+                }
+            }
+
+            initInteractiveSimulators() {
+                // Slide 2: Equation Linked Hover
+                const terms = [
+                    { term: document.getElementById('eqTermBias'), card: document.getElementById('cardBias') },
+                    { term: document.getElementById('eqTermVar'), card: document.getElementById('cardVar') },
+                    { term: document.getElementById('eqTermNoise'), card: document.getElementById('cardNoise') }
+                ];
+
+                terms.forEach(item => {
+                    if (item.term && item.card) {
+                        item.term.addEventListener('mouseenter', () => {
+                            item.card.classList.add('highlighted');
+                        });
+                        item.term.addEventListener('mouseleave', () => {
+                            item.card.classList.remove('highlighted');
+                        });
+                        item.card.addEventListener('mouseenter', () => {
+                            item.term.classList.add('active');
+                        });
+                        item.card.addEventListener('mouseleave', () => {
+                            item.term.classList.remove('active');
+                        });
+                    }
+                });
+
+                // Slide 3: Bias Simulator
+                const btnBiasRigid = document.getElementById('btnBiasRigid');
+                const btnBiasTrue = document.getElementById('btnBiasTrue');
+                const biasModelLine = document.getElementById('biasModelLine');
+                const biasTrueCurve = document.getElementById('biasTrueCurve');
+                const biasResiduals = document.getElementById('biasResiduals');
+
+                if (btnBiasRigid && btnBiasTrue) {
+                    btnBiasRigid.addEventListener('click', () => {
+                        btnBiasRigid.classList.add('active');
+                        btnBiasTrue.classList.remove('active');
+                        biasModelLine.style.display = 'block';
+                        biasResiduals.style.display = 'block';
+                        biasTrueCurve.style.display = 'none';
+                    });
+                    btnBiasTrue.addEventListener('click', () => {
+                        btnBiasTrue.classList.add('active');
+                        btnBiasRigid.classList.remove('active');
+                        biasModelLine.style.display = 'none';
+                        biasResiduals.style.display = 'none';
+                        biasTrueCurve.style.display = 'block';
+                    });
+                }
+
+                // Slide 4: Variance Simulator + Dynamic Outlier Click
+                const btnVarOverfit = document.getElementById('btnVarOverfit');
+                const btnVarTrue = document.getElementById('btnVarTrue');
+                const varOverfitPath = document.getElementById('varOverfitPath');
+                const varTruePath = document.getElementById('varTruePath');
+                const varSvg = document.getElementById('varSvg');
+                const varPointsGroup = document.getElementById('varPointsGroup');
+
+                if (btnVarOverfit && btnVarTrue) {
+                    btnVarOverfit.addEventListener('click', () => {
+                        btnVarOverfit.classList.add('active');
+                        btnVarTrue.classList.remove('active');
+                        varOverfitPath.style.display = 'block';
+                        varTruePath.style.display = 'none';
+                    });
+                    btnVarTrue.addEventListener('click', () => {
+                        btnVarTrue.classList.add('active');
+                        btnVarOverfit.classList.remove('active');
+                        varOverfitPath.style.display = 'none';
+                        varTruePath.style.display = 'block';
+                    });
+                }
+
+                // Dynamic Outlier insertion on click (Teaching feature!)
+                if (varSvg && varPointsGroup) {
+                    varSvg.addEventListener('click', (e) => {
+                        const rect = varSvg.getBoundingClientRect();
+                        const scaleX = 540 / rect.width;
+                        const scaleY = 280 / rect.height;
+                        const clickX = (e.clientX - rect.left) * scaleX;
+                        const clickY = (e.clientY - rect.top) * scaleY;
+
+                        if (clickX >= 60 && clickX <= 490 && clickY >= 30 && clickY <= 230) {
+                            const newCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                            newCircle.setAttribute('cx', clickX);
+                            newCircle.setAttribute('cy', clickY);
+                            newCircle.setAttribute('r', '6');
+                            newCircle.setAttribute('fill', '#D9383A');
+                            varPointsGroup.appendChild(newCircle);
+
+                            // Dynamically bend the overfit curve to touch this new point
+                            varOverfitPath.setAttribute('d', `M 60 220 Q 80 190 105 110 T 130 140 T 180 170 T 230 70 T ${clickX} ${clickY} T 280 120 T 330 60 T 380 160 T 430 180 T 470 80 T 490 20`);
+                        }
+                    });
+                }
+
+                // Slide 6: Polynomial Complexity Lab Slider
+                const slider = document.getElementById('labComplexitySlider');
+                const degreeDisplay = document.getElementById('degreeDisplay');
+                const sliderValLabel = document.getElementById('sliderValLabel');
+                const labFittedCurve = document.getElementById('labFittedCurve');
+                const labRegimeText = document.getElementById('labRegimeText');
+                const labDescText = document.getElementById('labDescText');
+
+                if (slider) {
+                    slider.addEventListener('input', (e) => {
+                        const deg = parseInt(e.target.value);
+                        degreeDisplay.textContent = `DEGREE d = ${deg}`;
+
+                        if (deg <= 2) {
+                            sliderValLabel.textContent = `Underfitting (d=${deg})`;
+                            sliderValLabel.style.color = 'var(--color-alert-red)';
+                            labFittedCurve.setAttribute('d', 'M 40 110 L 410 110');
+                            labFittedCurve.setAttribute('stroke', '#D9383A');
+                            labRegimeText.textContent = "UNDERFITTING ZONE (HIGH BIAS)";
+                            labRegimeText.style.color = "#D9383A";
+                            labDescText.textContent = "Model assumptions are too simplistic. High training error and high test error.";
+                        } else if (deg >= 7) {
+                            sliderValLabel.textContent = `Overfitting (d=${deg})`;
+                            sliderValLabel.style.color = 'var(--color-alert-cyan)';
+                            labFittedCurve.setAttribute('d', 'M 40 150 Q 60 130 85 40 T 110 95 T 140 160 T 170 55 T 200 130 T 230 45 T 260 140 T 290 65 T 320 150 T 350 110 T 390 140');
+                            labFittedCurve.setAttribute('stroke', '#0284C7');
+                            labRegimeText.textContent = "OVERFITTING ZONE (HIGH VARIANCE)";
+                            labRegimeText.style.color = "#0284C7";
+                            labDescText.textContent = "Model memorizes point noise and oscillates wildly. Training loss near 0% but test loss explodes.";
+                        } else {
+                            sliderValLabel.textContent = `Sweet Spot (d=${deg})`;
+                            sliderValLabel.style.color = 'var(--color-ink)';
+                            labFittedCurve.setAttribute('d', 'M 40 145 Q 230 15 410 150');
+                            labFittedCurve.setAttribute('stroke', '#1F2BE0');
+                            labRegimeText.textContent = "★ BALANCED SWEET SPOT (OPTIMAL GENERALIZATION)";
+                            labRegimeText.style.color = "#1F2BE0";
+                            labDescText.textContent = "Optimal model capacity captures natural quadratic structure while filtering noise.";
+                        }
+                    });
+                }
+
+                // Slide 7: Interactive U-Curve Crosshair Tracker
+                const ucurveBox = document.getElementById('ucurveTrackBox');
+                const uGuideline = document.getElementById('uGuideline');
+                const hudReadout = document.getElementById('hudTrackerReadout');
+                const cardUnder = document.getElementById('cardZoneUnderfit');
+                const cardOpt = document.getElementById('cardZoneOpt');
+                const cardOver = document.getElementById('cardZoneOverfit');
+
+                if (ucurveBox && uGuideline) {
+                    ucurveBox.addEventListener('mousemove', (e) => {
+                        const rect = ucurveBox.getBoundingClientRect();
+                        const svgX = ((e.clientX - rect.left) / rect.width) * 640;
+                        if (svgX >= 70 && svgX <= 590) {
+                            uGuideline.style.display = 'block';
+                            uGuideline.setAttribute('x1', svgX);
+                            uGuideline.setAttribute('x2', svgX);
+
+                            const pct = Math.round(((svgX - 70) / 520) * 100);
+                            if (pct < 38) {
+                                hudReadout.textContent = `COMPLEXITY: ${pct}% • UNDERFITTING (BIAS DOMINATES)`;
+                                hudReadout.style.color = '#D9383A';
+                                cardUnder.classList.add('active');
+                                cardOpt.classList.remove('active');
+                                cardOver.classList.remove('active');
+                            } else if (pct > 65) {
+                                hudReadout.textContent = `COMPLEXITY: ${pct}% • OVERFITTING (VARIANCE DOMINATES)`;
+                                hudReadout.style.color = '#0284C7';
+                                cardOver.classList.add('active');
+                                cardUnder.classList.remove('active');
+                                cardOpt.classList.remove('active');
+                            } else {
+                                hudReadout.textContent = `COMPLEXITY: ${pct}% • ★ OPTIMAL SWEET SPOT`;
+                                hudReadout.style.color = '#1F2BE0';
+                                cardOpt.classList.add('active');
+                                cardUnder.classList.remove('active');
+                                cardOver.classList.remove('active');
+                            }
+                        }
+                    });
+
+                    ucurveBox.addEventListener('mouseleave', () => {
+                        uGuideline.style.display = 'none';
+                        hudReadout.textContent = `COMPLEXITY: 50% • OPTIMAL`;
+                        hudReadout.style.color = 'var(--color-ink)';
+                        cardOpt.classList.add('active');
+                        cardUnder.classList.remove('active');
+                        cardOver.classList.remove('active');
+                    });
+                }
+
+                // Slide 8: K-Fold Step Button
+                const btnStepFold = document.getElementById('btnStepFold');
+                const kfoldStateText = document.getElementById('kfoldStateText');
+                const foldRow1 = document.getElementById('foldRow1');
+                const foldRow2 = document.getElementById('foldRow2');
+                let currentFoldStep = 1;
+
+                if (btnStepFold && foldRow1 && foldRow2) {
+                    btnStepFold.addEventListener('click', () => {
+                        currentFoldStep = (currentFoldStep % 5) + 1;
+                        kfoldStateText.textContent = `ROTATING VALIDATION SPLITS (FOLD ${currentFoldStep} OF 5)`;
+
+                        // Shift colors in fold row
+                        const rects1 = foldRow1.querySelectorAll('rect');
+                        rects1.forEach((r, idx) => {
+                            r.setAttribute('fill', (idx + 1 === currentFoldStep) ? '#D9383A' : '#1F2BE0');
+                        });
+
+                        const rects2 = foldRow2.querySelectorAll('rect');
+                        const nextStep = (currentFoldStep % 5) + 1;
+                        rects2.forEach((r, idx) => {
+                            r.setAttribute('fill', (idx + 1 === nextStep) ? '#D9383A' : '#1F2BE0');
+                        });
+                    });
+                }
+            }
+
+            initEditor() {
+                const hotzone = document.getElementById('editHotzone');
+                const toggle = document.getElementById('editToggle');
+                let timeout = null;
+
+                const showToggle = () => {
+                    clearTimeout(timeout);
+                    toggle.classList.add('show');
+                };
+
+                const hideToggle = () => {
+                    timeout = setTimeout(() => {
+                        if (!this.isEditing) toggle.classList.remove('show');
+                    }, 400);
+                };
+
+                hotzone.addEventListener('mouseenter', showToggle);
+                hotzone.addEventListener('mouseleave', hideToggle);
+                toggle.addEventListener('mouseenter', showToggle);
+                toggle.addEventListener('mouseleave', hideToggle);
+
+                const toggleEditMode = () => {
+                    this.isEditing = !this.isEditing;
+                    toggle.classList.toggle('active', this.isEditing);
+                    toggle.textContent = this.isEditing ? '✔ Save Changes' : '✏ Edit Mode';
+
+                    const editableTags = document.querySelectorAll('h1, h2, h3, p, span, .tier-desc, .grand-quote-text');
+                    editableTags.forEach(el => {
+                        el.setAttribute('contenteditable', this.isEditing ? 'true' : 'false');
+                    });
+
+                    if (!this.isEditing) {
+                        localStorage.setItem('bias_variance_deck_master_content', document.getElementById('deckStage').innerHTML);
+                    }
+                };
+
+                toggle.addEventListener('click', toggleEditMode);
+                hotzone.addEventListener('click', toggleEditMode);
+
+                document.addEventListener('keydown', (e) => {
+                    if ((e.key === 'e' || e.key === 'E') && !e.target.getAttribute('contenteditable')) {
+                        toggleEditMode();
+                    }
+                });
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            window.deck = new PresentationController();
+        });
+    </script>
+</body>
+</html>
