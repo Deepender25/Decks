@@ -917,7 +917,7 @@
         }
 
         /* ===========================================
-           5. PRESENTATION CONTROLS & EDIT HOTZONE
+           5. PRESENTATION CONTROLS & PREVIEW AFFORDANCES
            =========================================== */
         .deck-controls {
             position: fixed;
@@ -926,12 +926,13 @@
             transform: translateX(-50%);
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
             background: var(--color-paper);
             border: 1.5px solid var(--color-ink);
-            padding: 6px 16px;
+            padding: 6px 12px;
             z-index: 1000;
             box-shadow: 4px 4px 0px var(--color-ink);
+            user-select: none;
         }
 
         .ctrl-btn {
@@ -940,26 +941,168 @@
             color: var(--color-ink);
             font-family: var(--font-mono);
             font-size: 13px;
-            padding: 4px 10px;
+            padding: 5px 12px;
             cursor: pointer;
             font-weight: 600;
             transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
 
-        .ctrl-btn:hover {
+        .ctrl-btn:hover:not(:disabled) {
             background: var(--color-ink);
             color: var(--color-paper);
         }
 
-        .slide-progress-text {
-            font-family: var(--font-mono);
-            font-size: 14px;
-            font-weight: 500;
-            min-width: 60px;
-            text-align: center;
+        .ctrl-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
         }
 
-        /* Inline Edit Affordance */
+        .ctrl-btn-fs {
+            background: rgba(31, 43, 224, 0.08);
+        }
+
+        .ctrl-btn-help {
+            padding: 5px 8px;
+            font-weight: 700;
+        }
+
+        .slide-progress-text {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 700;
+            padding: 0 4px;
+            min-width: 52px;
+            text-align: center;
+            color: var(--color-ink);
+        }
+
+        /* Mobile Side Navigation Arrows (Touch) */
+        .mobile-side-nav {
+            display: none;
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 60px;
+            background: rgba(240, 235, 222, 0.9);
+            color: var(--color-ink);
+            border: 1.5px solid var(--color-ink);
+            font-size: 26px;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 999;
+            backdrop-filter: blur(4px);
+            box-shadow: 2px 2px 0px var(--color-ink);
+            touch-action: manipulation;
+            user-select: none;
+            transition: background 0.15s ease, transform 0.1s ease;
+        }
+
+        .mobile-side-nav:active {
+            background: var(--color-ink);
+            color: var(--color-paper);
+        }
+
+        .mobile-side-prev {
+            left: 8px;
+        }
+
+        .mobile-side-next {
+            right: 8px;
+        }
+
+        /* Keyboard Shortcuts Overlay Modal */
+        .shortcuts-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(9, 11, 18, 0.7);
+            backdrop-filter: blur(3px);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .shortcuts-modal.show {
+            display: flex;
+        }
+
+        .shortcuts-card {
+            background: var(--color-paper);
+            border: 2px solid var(--color-ink);
+            box-shadow: 6px 6px 0px var(--color-ink);
+            max-width: 460px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            animation: scAppear 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes scAppear {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .shortcuts-header {
+            background: var(--color-ink);
+            color: var(--color-paper);
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .shortcuts-close {
+            background: none;
+            border: none;
+            color: var(--color-paper);
+            font-size: 20px;
+            cursor: pointer;
+            font-family: monospace;
+            line-height: 1;
+        }
+
+        .shortcuts-grid {
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            font-family: var(--font-body);
+            font-size: 14px;
+        }
+
+        .sc-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed var(--color-ink-faint);
+        }
+
+        .sc-row kbd {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 700;
+            background: var(--color-paper-card);
+            border: 1px solid var(--color-ink);
+            padding: 2px 6px;
+            box-shadow: 1px 1px 0px var(--color-ink);
+        }
+
+        /* Inline Edit Affordance (Admin Only) */
         .edit-hotzone {
             position: fixed;
             top: 0;
@@ -1003,20 +1146,29 @@
         /* Mobile Touch & Responsive Styling */
         @media (max-width: 768px) {
             .deck-controls {
-                bottom: max(12px, env(safe-area-inset-bottom));
-                padding: 6px 12px;
-                gap: 8px;
-                box-shadow: 3px 3px 0px var(--color-ink);
+                bottom: max(10px, env(safe-area-inset-bottom));
+                padding: 4px 8px;
+                gap: 6px;
+                box-shadow: 2px 2px 0px var(--color-ink);
             }
             .ctrl-btn {
-                padding: 6px 12px;
-                font-size: 13px;
+                padding: 6px 10px;
+                font-size: 12px;
                 min-height: 38px;
                 touch-action: manipulation;
             }
+            .ctrl-btn-fs .fs-label {
+                display: none;
+            }
+            .ctrl-btn-help {
+                display: none;
+            }
             .slide-progress-text {
-                font-size: 13px;
-                min-width: 48px;
+                font-size: 12px;
+                min-width: 44px;
+            }
+            .mobile-side-nav {
+                display: flex;
             }
         }
 
@@ -1063,7 +1215,7 @@
             <!-- Top Act Progression Breadcrumbs -->
             <div class="top-deck-progress-bar">
                 <div style="display:flex; align-items:center; gap:12px;">
-                    <a href="../../index.html" style="color:var(--color-ink); text-decoration:none; border:1px solid var(--color-ink); padding:2px 8px; font-weight:700; background:rgba(31,43,224,0.06);">← HUB</a>
+                    <a href="../../index.html" id="hubNavBtn" style="display:none; color:var(--color-ink); text-decoration:none; border:1px solid var(--color-ink); padding:2px 8px; font-weight:700; background:rgba(31,43,224,0.06);">← HUB</a>
                     <span class="mono-text" style="font-weight:700;">ML THEORY SERIES &bull; 3-PRESENTER LECTURE</span>
                 </div>
                 <div class="progress-acts">
@@ -1806,11 +1958,35 @@
         </main>
     </div>
 
-    <!-- On-screen Navigation Controls -->
-    <div class="deck-controls">
-        <button class="ctrl-btn" id="prevBtn" title="Previous Slide (Left Arrow)">&larr; Prev</button>
-        <span class="slide-progress-text" id="progressIndicator">1 / 10</span>
-        <button class="ctrl-btn" id="nextBtn" title="Next Slide (Right Arrow, Space)">Next &rarr;</button>
+    <!-- On-screen Navigation Controls (Desktop & Mobile) -->
+    <div class="deck-controls" id="deckControls">
+        <button class="ctrl-btn" id="prevBtn" title="Previous Slide (← / PageUp)">&larr; Prev</button>
+        <span class="slide-progress-text" id="progressIndicator" title="Current Slide">1 / 10</span>
+        <button class="ctrl-btn" id="nextBtn" title="Next Slide (→ / Space / PageDown)">Next &rarr;</button>
+        <button class="ctrl-btn ctrl-btn-fs" id="fullscreenBtn" title="Toggle Fullscreen (F)">⛶ <span class="fs-label">Fullscreen</span></button>
+        <button class="ctrl-btn ctrl-btn-help" id="shortcutsBtn" title="Keyboard Shortcuts (?)">⌨</button>
+    </div>
+
+    <!-- Mobile Floating Side Navigation Arrows (Thumb Tap Navigation) -->
+    <button class="mobile-side-nav mobile-side-prev" id="mobilePrevBtn" aria-label="Previous Slide">&lsaquo;</button>
+    <button class="mobile-side-nav mobile-side-next" id="mobileNextBtn" aria-label="Next Slide">&rsaquo;</button>
+
+    <!-- Keyboard Shortcuts Modal -->
+    <div class="shortcuts-modal" id="shortcutsModal" onclick="if(event.target===this) window.deck.toggleShortcutsModal()">
+        <div class="shortcuts-card">
+            <div class="shortcuts-header">
+                <span>Presentation Controls</span>
+                <button class="shortcuts-close" onclick="window.deck.toggleShortcutsModal()">&times;</button>
+            </div>
+            <div class="shortcuts-grid">
+                <div class="sc-row"><kbd>&rarr;</kbd> / <kbd>Space</kbd> / <kbd>PgDn</kbd><span>Next Slide</span></div>
+                <div class="sc-row"><kbd>&larr;</kbd> / <kbd>PgUp</kbd><span>Previous Slide</span></div>
+                <div class="sc-row"><kbd>1</kbd> &ndash; <kbd>9</kbd><span>Jump directly to slide</span></div>
+                <div class="sc-row"><kbd>F</kbd><span>Toggle Fullscreen Mode</span></div>
+                <div class="sc-row"><kbd>Home</kbd> / <kbd>End</kbd><span>First / Last Slide</span></div>
+                <div class="sc-row"><kbd>Swipe &larr;&rarr;</kbd><span>Touch gesture slide change</span></div>
+            </div>
+        </div>
     </div>
 
     <!-- ===========================================
@@ -1825,6 +2001,11 @@
                 this.progressText = document.getElementById('progressIndicator');
                 this.prevBtn = document.getElementById('prevBtn');
                 this.nextBtn = document.getElementById('nextBtn');
+                this.fullscreenBtn = document.getElementById('fullscreenBtn');
+                this.shortcutsBtn = document.getElementById('shortcutsBtn');
+                this.mobilePrevBtn = document.getElementById('mobilePrevBtn');
+                this.mobileNextBtn = document.getElementById('mobileNextBtn');
+                this.shortcutsModal = document.getElementById('shortcutsModal');
                 this.topicTag = document.getElementById('liveTopicTag');
                 this.act1Tab = document.getElementById('act1Tab');
                 this.act2Tab = document.getElementById('act2Tab');
@@ -1866,23 +2047,44 @@
                     } else if (e.key === 'End') {
                         e.preventDefault();
                         this.showSlide(this.slides.length - 1);
+                    } else if (e.key === 'f' || e.key === 'F') {
+                        e.preventDefault();
+                        this.toggleFullscreen();
+                    } else if (e.key === '?' || e.key === 'h' || e.key === 'H') {
+                        e.preventDefault();
+                        this.toggleShortcutsModal();
+                    } else if (e.key === 'Escape') {
+                        if (this.shortcutsModal && this.shortcutsModal.classList.contains('show')) {
+                            this.toggleShortcutsModal();
+                        }
+                    } else if (e.key >= '1' && e.key <= '9') {
+                        const num = parseInt(e.key) - 1;
+                        if (num < this.slides.length) {
+                            this.showSlide(num);
+                        }
                     }
                 });
 
                 this.prevBtn.addEventListener('click', () => this.prev());
                 this.nextBtn.addEventListener('click', () => this.next());
+                if (this.fullscreenBtn) this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+                if (this.shortcutsBtn) this.shortcutsBtn.addEventListener('click', () => this.toggleShortcutsModal());
+                if (this.mobilePrevBtn) this.mobilePrevBtn.addEventListener('click', () => this.prev());
+                if (this.mobileNextBtn) this.mobileNextBtn.addEventListener('click', () => this.next());
 
                 // Breadcrumb Clicks
                 [this.act1Tab, this.act2Tab, this.act3Tab].forEach(tab => {
-                    tab.addEventListener('click', () => {
-                        const targetSlide = parseInt(tab.getAttribute('data-start'));
-                        this.showSlide(targetSlide);
-                    });
+                    if (tab) {
+                        tab.addEventListener('click', () => {
+                            const targetSlide = parseInt(tab.getAttribute('data-start'));
+                            this.showSlide(targetSlide);
+                        });
+                    }
                 });
 
                 let startX = 0, startY = 0, isInteractiveTouch = false;
                 document.addEventListener('touchstart', (e) => {
-                    isInteractiveTouch = !!e.target.closest('input, .styled-slider, button, a, #ucurveTrackBox, #varPointsGroup');
+                    isInteractiveTouch = !!e.target.closest('input, .styled-slider, button, a, #ucurveTrackBox, #varPointsGroup, .shortcuts-card');
                     startX = e.touches[0].clientX;
                     startY = e.touches[0].clientY;
                 }, { passive: true });
@@ -1896,6 +2098,28 @@
                         else this.prev();
                     }
                 }, { passive: true });
+            }
+
+            toggleFullscreen() {
+                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                    if (document.documentElement.requestFullscreen) {
+                        document.documentElement.requestFullscreen().catch(() => {});
+                    } else if (document.documentElement.webkitRequestFullscreen) {
+                        document.documentElement.webkitRequestFullscreen();
+                    }
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen().catch(() => {});
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    }
+                }
+            }
+
+            toggleShortcutsModal() {
+                if (this.shortcutsModal) {
+                    this.shortcutsModal.classList.toggle('show');
+                }
             }
 
             showSlide(index) {
@@ -2153,6 +2377,8 @@
                     if (res.ok) {
                         const data = await res.json();
                         if (data && data.authenticated) {
+                            const hubBtn = document.getElementById('hubNavBtn');
+                            if (hubBtn) hubBtn.style.display = 'inline-block';
                             this.mountEditor();
                         }
                     }
