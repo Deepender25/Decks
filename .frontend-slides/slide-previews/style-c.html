@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Style 3: Apartamento Monograph (European Design Journal) — DRL Input Noise</title>
+    
+    <!-- Google Fonts: Source Serif 4 (700/800), Bricolage Grotesque (600/700), DM Mono (500) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700&family=DM+Mono:wght@400;500;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,600;0,8..60,700;0,8..60,800;1,8..60,400;1,8..60,600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-canvas: #F4EFEA;
+            --bg-card: #FFFFFF;
+            --bg-card-sand: #EAE2D5;
+            
+            --color-forest: #1F3C28;
+            --color-forest-soft: #32583D;
+            --color-rose: #E691A4;
+            --color-charcoal: #1C1916;
+            --color-muted: #615B54;
+            
+            --border-forest: #1F3C28;
+            
+            --font-serif: 'Source Serif 4', Georgia, serif;
+            --font-sans: 'Bricolage Grotesque', sans-serif;
+            --font-mono: 'DM Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #DCD3C6;
+            font-family: var(--font-sans);
+            color: var(--color-charcoal);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .viewport-wrapper {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stage-16-9 {
+            width: 1920px;
+            height: 1080px;
+            background: var(--bg-canvas);
+            background-image: 
+                radial-gradient(var(--color-forest) 0.75px, transparent 0.75px);
+            background-size: 36px 36px;
+            position: absolute;
+            overflow: hidden;
+            border: 3.5px solid var(--border-forest);
+            box-shadow: 0 30px 90px rgba(31, 60, 40, 0.22);
+            display: flex;
+            flex-direction: column;
+            padding: 48px 68px;
+        }
+
+        /* Monograph Header */
+        .mono-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 2px solid var(--border-forest);
+            padding-bottom: 16px;
+            margin-bottom: 30px;
+        }
+
+        .header-meta-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .forest-pill {
+            background: var(--color-forest);
+            color: #FFFFFF;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 700;
+            padding: 6px 14px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .volume-caption {
+            font-family: var(--font-serif);
+            font-size: 18px;
+            font-style: italic;
+            color: var(--color-forest);
+        }
+
+        .folio-number {
+            font-family: var(--font-serif);
+            font-size: 32px;
+            font-style: italic;
+            color: var(--color-forest);
+            line-height: 1;
+        }
+
+        /* 2-Column Monograph Layout */
+        .mono-body {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1.18fr 0.96fr;
+            gap: 52px;
+            align-items: stretch;
+        }
+
+        .mono-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .section-eyebrow {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--color-forest);
+            margin-bottom: 8px;
+        }
+
+        .headline-serif {
+            font-family: var(--font-serif);
+            font-size: 68px;
+            font-weight: 700;
+            line-height: 1.02;
+            letter-spacing: -0.02em;
+            color: var(--color-forest);
+        }
+
+        .headline-serif em {
+            font-style: italic;
+            font-weight: 400;
+            color: #8C2D43;
+        }
+
+        .monograph-lede {
+            font-size: 23px;
+            line-height: 1.45;
+            color: var(--color-muted);
+            margin-top: 16px;
+            font-weight: 600;
+        }
+
+        .rose-quote-card {
+            background: var(--color-rose);
+            border: 2px solid var(--border-forest);
+            border-radius: 24px;
+            padding: 22px 28px;
+            margin-top: 18px;
+        }
+
+        .rose-quote-text {
+            font-family: var(--font-serif);
+            font-size: 26px;
+            font-style: italic;
+            line-height: 1.35;
+            color: var(--color-forest);
+        }
+
+        .quadrant-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .quadrant-item {
+            background: var(--bg-card-sand);
+            border: 1.5px solid var(--border-forest);
+            border-radius: 16px;
+            padding: 10px 14px;
+            font-size: 14px;
+            line-height: 1.35;
+        }
+
+        .quadrant-item strong {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--color-forest);
+            margin-bottom: 2px;
+        }
+
+        /* Right Column: Forest Card & Diagrams */
+        .mono-right {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            justify-content: space-between;
+        }
+
+        .forest-formula-card {
+            background: var(--color-forest);
+            color: #FFFFFF;
+            border-radius: 28px;
+            padding: 26px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .card-forest-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+            padding-bottom: 10px;
+        }
+
+        .forest-label {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--color-rose);
+        }
+
+        .forest-equation {
+            font-family: var(--font-serif);
+            font-size: 44px;
+            font-style: italic;
+            color: #FFFFFF;
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+        }
+
+        .forest-equation span {
+            font-family: var(--font-sans);
+            font-size: 14px;
+            font-style: normal;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .sand-article-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border-forest);
+            border-radius: 28px;
+            padding: 22px 26px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .pipeline-forest-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-canvas);
+            border: 1.5px solid var(--border-forest);
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--color-forest);
+            margin: 10px 0;
+        }
+
+        .highlight-forest-tag {
+            background: var(--color-rose);
+            color: var(--color-forest);
+            padding: 2px 8px;
+            border-radius: 999px;
+        }
+
+        .forest-banner {
+            background: var(--bg-card-sand);
+            border-left: 4px solid var(--color-forest);
+            padding: 12px 16px;
+            font-size: 14px;
+            line-height: 1.4;
+            color: var(--color-forest);
+        }
+
+        /* Footer */
+        .mono-footer {
+            border-top: 2px solid var(--border-forest);
+            padding-top: 14px;
+            margin-top: 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--color-forest);
+        }
+    </style>
+</head>
+<body>
+    <div class="viewport-wrapper">
+        <main class="stage-16-9" id="slideStage">
+            <!-- Header -->
+            <header class="mono-header">
+                <div class="header-meta-group">
+                    <span class="forest-pill">DEEP AND REINFORCEMENT LEARNING</span>
+                    <span class="volume-caption">The Monograph Series &bull; Volume I</span>
+                </div>
+                <div class="folio-number">Folio 01</div>
+            </header>
+
+            <!-- Main Body -->
+            <div class="mono-body">
+                <!-- Left Column -->
+                <div class="mono-left">
+                    <div>
+                        <div class="section-eyebrow">ROBUST CONTROL &bull; OBSERVATION INVARIANCE</div>
+                        <h1 class="headline-serif">
+                            Injecting Noise<br>at <em>Input in DRL</em>
+                        </h1>
+
+                        <p class="monograph-lede">
+                            How introducing small, structured stochastic perturbations into the sensory stream enables neural policies to bridge the simulation-to-reality gap.
+                        </p>
+
+                        <div class="rose-quote-card">
+                            <div class="rose-quote-text">
+                                &ldquo;We slightly alter sensory input so the agent learns resilience against imperfect physical observations.&rdquo;
+                            </div>
+                        </div>
+
+                        <div class="quadrant-grid">
+                            <div class="quadrant-item">
+                                <strong>01 / Robotics</strong>
+                                Sensors fluctuate (10.0m &rarr; 10.2m); noise prevents behavioral collapse.
+                            </div>
+                            <div class="quadrant-item">
+                                <strong>02 / Autonomous Cars</strong>
+                                LiDAR &amp; GPS jitter smoothed out by noise-trained policy networks.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="font-family:var(--font-mono); font-size:13px; color:var(--color-forest);">
+                        MAGAZINE DESIGN SYSTEM 03 &bull; APARTAMENTO ART MONOGRAPH
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="mono-right">
+                    <!-- Forest Card -->
+                    <div class="forest-formula-card">
+                        <div class="card-forest-head">
+                            <span class="forest-label">FORMAL TRANSFORMATION</span>
+                            <span style="font-family:var(--font-mono); font-size:12px;">EQ. 01</span>
+                        </div>
+
+                        <div class="forest-equation">
+                            s' = s + &epsilon;
+                            <span>(s: clean state, &epsilon;: random noise)</span>
+                        </div>
+
+                        <div style="background:rgba(255,255,255,0.12); padding:12px 16px; border-radius:14px; font-family:var(--font-mono); font-size:13px; line-height:1.5;">
+                            &bull; Obstacle Distance: 10.0m &rarr; <strong>10.2m</strong><br>
+                            &bull; Policy &pi;<sub>&theta;</sub> produces stable actions regardless of &plusmn;&epsilon; variance.
+                        </div>
+                    </div>
+
+                    <!-- Sand Article Card -->
+                    <div class="sand-article-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid var(--border-forest); padding-bottom:8px;">
+                            <span style="font-family:var(--font-mono); font-size:12px; font-weight:700; text-transform:uppercase; color:var(--color-forest);">EXECUTION FLOW</span>
+                            <span style="font-family:var(--font-mono); font-size:11px; font-weight:700;">FEEDFORWARD</span>
+                        </div>
+
+                        <div class="pipeline-forest-row">
+                            <span>Environment</span>
+                            <span>&rarr;</span>
+                            <span>Sensor (s)</span>
+                            <span>&rarr;</span>
+                            <span class="highlight-forest-tag">+ Noise (&epsilon;)</span>
+                            <span>&rarr;</span>
+                            <span>Actor &pi;<sub>&theta;</sub></span>
+                            <span>&rarr;</span>
+                            <span>Action</span>
+                        </div>
+
+                        <div class="forest-banner">
+                            <strong>Key Takeaway:</strong> <em>Input Noise</em> alters what the agent <strong>sees</strong> (robustness); <em>Action Noise</em> alters what the agent <strong>does</strong> (exploration).
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="mono-footer">
+                <div>PRESENTED BY: CHANCHAL (13) &bull; DEEPAK (14) &bull; DEEPENDER (15)</div>
+                <div>DEEP AND REINFORCEMENT LEARNING &bull; APARTAMENTO EDITION</div>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        function resizeStage() {
+            const stage = document.getElementById('slideStage');
+            const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+            stage.style.transform = `scale(${scale})`;
+        }
+        window.addEventListener('resize', resizeStage);
+        window.addEventListener('DOMContentLoaded', resizeStage);
+    </script>
+</body>
+</html>

@@ -1,0 +1,2356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Injecting Noise at Input in Deep Reinforcement Learning — Master Magazine Edition</title>
+    <meta name="description" content="A 10-slide interactive master lecture on sensor noise, mathematical formulation, robustness, Sim2Real transfer, and input vs action noise in Deep Reinforcement Learning.">
+
+    <!-- OpenGraph & Twitter Social Meta Tags -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Injecting Noise at Input in Deep Reinforcement Learning">
+    <meta property="og:description" content="Interactive lecture on building robust autonomous perception in Deep RL using input noise injection.">
+    <meta property="og:image" content="../../assets/og-preview.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Injecting Noise at Input in Deep Reinforcement Learning">
+    <meta name="twitter:description" content="Interactive lecture on building robust autonomous perception in Deep RL using input noise injection.">
+
+    <!-- Google Fonts: Syne (Display), Newsreader (Editorial Serif), Plus Jakarta Sans (Body), JetBrains Mono (Technical) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400;1,6..72,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* ===========================================
+           1. DESIGN SYSTEM: THE TECH REVIEW (WIRED STYLE)
+           =========================================== */
+        :root {
+            --bg-page: #FBF9F5;
+            --bg-card: #FFFFFF;
+            --bg-card-tint: #F3EFE6;
+            --bg-card-blue: #F0F5FF;
+            --bg-card-green: #F0FDF4;
+            --bg-card-orange: #FFF7ED;
+            
+            --ink-primary: #0D131F;
+            --ink-secondary: #4F5D73;
+            --ink-muted: #8E9BAE;
+            --ink-faint: rgba(13, 19, 31, 0.12);
+            --grid-line: rgba(13, 19, 31, 0.04);
+            
+            --accent-orange: #FF4D00;
+            --accent-blue: #0957D0;
+            --accent-cyan: #0284C7;
+            --accent-green: #15803D;
+            --accent-red: #D9383A;
+            --border-heavy: #0D131F;
+            
+            --font-display: 'Syne', -apple-system, sans-serif;
+            --font-editorial: 'Newsreader', Georgia, serif;
+            --font-body: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+            
+            --shadow-hard: 6px 6px 0px 0px #0D131F;
+            --shadow-hard-sm: 4px 4px 0px 0px #0D131F;
+            --shadow-hard-lg: 8px 8px 0px 0px #0D131F;
+        }
+
+        /* Reset and Box Sizing */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            border-radius: 0 !important;
+        }
+
+        /* Permanently Hide Any Injected Netlify Badges/Drawers */
+        #netlify-drawer,
+        iframe[src*="netlify"],
+        iframe[data-netlify],
+        iframe[title*="Netlify"],
+        .netlify-feedback-widget,
+        [data-netlify-drawer],
+        [data-netlify-feedback],
+        [id*="netlify-drawer"],
+        [id*="netlify-feedback"],
+        [class*="netlify-feedback"],
+        [class*="netlify-drawer"],
+        netlify-drawer {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            position: absolute !important;
+            top: -9999px !important;
+            left: -9999px !important;
+            clip: rect(0, 0, 0, 0) !important;
+            z-index: -9999 !important;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0D131F;
+            font-family: var(--font-body);
+            color: var(--ink-primary);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Viewport & 16:9 Fixed Canvas Architecture */
+        .deck-viewport {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            background: #090C12;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .deck-stage {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            transform-origin: 0 0;
+            background: var(--bg-page);
+            color: var(--ink-primary);
+            border: 3.5px solid var(--border-heavy);
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            padding: 40px 60px 36px 60px;
+        }
+
+        /* Subtle Background Grid Pattern */
+        .deck-stage::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+            background-size: 32px 32px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Top Magazine Masthead (Visible Across All Slides) */
+        .mag-masthead {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2.5px solid var(--border-heavy);
+            padding-bottom: 12px;
+            margin-bottom: 24px;
+        }
+
+        .masthead-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .masthead-badge {
+            background: var(--border-heavy);
+            color: #FFFFFF;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 800;
+            padding: 5px 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .masthead-subject {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--accent-orange);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .masthead-acts {
+            display: flex;
+            gap: 20px;
+        }
+
+        .masthead-act-tab {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--ink-secondary);
+            opacity: 0.5;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .masthead-act-tab.active {
+            opacity: 1;
+            color: var(--border-heavy);
+            font-weight: 800;
+        }
+
+        .masthead-act-tab.active::before {
+            content: '●';
+            color: var(--accent-orange);
+            font-size: 10px;
+        }
+
+        .masthead-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .barcode-patch {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--ink-secondary);
+        }
+
+        .barcode-bars {
+            height: 20px;
+            width: 80px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--border-heavy) 0px,
+                var(--border-heavy) 2px,
+                transparent 2px,
+                transparent 4px,
+                var(--border-heavy) 4px,
+                var(--border-heavy) 7px,
+                transparent 7px,
+                transparent 9px
+            );
+        }
+
+        /* Slide Container & Slide Transitions */
+        .slides-wrapper {
+            position: relative;
+            flex: 1;
+            z-index: 10;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .slide-item {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            pointer-events: none;
+            visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateX(18px);
+        }
+
+        .slide-item.active {
+            opacity: 1;
+            pointer-events: auto;
+            visibility: visible;
+            transform: translateX(0);
+        }
+
+        /* Magazine Layout Grids */
+        .mag-grid-2col {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1.15fr 0.95fr;
+            gap: 40px;
+            align-items: stretch;
+        }
+
+        .mag-grid-2col-even {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 36px;
+            align-items: stretch;
+        }
+
+        .mag-grid-3col {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        .mag-grid-4col {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 22px;
+            align-items: stretch;
+        }
+
+        /* Column Layout Elements */
+        .col-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .article-category {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .cat-tag {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--accent-orange);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .cat-issue {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--ink-muted);
+            font-weight: 700;
+        }
+
+        .article-headline {
+            font-family: var(--font-display);
+            font-size: 54px;
+            font-weight: 900;
+            line-height: 1.04;
+            letter-spacing: -0.035em;
+            text-transform: uppercase;
+            color: var(--ink-primary);
+        }
+
+        .article-headline-sm {
+            font-family: var(--font-display);
+            font-size: 44px;
+            font-weight: 900;
+            line-height: 1.08;
+            letter-spacing: -0.03em;
+            text-transform: uppercase;
+            color: var(--ink-primary);
+        }
+
+        .highlight-orange {
+            color: var(--accent-orange);
+            background: rgba(255, 77, 0, 0.08);
+            padding: 0 6px;
+            border-left: 4px solid var(--accent-orange);
+            display: inline-block;
+        }
+
+        .highlight-blue {
+            color: var(--accent-blue);
+            background: rgba(9, 87, 208, 0.08);
+            padding: 0 6px;
+            border-left: 4px solid var(--accent-blue);
+            display: inline-block;
+        }
+
+        .article-dek {
+            font-size: 19px;
+            line-height: 1.45;
+            color: var(--ink-secondary);
+            margin-top: 14px;
+            font-weight: 500;
+        }
+
+        /* Editorial Pullquote Box */
+        .editorial-pullquote {
+            background: var(--bg-card);
+            border: 2px solid var(--border-heavy);
+            box-shadow: var(--shadow-hard);
+            padding: 18px 22px;
+            margin-top: 14px;
+            position: relative;
+        }
+
+        .pullquote-text {
+            font-family: var(--font-editorial);
+            font-size: 24px;
+            font-style: italic;
+            line-height: 1.35;
+            color: var(--ink-primary);
+        }
+
+        .pullquote-text strong {
+            font-style: normal;
+            color: var(--accent-orange);
+            font-family: var(--font-body);
+            font-weight: 700;
+        }
+
+        /* Cards & Widgets */
+        .mag-card {
+            background: var(--bg-card);
+            border: 2.5px solid var(--border-heavy);
+            box-shadow: var(--shadow-hard);
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .mag-card.card-blue-tint {
+            background: var(--bg-card-blue);
+        }
+
+        .mag-card.card-orange-tint {
+            background: var(--bg-card-orange);
+        }
+
+        .mag-card.card-green-tint {
+            background: var(--bg-card-green);
+        }
+
+        .card-header-strip {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1.5px solid var(--border-heavy);
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--ink-primary);
+        }
+
+        .card-pill {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 6px;
+            background: var(--border-heavy);
+            color: #FFFFFF;
+            text-transform: uppercase;
+        }
+
+        .card-pill.pill-orange {
+            background: var(--accent-orange);
+        }
+
+        .card-pill.pill-blue {
+            background: var(--accent-blue);
+        }
+
+        /* Big Mathematical Display */
+        .big-math-display {
+            font-family: var(--font-mono);
+            font-size: 38px;
+            font-weight: 900;
+            color: var(--accent-blue);
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+
+        /* Feature Row Grids */
+        .feature-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .feature-box {
+            background: var(--bg-card-tint);
+            border: 1.5px solid var(--border-heavy);
+            padding: 12px 14px;
+        }
+
+        .feature-box strong {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--accent-orange);
+            margin-bottom: 4px;
+        }
+
+        .feature-box p {
+            font-size: 13.5px;
+            line-height: 1.35;
+            color: var(--ink-primary);
+        }
+
+        /* Tables */
+        .mag-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+            background: #FAFBFD;
+            border: 1.5px solid var(--border-heavy);
+        }
+
+        .mag-table th {
+            background: var(--border-heavy);
+            color: #FFFFFF;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            padding: 7px 10px;
+            text-align: left;
+            letter-spacing: 0.06em;
+        }
+
+        .mag-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--ink-faint);
+            font-family: var(--font-mono);
+            color: var(--ink-primary);
+        }
+
+        .mag-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Pipeline Flow Strip */
+        .pipeline-flow-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #FFFFFF;
+            border: 2px solid var(--border-heavy);
+            box-shadow: var(--shadow-hard-sm);
+            padding: 12px 16px;
+            margin: 12px 0;
+            gap: 8px;
+        }
+
+        .pipeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 6px 10px;
+            background: var(--bg-card-tint);
+            border: 1px solid var(--border-heavy);
+            flex: 1;
+        }
+
+        .pipeline-step.step-highlight {
+            background: var(--accent-orange);
+            color: #FFFFFF;
+            border-color: var(--accent-orange);
+        }
+
+        .pipeline-step.step-highlight .pipeline-step-title,
+        .pipeline-step.step-highlight .pipeline-step-sub {
+            color: #FFFFFF;
+        }
+
+        .pipeline-step-title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--ink-primary);
+        }
+
+        .pipeline-step-sub {
+            font-size: 10px;
+            color: var(--ink-secondary);
+            margin-top: 2px;
+            font-family: var(--font-mono);
+        }
+
+        .pipeline-arrow {
+            font-size: 14px;
+            font-weight: 900;
+            color: var(--ink-muted);
+        }
+
+        /* Interactive Canvas & Widget Controls */
+        .interactive-container {
+            position: relative;
+            background: #FFFFFF;
+            border: 2px solid var(--border-heavy);
+            overflow: hidden;
+        }
+
+        .styled-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: var(--bg-card-tint);
+            border: 1.5px solid var(--border-heavy);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .styled-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            background: var(--accent-orange);
+            border: 2px solid var(--border-heavy);
+            cursor: pointer;
+            box-shadow: 2px 2px 0px var(--border-heavy);
+        }
+
+        .interactive-btn {
+            background: var(--bg-card);
+            color: var(--ink-primary);
+            border: 2px solid var(--border-heavy);
+            box-shadow: 3px 3px 0px var(--border-heavy);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 800;
+            padding: 8px 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+
+        .interactive-btn:hover {
+            background: var(--accent-orange);
+            color: #FFFFFF;
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0px var(--border-heavy);
+        }
+
+        .interactive-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: none;
+        }
+
+        .interactive-btn.active {
+            background: var(--border-heavy);
+            color: #FFFFFF;
+        }
+
+        /* Magazine Footer */
+        .mag-footer {
+            position: relative;
+            z-index: 10;
+            border-top: 2.5px solid var(--border-heavy);
+            padding-top: 12px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .footer-left {
+            display: flex;
+            gap: 24px;
+            color: var(--ink-secondary);
+        }
+
+        .footer-counter {
+            font-family: var(--font-mono);
+            font-weight: 900;
+            font-size: 14px;
+            color: var(--accent-orange);
+        }
+
+        /* ===========================================
+           FLOATING PRESENTER CONTROLS & HUD
+           =========================================== */
+        .deck-toolbar-wrapper {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+        }
+
+        .deck-toolbar-wrapper.collapsed {
+            transform: translate(-50%, calc(100% + 40px));
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .deck-toolbar {
+            background: #FFFFFF;
+            border: 3px solid var(--border-heavy);
+            box-shadow: 6px 6px 0px 0px #0D131F;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toolbar-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: var(--bg-card);
+            color: var(--ink-primary);
+            border: 2px solid var(--border-heavy);
+            padding: 8px 14px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            box-shadow: 2px 2px 0px 0px #0D131F;
+            transition: transform 0.05s ease, background-color 0.1s ease, color 0.1s ease, box-shadow 0.05s ease;
+        }
+
+        .toolbar-btn:hover:not(:disabled) {
+            background: var(--accent-orange);
+            color: #FFFFFF;
+            transform: translate(-1px, -1px);
+            box-shadow: 3px 3px 0px 0px #0D131F;
+        }
+
+        .toolbar-btn:active:not(:disabled) {
+            transform: translate(2px, 2px);
+            box-shadow: none;
+        }
+
+        .toolbar-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            box-shadow: none;
+            background: #E6E1D6;
+        }
+
+        .toolbar-counter-pill {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 900;
+            padding: 6px 12px;
+            background: var(--border-heavy);
+            color: #FFFFFF;
+            letter-spacing: 0.05em;
+            min-width: 75px;
+            text-align: center;
+        }
+
+        .toolbar-topic-tag {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--accent-orange);
+            max-width: 220px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-transform: uppercase;
+        }
+
+        /* Floating Restore Expand Button when Toolbar is Collapsed */
+        .floating-expand-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 999;
+            background: #FFFFFF;
+            color: var(--ink-primary);
+            border: 2.5px solid var(--border-heavy);
+            box-shadow: 4px 4px 0px 0px #0D131F;
+            padding: 8px 14px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px);
+            transition: all 0.25s ease;
+        }
+
+        .deck-toolbar-wrapper.collapsed ~ .floating-expand-btn {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        /* Keyboard Shortcuts Modal */
+        .shortcuts-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(13, 19, 31, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .shortcuts-modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .shortcuts-card {
+            background: #FFFFFF;
+            border: 3.5px solid var(--border-heavy);
+            box-shadow: 12px 12px 0px 0px #0D131F;
+            padding: 32px 40px;
+            width: 90%;
+            max-width: 580px;
+        }
+
+        .shortcuts-card h3 {
+            font-family: var(--font-display);
+            font-size: 26px;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            border-bottom: 2.5px solid var(--border-heavy);
+            padding-bottom: 10px;
+        }
+
+        .shortcut-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--ink-faint);
+            font-family: var(--font-mono);
+            font-size: 13px;
+        }
+
+        .shortcut-key-badge {
+            background: var(--bg-card-tint);
+            border: 1.5px solid var(--border-heavy);
+            box-shadow: 2px 2px 0px var(--border-heavy);
+            padding: 4px 8px;
+            font-weight: 800;
+        }
+
+        /* Mobile Portrait Orientation Warning & Auto-Rotate Trigger */
+        .mobile-portrait-prompt {
+            position: fixed;
+            inset: 0;
+            background: #0D131F;
+            color: #FFFFFF;
+            z-index: 5000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            text-align: center;
+        }
+
+        @media (max-width: 850px) and (orientation: portrait) {
+            .mobile-portrait-prompt {
+                display: flex;
+            }
+        }
+
+        .rotate-icon-anim {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 20px;
+            animation: rotatePrompt 2s infinite ease-in-out;
+        }
+
+        @keyframes rotatePrompt {
+            0%, 20% { transform: rotate(0deg); }
+            50%, 70% { transform: rotate(90deg); }
+            100% { transform: rotate(90deg); }
+        }
+
+        .rotate-title {
+            font-family: var(--font-display);
+            font-size: 24px;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            color: var(--accent-orange);
+        }
+
+        .rotate-sub {
+            font-size: 15px;
+            line-height: 1.4;
+            color: #C2CBD9;
+            max-width: 320px;
+            margin-bottom: 24px;
+        }
+
+        .btn-rotate-fullscreen {
+            background: var(--accent-orange);
+            color: #FFFFFF;
+            border: 2px solid #FFFFFF;
+            padding: 12px 24px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        /* Edit Mode Floating Toggle Button */
+        .edit-hotzone {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 140px;
+            height: 70px;
+            z-index: 9998;
+        }
+
+        .edit-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            background: #FFFFFF;
+            color: var(--ink-primary);
+            border: 2.5px solid var(--border-heavy);
+            box-shadow: 4px 4px 0px 0px #0D131F;
+            padding: 8px 14px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+        }
+
+        .edit-toggle.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .edit-toggle.active {
+            background: var(--accent-orange);
+            color: #FFFFFF;
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        [contenteditable="true"] {
+            outline: 2px dashed var(--accent-orange) !important;
+            outline-offset: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Viewport Container for 16:9 Fixed Canvas Architecture -->
+    <div class="deck-viewport" id="deckViewport">
+        <div class="deck-stage" id="deckStage">
+
+            <!-- Persistent Magazine Top Masthead -->
+            <header class="mag-masthead">
+                <div class="masthead-left">
+                    <span class="masthead-badge">RESEARCH SPREAD // 04</span>
+                    <span class="masthead-subject">DEEP AND REINFORCEMENT LEARNING</span>
+                </div>
+                <div class="masthead-acts">
+                    <div class="masthead-act-tab active" id="act1Tab" data-start="0"><span>ACT I: FOUNDATIONS</span></div>
+                    <div class="masthead-act-tab" id="act2Tab" data-start="4"><span>ACT II: MECHANISM & PROCESS</span></div>
+                    <div class="masthead-act-tab" id="act3Tab" data-start="8"><span>ACT III: SYNTHESIS</span></div>
+                </div>
+                <div class="masthead-right">
+                    <div class="barcode-patch">
+                        <span>DRL-NOISE-SYS</span>
+                        <div class="barcode-bars"></div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Slide Collection (10 Master Slides) -->
+            <main class="slides-wrapper" id="slidesWrapper">
+
+                <!-- ==========================================
+                     SLIDE 1: COVER & TITLE SPREAD
+                     ========================================== -->
+                <section class="slide-item active" data-act="1" data-topic="LECTURE OVERVIEW" id="slide1">
+                    <div class="mag-grid-2col">
+                        <div class="col-content">
+                            <div>
+                                <div class="article-category">
+                                    <span class="cat-tag">AUTONOMOUS PERCEPTION & CONTROL</span>
+                                    <span class="cat-issue">// ACADEMIC MONOGRAPH</span>
+                                </div>
+                                <h1 class="article-headline">
+                                    INJECTING NOISE AT INPUT IN <span class="highlight-orange">DEEP RL</span>
+                                </h1>
+                                <p class="article-dek">
+                                    Bridging the Reality Gap — Building Resilient State Representations for Deep Neural Agents Operating Under Sensor Imperfection.
+                                </p>
+                            </div>
+
+                            <div class="editorial-pullquote">
+                                <p class="pullquote-text">
+                                    "A neural policy optimized solely on immaculate mathematical simulations <strong>collapses catastrophically</strong> the moment physical hardware encounters real-world entropy."
+                                </p>
+                            </div>
+
+                            <div class="feature-grid-2">
+                                <div class="feature-box">
+                                    <strong>CORE INQUIRY</strong>
+                                    <p>How stochastic observation noise regularizes policy networks to achieve robust zero-shot Sim2Real transfer.</p>
+                                </div>
+                                <div class="feature-box">
+                                    <strong>KEY FORMULATION</strong>
+                                    <p class="big-math-display" style="font-size: 22px; margin-top: 4px;">s' = s + ε</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Presenter Metadata & Visual Badge -->
+                        <div class="col-content">
+                            <div class="mag-card card-blue-tint" style="flex: 1; justify-content: space-between;">
+                                <div class="card-header-strip">
+                                    <span class="card-title">RESEARCH SEMINAR MONOGRAPH</span>
+                                    <span class="card-pill pill-blue">OFFICIAL BRIEF</span>
+                                </div>
+
+                                <div style="margin: 16px 0;">
+                                    <div style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; color: var(--ink-secondary); margin-bottom: 6px;">
+                                        COURSE MODULE
+                                    </div>
+                                    <div style="font-family: var(--font-display); font-size: 26px; font-weight: 900; line-height: 1.15; color: var(--ink-primary); margin-bottom: 18px;">
+                                        DEEP AND REINFORCEMENT LEARNING
+                                    </div>
+
+                                    <div style="border-top: 1.5px solid var(--border-heavy); padding-top: 14px;">
+                                        <div style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; color: var(--ink-secondary); margin-bottom: 8px;">
+                                            PRESENTED BY
+                                        </div>
+                                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; border: 1.5px solid var(--border-heavy); padding: 8px 12px; font-family: var(--font-mono);">
+                                                <span style="font-weight: 800; font-size: 14px;">Chanchal</span>
+                                                <span style="color: var(--accent-orange); font-weight: 800;">ROLL NO. 13</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; border: 1.5px solid var(--border-heavy); padding: 8px 12px; font-family: var(--font-mono);">
+                                                <span style="font-weight: 800; font-size: 14px;">Deepak</span>
+                                                <span style="color: var(--accent-orange); font-weight: 800;">ROLL NO. 14</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; border: 1.5px solid var(--border-heavy); padding: 8px 12px; font-family: var(--font-mono);">
+                                                <span style="font-weight: 800; font-size: 14px;">Deepender</span>
+                                                <span style="color: var(--accent-orange); font-weight: 800;">ROLL NO. 15</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="background: #FFFFFF; border: 1.5px solid var(--border-heavy); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 11px;">
+                                    <span>DEPARTMENT OF COMPUTER SCIENCE</span>
+                                    <span style="color: var(--accent-green); font-weight: 800;">● MASTER STAGE 16:9</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==========================================
+                     SLIDE 2: AGENT-ENVIRONMENT INTERACTION LOOP
+                     ========================================== -->
+                <section class="slide-item" data-act="1" data-topic="PERCEPTION CYCLE" id="slide2">
+                    <div class="mag-grid-2col">
+                        <div class="col-content">
+                            <div>
+                                <div class="article-category">
+                                    <span class="cat-tag">SYSTEMS ARCHITECTURE</span>
+                                    <span class="cat-issue">// PERCEPTION & CONTROL</span>
+                                </div>
+                                <h2 class="article-headline-sm">
+                                    HOW REINFORCEMENT LEARNING <span class="highlight-orange">AGENTS OBSERVE</span>
+                                </h2>
+                                <p class="article-dek">
+                                    In Deep Reinforcement Learning, an autonomous agent interacts iteratively with its operational environment via sensor telemetry.
+                                </p>
+                            </div>
+
+                            <div class="editorial-pullquote">
+                                <p class="pullquote-text">
+                                    "The agent observes state <strong>s</strong> through sensors, passes it through deep neural layers, and synthesizes motor action <strong>a</strong>."
+                                </p>
+                            </div>
+
+                            <div class="feature-box">
+                                <strong>PHYSICAL ROBOT SCENARIO</strong>
+                                <p>Imagine a mobile robot navigating an unfamiliar room. Its optical cameras, LiDAR, and ultrasonic sensors continuously measure proximity to walls and obstacles to decide whether to accelerate, steer, or brake.</p>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Interactive 2D Sensor Perception Radar -->
+                        <div class="col-content">
+                            <div class="mag-card" style="flex: 1;">
+                                <div class="card-header-strip">
+                                    <span class="card-title">INTERACTIVE SENSOR RADAR HUD</span>
+                                    <span class="card-pill pill-orange">LIVE TELEMETRY</span>
+                                </div>
+
+                                <div class="interactive-container" style="height: 300px; display: flex; align-items: center; justify-content: center; background: #FAF9F6;">
+                                    <svg viewBox="0 0 400 300" style="width: 100%; height: 100%;" id="radarSvg">
+                                        <!-- Room Grid -->
+                                        <pattern id="radarGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+                                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(13, 19, 31, 0.08)" stroke-width="1"/>
+                                        </pattern>
+                                        <rect width="400" height="300" fill="url(#radarGrid)" />
+
+                                        <!-- Obstacle Wall -->
+                                        <rect x="290" y="60" width="24" height="180" fill="#0D131F" rx="0"/>
+                                        <text x="302" y="50" font-family="'JetBrains Mono'" font-size="11" font-weight="800" text-anchor="middle" fill="#0D131F">OBSTACLE</text>
+
+                                        <!-- Raycast Sensor Cones -->
+                                        <line x1="110" y1="150" x2="290" y2="150" stroke="#FF4D00" stroke-width="2.5" stroke-dasharray="4 2"/>
+                                        <line x1="110" y1="150" x2="290" y2="90" stroke="#0957D0" stroke-width="1.5" stroke-dasharray="3 3"/>
+                                        <line x1="110" y1="150" x2="290" y2="210" stroke="#0957D0" stroke-width="1.5" stroke-dasharray="3 3"/>
+
+                                        <!-- Distance Marker -->
+                                        <rect x="180" y="130" width="70" height="24" fill="#FFFFFF" stroke="#0D131F" stroke-width="1.5"/>
+                                        <text x="215" y="146" font-family="'JetBrains Mono'" font-size="11" font-weight="800" text-anchor="middle" fill="#FF4D00" id="radarDistText">d = 5.0 m</text>
+
+                                        <!-- Mobile Robot Body -->
+                                        <circle cx="110" cy="150" r="28" fill="#FFFFFF" stroke="#0D131F" stroke-width="3"/>
+                                        <circle cx="110" cy="150" r="10" fill="#0957D0"/>
+                                        <line x1="110" y1="150" x2="135" y2="150" stroke="#FF4D00" stroke-width="3"/>
+                                        <text x="110" y="195" font-family="'JetBrains Mono'" font-size="10" font-weight="800" text-anchor="middle" fill="#0D131F">ROBOT AGENT</text>
+                                    </svg>
+                                </div>
+
+                                <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center; background: var(--bg-card-tint); border: 1.5px solid var(--border-heavy); padding: 10px 14px; font-family: var(--font-mono); font-size: 12px;">
+                                    <span>STATE OBSERVATION: <strong>[x, y, θ, d_lidar]</strong></span>
+                                    <button class="interactive-btn" id="btnSweepRadar">Pulse Radar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==========================================
+                     SLIDE 3: THE SENSOR REALITY GAP
+                     ========================================== -->
+                <section class="slide-item" data-act="1" data-topic="THE REALITY GAP" id="slide3">
+                    <div class="mag-grid-2col">
+                        <div class="col-content">
+                            <div>
+                                <div class="article-category">
+                                    <span class="cat-tag">HARDWARE DILEMMA</span>
+                                    <span class="cat-issue">// SENSOR UNCERTAINTY</span>
+                                </div>
+                                <h2 class="article-headline-sm">
+                                    WHY REAL-WORLD SENSORS <span class="highlight-orange">ARE NEVER PERFECT</span>
+                                </h2>
+                                <p class="article-dek">
+                                    In pure software simulations, numbers are mathematically pristine. In the physical realm, physical sensors are plagued by noise and tolerances.
+                                </p>
+                            </div>
+
+                            <div class="editorial-pullquote">
+                                <p class="pullquote-text">
+                                    "A sensor might report an obstacle at <strong>5.0 meters</strong>, while the true physical distance is <strong>5.2 meters</strong>. This discrepancy breaks fragile policies."
+                                </p>
+                            </div>
+
+                            <div class="feature-grid-2">
+                                <div class="feature-box">
+                                    <strong>IDEAL SIMULATION</strong>
+                                    <p>Exact floating-point measurements with zero variance ($d = 5.000\text{m}$).</p>
+                                </div>
+                                <div class="feature-box">
+                                    <strong>PHYSICAL REALITY</strong>
+                                    <p>Optical lens flare, ultrasonic echo, encoder slip, and thermal drift ($d = 5.230\text{m}$).</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Interactive Noise Deviation Lab -->
+                        <div class="col-content">
+                            <div class="mag-card" style="flex: 1;">
+                                <div class="card-header-strip">
+                                    <span class="card-title">SENSOR PERTURBATION LAB</span>
+                                    <span class="card-pill pill-orange">INTERACTIVE HUD</span>
+                                </div>
+
+                                <div>
+                                    <table class="mag-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Measurement Channel</th>
+                                                <th>Ground Truth</th>
+                                                <th>Observed by Agent</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Front LiDAR Range</td>
+                                                <td>5.00 m</td>
+                                                <td id="tableObsDist" style="color: var(--accent-orange); font-weight: 800;">5.20 m</td>
+                                                <td><span class="card-pill pill-orange">PERTURBED</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Optical Odometry</td>
+                                                <td>1.50 m/s</td>
+                                                <td id="tableObsVel">1.44 m/s</td>
+                                                <td><span class="card-pill pill-blue">NOISY</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>IMU Heading Angle</td>
+                                                <td>45.00°</td>
+                                                <td id="tableObsHeading">46.15°</td>
+                                                <td><span class="card-pill pill-blue">DRIFT</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <!-- Interactive Slider for Noise Injection -->
+                                    <div style="background: var(--bg-card-tint); border: 1.5px solid var(--border-heavy); padding: 14px 18px; margin-top: 14px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-family: var(--font-mono); font-size: 12px; font-weight: 800;">
+                                            <span>HARDWARE NOISE SEVERITY (σ)</span>
+                                            <span id="noiseLevelLabel" style="color: var(--accent-orange);">σ = 0.20 m</span>
+                                        </div>
+                                        <input type="range" min="0" max="100" value="20" class="styled-slider" id="sliderSensorNoise">
+                                    </div>
+                                </div>
+
+                                <div style="background: #EFF6FF; border-left: 4px solid var(--accent-blue); padding: 12px 16px; font-size: 13.5px; line-height: 1.4; color: var(--ink-primary);">
+                                    <strong>Key Takeaway:</strong> If the model is not trained on noisy data, it confuses normal sensor drift for genuine environmental changes.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==========================================
+                     SLIDE 4: DEFINITION & MATHEMATICAL FORMULATION
+                     ========================================== -->
+                <section class="slide-item" data-act="1" data-topic="MATHEMATICAL FORMULATION" id="slide4">
+                    <div class="mag-grid-2col">
+                        <div class="col-content">
+                            <div>
+                                <div class="article-category">
+                                    <span class="cat-tag">FORMAL DEFINITION</span>
+                                    <span class="cat-issue">// MATHEMATICAL MODEL</span>
+                                </div>
+                                <h2 class="article-headline-sm">
+                                    WHAT IS <span class="highlight-orange">INPUT NOISE?</span>
+                                </h2>
+                                <p class="article-dek">
+                                    Input noise injection is the practice of adding controlled stochastic variations directly into sensory observations before passing them to the policy network.
+                                </p>
+                            </div>
+
+                            <div class="editorial-pullquote">
+                                <p class="pullquote-text">
+                                    "We slightly perturb the sensory state given to the agent so that it learns to <strong>make sound decisions under imperfect information</strong>."
+                                </p>
+                            </div>
+
+                            <div class="feature-box">
+                                <strong>NUMERICAL INSTANCE</strong>
+                                <p>Suppose the true distance is $10.0\text{ m}$. We add noise $\epsilon = +0.2\text{ m}$, providing $10.2\text{ m}$ to the network. The value remains within the operational neighborhood but prevents exact memorization.</p>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Big Formula Plaque & Equation Breakdown -->
+                        <div class="col-content">
+                            <div class="mag-card" style="flex: 1;">
+                                <div class="card-header-strip">
+                                    <span class="card-title">CANONICAL FORMULATION</span>
+                                    <span class="card-pill pill-blue">EQUATION 01</span>
+                                </div>
+
+                                <div style="background: var(--bg-card-blue); border: 2px solid var(--border-heavy); box-shadow: var(--shadow-hard-sm); padding: 24px; text-align: center;">
+                                    <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 800; color: var(--accent-blue); text-transform: uppercase; margin-bottom: 8px;">
+                                        STATE PERTURBATION EQUATION
+                                    </div>
+                                    <div class="big-math-display" style="font-size: 48px; margin: 10px 0;">
+                                        s' = s + ε
+                                    </div>
+                                    <div style="font-family: var(--font-mono); font-size: 13px; color: var(--ink-secondary);">
+                                        where ε ~ N(0, σ² I) or ε ~ U(-δ, +δ)
+                                    </div>
+                                </div>
+
+                                <div style="margin-top: 14px;">
+                                    <table class="mag-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Symbol</th>
+                                                <th>Formal Name</th>
+                                                <th>Operational Meaning</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td style="font-weight: 800; color: var(--accent-blue);">s</td>
+                                                <td>True State Vector</td>
+                                                <td>Actual ground-truth physical observation</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight: 800; color: var(--accent-orange);">ε</td>
+                                                <td>Stochastic Perturbation</td>
+                                                <td>Random noise drawn from Gaussian/Uniform kernel</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight: 800; color: var(--accent-green);">s'</td>
+                                                <td>Noisy Input State</td>
+                                                <td>Perturbed observation ingested by neural layers</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==========================================
+                     SLIDE 5: WHY IT WORKS — ROBUSTNESS & SIM2REAL
+                     ========================================== -->
+                <section class="slide-item" data-act="2" data-topic="ROBUSTNESS & SIM2REAL" id="slide5">
+                    <div class="mag-grid-2col">
+                        <div class="col-content">
+                            <div>
+                                <div class="article-category">
+                                    <span class="cat-tag">THEORETICAL MECHANISM</span>
+                                    <span class="cat-issue">// POLICY REGULARIZATION</span>
+                                </div>
+                                <h2 class="article-headline-sm">
+                                    WHY INPUT NOISE CREATES <span class="highlight-orange">ROBUST AGENTS</span>
+                                </h2>
+                                <p class="article-dek">
+                                    The primary objective is robustness and generalization. Training under noise forces the policy network to flatten its decision boundaries.
+                                </p>
+                            </div>
+
+                            <div class="editorial-pullquote">
+                                <p class="pullquote-text">
+                                    "The agent internalizes a fundamental rule: <strong>'Even if my sensory input wobbles slightly, my strategic action must remain steadfast.'</strong>"
+                                </p>
+                            </div>
+
+                            <div class="feature-grid-2">
+                                <div class="feature-box">
+                                    <strong>POLICY SMOOTHING</strong>
+                                    <p>Prevents the neural network from memorizing sharp, high-frequency artifacts in training observations.</p>
+                                </div>
+                                <div class="feature-box">
+                                    <strong>SIM-TO-REAL TRANSFER</strong>
+                                    <p>Physical hardware noise falls entirely within the synthetic noise envelope experienced in simulation.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Visual Decision Manifold Comparison -->
+                        <div class="col-content">
+                            <div class="mag-card" style="flex: 1;">
+                                <div class="card-header-strip">
+                                    <span class="card-title">POLICY DECISION MANIFOLD COMPARISON</span>
+                                    <span class="card-pill pill-orange">REGULARIZATION</span>
+                                </div>
+
+                                <div class="interactive-container" style="height: 280px; display: flex; align-items: center; justify-content: center; background: #FAF9F6;">
+                                    <svg viewBox="0 0 420 260" style="width: 100%; height: 100%;">
+                                        <!-- Axes -->
+                                        <line x1="40" y1="220" x2="380" y2="220" stroke="#0D131F" stroke-width="2"/>
+                                        <line x1="40" y1="30" x2="40" y2="220" stroke="#0D131F" stroke-width="2"/>
+                                        <text x="375" y="240" font-family="'JetBrains Mono'" font-size="10" font-weight="800" text-anchor="end" fill="#0D131F">OBSERVATION STATE (s)</text>
+                                        <text x="35" y="25" font-family="'JetBrains Mono'" font-size="10" font-weight="800" text-anchor="start" fill="#0D131F">ACTION OUTPUT π(s)</text>
+
+                                        <!-- Fragile Overfitted Policy (Without Noise) -->
+                                        <path id="pathFragilePolicy" d="M 40 180 Q 70 20 100 190 T 160 50 T 220 200 T 280 40 T 340 180 T 380 90" fill="none" stroke="#D9383A" stroke-width="2.5" stroke-dasharray="4 2"/>
+
+                                        <!-- Robust Smooth Policy (With Input Noise) -->
+                                        <path id="pathRobustPolicy" d="M 40 160 C 140 160 220 80 380 80" fill="none" stroke="#0957D0" stroke-width="4"/>
+
+                                        <!-- Legend -->
+                                        <rect x="50" y="40" width="16" height="4" fill="#D9383A"/>
+                                        <text x="72" y="45" font-family="'JetBrains Mono'" font-size="10" font-weight="800" fill="#D9383A">FRAGILE (NO NOISE: JAGGED)</text>
+
+                                        <rect x="50" y="60" width="16" height="4" fill="#0957D0"/>
+                                        <text x="72" y="65" font-family="'JetBrains Mono'" font-size="10" font-weight="800" fill="#0957D0">ROBUST (WITH NOISE: SMOOTH)</text>
+                                    </svg>
+                                </div>
+
+                                <div style="margin-top: 14px; display: flex; gap: 10px;">
+                                    <button class="interactive-btn active" id="btnToggleRobust">Show Robust Policy</button>
+                                    <button class="interactive-btn" id="btnToggleFragile">Show Fragile Policy</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==========================================
+                     SLIDE 6: OPERATIONAL PIPELINE & 3-VECTOR EXAMPLE
+                     ========================================== -->
+                <section class="slide-item" data-act="2" data-topic="OPERATIONAL PIPELINE" id="slide6">
+                    <div class="col-content" style="gap: 16px;">
+                        <div>
+                            <div class="article-category">
+                                <span class="cat-tag">PIPELINE ARCHITECTURE</span>
+                                <span class="cat-issue">// MULTI-DIMENSIONAL STATES</span>
+                            </div>
+                            <h2 class="article-headline-sm">
+                                HOW INPUT NOISE OPERATES <span class="highlight-orange">IN REAL TIME</span>
+                            </h2>
+                        </div>
+
+                        <!-- 5-Stage Pipeline Strip -->
+                        <div class="pipeline-flow-box">
+                            <div class="pipeline-step">
+                                <span class="pipeline-step-title">1. ENVIRONMENT</span>
+                                <span class="pipeline-step-sub">Physical Room / Sim</span>
+                            </div>
+                            <span class="pipeline-arrow">&rarr;</span>
+                            <div class="pipeline-step">
+                                <span class="pipeline-step-title">2. RAW STATE (s)</span>
+                                <span class="pipeline-step-sub">Sensor Capture</span>
+                            </div>
+                            <span class="pipeline-arrow">&rarr;</span>
+                            <div class="pipeline-step step-highlight">
+                                <span class="pipeline-step-title">3. ADD NOISE (+ε)</span>
+                                <span class="pipeline-step-sub">Stochastic Injection</span>
+                            </div>
+                            <span class="pipeline-arrow">&rarr;</span>
+                            <div class="pipeline-step">
+                                <span class="pipeline-step-title">4. NEURAL NETWORK</span>
+                                <span class="pipeline-step-sub">Actor-Critic Policy</span>
+                            </div>
+                            <span class="pipeline-arrow">&rarr;</span>
+                            <div class="pipeline-step">
+                                <span class="pipeline-step-title">5. ACTION (a)</span>
+                                <span class="pipeline-step-sub">Motor Actuation</span>
+                            </div>
+                        </div>
+
+                        <!-- 3-Observation Vector Concrete Table & Generator -->
+                        <div class="mag-grid-2col-even">
+                            <div class="mag-card">
+                                <div class="card-header-strip">
+                                    <span class="card-title">3-OBSERVATION STATE VECTOR EXAMPLE</span>
+                                    <span class="card-pill pill-blue">VECTOR BREAKDOWN</span>
+                                </div>
+
+                                <table class="mag-table">
+                                    <thead>
+                                        <tr>
+                                            <th>State Feature</th>
+                                            <th>Original (s)</th>
+                                            <th>Added Noise (ε)</th>
+                                            <th>Noisy Input (s')</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="stateVectorRows">
+                                        <tr>
+                                            <td><strong>Distance from obstacle</strong></td>
+                                            <td>10.0 m</td>
+                                            <td style="color: var(--accent-orange);">+0.2 m</td>
+                                            <td style="font-weight: 800; color: var(--accent-blue);">10.2 m</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Current Velocity</strong></td>
+                                            <td>2.0 m/s</td>
+                                            <td style="color: var(--accent-orange);">-0.1 m/s</td>
+                                            <td style="font-weight: 800; color: var(--accent-blue);">1.9 m/s</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Heading Direction</strong></td>
+                                            <td>30.0°</td>
+                                            <td style="color: var(--accent-orange);">+0.5°</td>
+                                            <td style="font-weight: 800; color: var(--accent-blue);">30.5°</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-family: var(--font-mono); font-size: 11px; color: var(--ink-secondary);">ITERATED ACROSS MILLIONS OF EPOCHS</span>
+                                    <button class="interactive-btn" id="btnSampleNewNoise">🎲 Sample New Epoch Vector</button>
+                                </div>
+                            </div>
+
+                            <div class="mag-card card-orange-tint">
+                                <div class="card-header-strip">
+                                    <span class="card-title">LEARNING EFFECT</span>
+                                    <span class="card-pill pill-orange">INVARIANCE</span>
+                                </div>
+
+                                <p class="pullquote-text" style="font-size: 20px; line-height: 1.4;">
+                                    "When the policy encounters thousands of slightly varied tuples $[10.2, 1.9, 30.5^\circ]$, $[9.9, 2.1, 29.8^\circ]$, $[10.1, 2.0, 30.2^\circ]$, it stops expecting rigid floating-point precision and masters continuous adaptive control."
+                                </p>
+
+                                <div style="background: #FFFFFF; border: 1.5px solid var(--border-heavy); padding: 10px 14px; font-family: var(--font-mono); font-size: 12px; margin-top: 12px;">
+                                    <strong>Outcome:</strong> Eliminates catastrophic policy over-reactivity in physical testing.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==========================================
+                     SLIDE 7: REAL-WORLD DOMAINS & APPLICATIONS
+                     ========================================== -->
+                <section class="slide-item" data-act="2" data-topic="PRACTICAL DOMAINS" id="slide7">
+                    <div class="col-content" style="gap: 16px;">
+                        <div>
+                            <div class="article-category">
+                                <span class="cat-tag">INDUSTRY APPLICATIONS</span>
+                                <span class="cat-issue">// DEPLOYED ROBOTICS</span>
+                            </div>
+                            <h2 class="article-headline-sm">
+                                WHERE INPUT NOISE IS <span class="highlight-orange">MISSION CRITICAL</span>
+                            </h2>
+                        </div>
+
+                        <!-- 4-Quadrant Magazine Matrix -->
+                        <div class="mag-grid-4col">
+                            <!-- Quadrant 1: Robotics -->
+                            <div class="mag-card">
+                                <div class="card-header-strip">
+                                    <span class="card-title">01. INDUSTRIAL & MOBILE ROBOTICS</span>
+                                    <span class="card-pill pill-orange">ROBOTICS</span>
+                                </div>
+                                <p style="font-size: 14px; line-height: 1.4; color: var(--ink-secondary);">
+                                    Robots rely on physical LiDAR, optical cameras, and joint encoders. Input noise prevents erratic motor tremors caused by mechanical vibrations and sensor calibration tolerances.
+                                </p>
+                                <div style="background: var(--bg-card-tint); border: 1px solid var(--border-heavy); padding: 6px 10px; font-family: var(--font-mono); font-size: 11px; margin-top: 8px;">
+                                    <strong>Mitigates:</strong> Wheel slip, LiDAR jitter, optical glare.
+                                </div>
+                            </div>
+
+                            <!-- Quadrant 2: Self-Driving -->
+                            <div class="mag-card">
+                                <div class="card-header-strip">
+                                    <span class="card-title">02. AUTONOMOUS VEHICLES</span>
+                                    <span class="card-pill pill-blue">AUTOMOTIVE</span>
+                                </div>
+                                <p style="font-size: 14px; line-height: 1.4; color: var(--ink-secondary);">
+                                    Self-driving perception fuses GPS, radar, and camera telemetry. Input noise ensures navigation trajectories remain stable when GPS drifts in urban canyons or heavy rainfall.
+                                </p>
+                                <div style="background: var(--bg-card-tint); border: 1px solid var(--border-heavy); padding: 6px 10px; font-family: var(--font-mono); font-size: 11px; margin-top: 8px;">
+                                    <strong>Mitigates:</strong> Rain scatter, GPS multipath, sensor latency.
+                                </div>
+                            </div>
+
+                            <!-- Quadrant 3: Drones & UAVs -->
+                            <div class="mag-card">
+                                <div class="card-header-strip">
+                                    <span class="card-title">03. DRONES & UAVS</span>
+                                    <span class="card-pill pill-green">AEROSPACE</span>
+                                </div>
+                                <p style="font-size: 14px; line-height: 1.4; color: var(--ink-secondary);">
+                                    UAV flight controllers face sudden wind turbulence and barometric altitude fluctuations. Input noise simulates these turbulent disturbances during simulation flight training.
+                                </p>
+                                <div style="background: var(--bg-card-tint); border: 1px solid var(--border-heavy); padding: 6px 10px; font-family: var(--font-mono); font-size: 11px; margin-top: 8px;">
+                                    <strong>Mitigates:</strong> Barometer drift, wind gusts, IMU tilt errors.
+                                </div>
+                            </div>
+
+                            <!-- Quadrant 4: Sim2Real & Games -->
+                            <div class="mag-card">
+                                <div class="card-header-strip">
+                                    <span class="card-title">04. SIM2REAL TRANSFER & GAMES</span>
+                                    <span class="card-pill pill-orange">SIMULATION</span>
+                                </div>
+                                <p style="font-size: 14px; line-height: 1.4; color: var(--ink-secondary);">
+                                    Prevents deep learning agents from "cheating" by exploiting simulator-specific physics glitches or memorizing exact pixel configurations in visual environments.
+                                </p>
+                                <div style="background: var(--bg-card-tint); border: 1px solid var(--border-heavy); padding: 6px 10px; font-family: var(--font-mono); font-size: 11px; margin-top: 8px;">
+                                    <strong>Mitigates:</strong> Simulator memorization & reward hacking.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==========================================
+                     SLIDE 8: CASE STUDY — TARGET REACHING ROBOT
+                     ========================================== -->
+                <section class="slide-item" data-act="2" data-topic="CASE STUDY" id="slide8">
+                    <div class="mag-grid-2col">
+                        <div class="col-content">
+                            <div>
+                                <div class="article-category">
+                                    <span class="cat-tag">EMPIRICAL DEMONSTRATION</span>
+                                    <span class="cat-issue">// NAVIGATION WALKTHROUGH</span>
+                                </div>
+                                <h2 class="article-headline-sm">
+                                    CASE STUDY: THE <span class="highlight-orange">TARGET-REACHING ROBOT</span>
+                                </h2>
+                                <p class="article-dek">
+                                    Consider a DRL robot trained to dock accurately at a target positioned at exactly $10.0\text{ meters}$.
+                                </p>
+                            </div>
+
+                            <div class="editorial-pullquote">
+                                <p class="pullquote-text">
+                                    "During training, the robot sees <strong>10.1m</strong>, then <strong>9.8m</strong>, then <strong>10.3m</strong>. It learns that slight fluctuation must not cause violent steering."
+                                </p>
+                            </div>
+
+                            <div class="feature-grid-2">
+                                <div class="feature-box">
+                                    <strong>WITHOUT INPUT NOISE</strong>
+                                    <p>Over-reacts to jitter, jerks steering constantly, oscillates wildly near the target.</p>
+                                </div>
+                                <div class="feature-box">
+                                    <strong>WITH INPUT NOISE</strong>
+                                    <p>Smoothly converges, ignores micro-flutter, achieves steady docking.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Interactive Trajectory Simulator -->
+                        <div class="col-content">
+                            <div class="mag-card" style="flex: 1;">
+                                <div class="card-header-strip">
+                                    <span class="card-title">INTERACTIVE TRAJECTORY CONVERGENCE</span>
+                                    <span class="card-pill pill-orange">SIMULATOR</span>
+                                </div>
+
+                                <div class="interactive-container" style="height: 270px; background: #FAF9F6; display: flex; align-items: center; justify-content: center;">
+                                    <svg viewBox="0 0 420 250" style="width: 100%; height: 100%;" id="trajSvg">
+                                        <!-- Target Zone -->
+                                        <circle cx="360" cy="125" r="24" fill="rgba(21, 128, 61, 0.15)" stroke="#15803D" stroke-width="2" stroke-dasharray="3 3"/>
+                                        <circle cx="360" cy="125" r="6" fill="#15803D"/>
+                                        <text x="360" y="165" font-family="'JetBrains Mono'" font-size="10" font-weight="800" text-anchor="middle" fill="#15803D">TARGET (10.0m)</text>
+
+                                        <!-- Start Point -->
+                                        <circle cx="50" cy="125" r="8" fill="#0D131F"/>
+                                        <text x="50" y="155" font-family="'JetBrains Mono'" font-size="10" font-weight="800" text-anchor="middle" fill="#0D131F">START (0.0m)</text>
+
+                                        <!-- Fragile Oscillating Trajectory -->
+                                        <path id="trajFragile" d="M 50 125 Q 110 30 160 210 T 240 40 T 310 190 T 360 125" fill="none" stroke="#D9383A" stroke-width="2" stroke-dasharray="4 3"/>
+
+                                        <!-- Robust Smooth Trajectory -->
+                                        <path id="trajRobust" d="M 50 125 C 150 125 250 125 360 125" fill="none" stroke="#0957D0" stroke-width="4"/>
+
+                                        <!-- Active Robot Marker -->
+                                        <circle id="trajRobotMarker" cx="50" cy="125" r="10" fill="#FF4D00" stroke="#0D131F" stroke-width="2"/>
+                                    </svg>
+                                </div>
+
+                                <div style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center; background: var(--bg-card-tint); border: 1.5px solid var(--border-heavy); padding: 8px 12px; font-family: var(--font-mono); font-size: 11px;">
+                                    <span id="trajStatusText">SIMULATION STATUS: <strong>READY</strong></span>
+                                    <button class="interactive-btn" id="btnRunTraj">▶ Run Navigation Step</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==========================================
+                     SLIDE 9: CRITICAL DISTINCTION — INPUT VS ACTION NOISE
+                     ========================================== -->
+                <section class="slide-item" data-act="3" data-topic="INPUT VS ACTION NOISE" id="slide9">
+                    <div class="col-content" style="gap: 16px;">
+                        <div>
+                            <div class="article-category">
+                                <span class="cat-tag">ARCHITECTURAL TAXONOMY</span>
+                                <span class="cat-issue">// FUNCTIONAL DUALITY</span>
+                            </div>
+                            <h2 class="article-headline-sm">
+                                CRUCIAL DISTINCTION: <span class="highlight-orange">INPUT VS. ACTION NOISE</span>
+                            </h2>
+                        </div>
+
+                        <!-- Core Axiom Callout Box -->
+                        <div class="editorial-pullquote" style="margin-top: 0; background: var(--bg-card-tint);">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                                <div>
+                                    <span class="card-pill pill-orange">INPUT NOISE (OBSERVATION)</span>
+                                    <p class="pullquote-text" style="font-size: 22px; margin-top: 8px;">
+                                        "Input noise changes what the agent <strong>SEES</strong>."
+                                    </p>
+                                </div>
+                                <div style="border-left: 2px solid var(--border-heavy); padding-left: 24px;">
+                                    <span class="card-pill pill-blue">ACTION NOISE (ACTUATION)</span>
+                                    <p class="pullquote-text" style="font-size: 22px; margin-top: 8px;">
+                                        "Action noise changes what the agent <strong>DOES</strong>."
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detailed Comparison Matrix -->
+                        <div class="mag-card" style="padding: 16px 20px;">
+                            <table class="mag-table">
+                                <thead>
+                                    <tr>
+                                        <th>Comparison Dimension</th>
+                                        <th>Input Noise (State Perturbation)</th>
+                                        <th>Action Noise (Control Perturbation)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Injection Point</strong></td>
+                                        <td style="color: var(--accent-orange); font-weight: 800;">Observation Space S (Input Layer)</td>
+                                        <td style="color: var(--accent-blue); font-weight: 800;">Action Space A (Output Layer)</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Primary Purpose</strong></td>
+                                        <td><strong>Robustness & Sim2Real Transfer</strong></td>
+                                        <td><strong>Exploration & Policy Discovery</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Typical Algorithms</strong></td>
+                                        <td>Domain Randomization, Robust RL, PPO</td>
+                                        <td>DDPG (Ornstein-Uhlenbeck), SAC, TD3</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Mathematical Form</strong></td>
+                                        <td><code>s' = s + ε</code></td>
+                                        <td><code>a' = a + η</code> (where η ~ N(0, σ²))</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Risk if Excessive</strong></td>
+                                        <td>Hallucinatory states; distorted perception</td>
+                                        <td>Chaotic erratic movements; motor damage</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==========================================
+                     SLIDE 10: TRADEOFFS, THE SWEET SPOT & CONCLUSION
+                     ========================================== -->
+                <section class="slide-item" data-act="3" data-topic="SYNTHESIS & CREDITS" id="slide10">
+                    <div class="mag-grid-2col">
+                        <div class="col-content">
+                            <div>
+                                <div class="article-category">
+                                    <span class="cat-tag">STRATEGIC SYNTHESIS</span>
+                                    <span class="cat-issue">// BEST PRACTICES & TRADEOFFS</span>
+                                </div>
+                                <h2 class="article-headline-sm">
+                                    BALANCING PERTURBATION: <span class="highlight-orange">THE SWEET SPOT</span>
+                                </h2>
+                                <p class="article-dek">
+                                    Input noise is powerful, but must be calibrated to match physical sensor tolerances.
+                                </p>
+                            </div>
+
+                            <div class="mag-card card-orange-tint" style="margin-top: 10px;">
+                                <div class="card-header-strip">
+                                    <span class="card-title">THE GOLDEN RULE OF CALIBRATION</span>
+                                    <span class="card-pill pill-orange">RULE</span>
+                                </div>
+                                <div class="big-math-display" style="font-size: 24px;">
+                                    σ_noise ≈ σ_hardware_tolerance
+                                </div>
+                                <p style="font-size: 13.5px; line-height: 1.4; margin-top: 6px; color: var(--ink-secondary);">
+                                    Excessive noise ($\sigma \gg \text{Signal}$) obscures informative gradients and produces degenerate policies. Calibrate to expected real-world sensor error.
+                                </p>
+                            </div>
+
+                            <div class="feature-grid-2">
+                                <div class="feature-box">
+                                    <strong>KEY BENEFITS</strong>
+                                    <p>Zero-shot Sim2Real, regularized neural weights, resilience to hardware degradation.</p>
+                                </div>
+                                <div class="feature-box">
+                                    <strong>KEY LIMITATION</strong>
+                                    <p>Over-noising leads to learned hesitation and sub-optimal asymptotic return.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Final Summary & Lecture Credits Plaque -->
+                        <div class="col-content">
+                            <div class="mag-card card-blue-tint" style="flex: 1; justify-content: space-between;">
+                                <div class="card-header-strip">
+                                    <span class="card-title">SEMINAR CONCLUSION & ACKNOWLEDGMENTS</span>
+                                    <span class="card-pill pill-blue">FINAL TAKEAWAY</span>
+                                </div>
+
+                                <div style="background: #FFFFFF; border: 2px solid var(--border-heavy); box-shadow: var(--shadow-hard-sm); padding: 18px 20px;">
+                                    <div style="font-family: var(--font-display); font-size: 22px; font-weight: 900; color: var(--ink-primary); margin-bottom: 8px;">
+                                        "NOISE IS NOT AN ERROR—IT IS THE CRUCIBLE OF ROBUST INTELLIGENCE."
+                                    </div>
+                                    <p style="font-size: 13.5px; line-height: 1.4; color: var(--ink-secondary);">
+                                        By exposing deep reinforcement learning agents to stochastic uncertainty during simulation, we build autonomous systems that survive and thrive in the unpredictable physical world.
+                                    </p>
+                                </div>
+
+                                <div style="border-top: 1.5px solid var(--border-heavy); padding-top: 14px;">
+                                    <div style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; color: var(--ink-secondary); margin-bottom: 8px;">
+                                        LECTURE PRESENTERS
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                                        <div style="background: #FFFFFF; border: 1.5px solid var(--border-heavy); padding: 8px 10px; font-family: var(--font-mono); text-align: center;">
+                                            <div style="font-weight: 800; font-size: 13px;">Chanchal</div>
+                                            <div style="color: var(--accent-orange); font-size: 10px; font-weight: 800;">ROLL NO. 13</div>
+                                        </div>
+                                        <div style="background: #FFFFFF; border: 1.5px solid var(--border-heavy); padding: 8px 10px; font-family: var(--font-mono); text-align: center;">
+                                            <div style="font-weight: 800; font-size: 13px;">Deepak</div>
+                                            <div style="color: var(--accent-orange); font-size: 10px; font-weight: 800;">ROLL NO. 14</div>
+                                        </div>
+                                        <div style="background: #FFFFFF; border: 1.5px solid var(--border-heavy); padding: 8px 10px; font-family: var(--font-mono); text-align: center;">
+                                            <div style="font-weight: 800; font-size: 13px;">Deepender</div>
+                                            <div style="color: var(--accent-orange); font-size: 10px; font-weight: 800;">ROLL NO. 15</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="background: var(--border-heavy); color: #FFFFFF; padding: 10px 14px; text-align: center; font-family: var(--font-mono); font-size: 12px; font-weight: 800; letter-spacing: 0.05em;">
+                                    THANK YOU — OPEN FOR QUESTIONS & DISCUSSION
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+
+            <!-- Persistent Magazine Bottom Footer -->
+            <footer class="mag-footer">
+                <div class="footer-left">
+                    <span>SUBJECT: DEEP AND REINFORCEMENT LEARNING</span>
+                    <span>•</span>
+                    <span id="footerSlideTopic">TOPIC: LECTURE OVERVIEW</span>
+                </div>
+                <div class="footer-right">
+                    <span class="footer-counter" id="footerCounter">01 / 10</span>
+                </div>
+            </footer>
+
+        </div>
+    </div>
+
+    <!-- Floating Bottom Presenter Controls & Navigation Toolbar -->
+    <div class="deck-toolbar-wrapper" id="deckToolbarWrapper">
+        <div class="deck-toolbar">
+            <button class="toolbar-btn" id="prevBtn" title="Previous Slide (Shortcut: Left Arrow, PageUp)">&larr; Prev</button>
+            <div class="toolbar-counter-pill" id="toolbarCounter">01 / 10</div>
+            <button class="toolbar-btn" id="nextBtn" title="Next Slide (Shortcut: Right Arrow, Space, PageDown)">Next &rarr;</button>
+            
+            <div style="width: 1px; height: 24px; background: var(--border-heavy); margin: 0 4px;"></div>
+            
+            <div class="toolbar-topic-tag" id="toolbarTopicTag">LECTURE OVERVIEW</div>
+            
+            <div style="width: 1px; height: 24px; background: var(--border-heavy); margin: 0 4px;"></div>
+
+            <button class="toolbar-btn" id="fullscreenBtn" title="Toggle Fullscreen (Shortcut: F)">⛶ Fullscreen</button>
+            <button class="toolbar-btn" id="shortcutsBtn" title="Keyboard Shortcuts (Shortcut: ?)">⌨ Help</button>
+            <button class="toolbar-btn" id="collapseBtn" title="Collapse Toolbar (Shortcut: C)">&times;</button>
+        </div>
+    </div>
+
+    <!-- Floating Expand Button (Appears when Toolbar is Collapsed) -->
+    <button class="floating-expand-btn" id="expandBtn" title="Show Presentation Controls">▲ Controls</button>
+
+    <!-- Keyboard Shortcuts Modal -->
+    <div class="shortcuts-modal-overlay" id="shortcutsModal">
+        <div class="shortcuts-card">
+            <h3>Presentation Controls</h3>
+            <div class="shortcut-row">
+                <span>Next Slide</span>
+                <span class="shortcut-key-badge">→ / Space / PgDn</span>
+            </div>
+            <div class="shortcut-row">
+                <span>Previous Slide</span>
+                <span class="shortcut-key-badge">← / PgUp</span>
+            </div>
+            <div class="shortcut-row">
+                <span>Jump to Slide N</span>
+                <span class="shortcut-key-badge">1 - 9</span>
+            </div>
+            <div class="shortcut-row">
+                <span>Toggle Fullscreen</span>
+                <span class="shortcut-key-badge">F</span>
+            </div>
+            <div class="shortcut-row">
+                <span>Collapse / Expand Bar</span>
+                <span class="shortcut-key-badge">C</span>
+            </div>
+            <div class="shortcut-row">
+                <span>Toggle In-Place Edit Mode</span>
+                <span class="shortcut-key-badge">E</span>
+            </div>
+            <div class="shortcut-row">
+                <span>Close This Modal</span>
+                <span class="shortcut-key-badge">Esc / ?</span>
+            </div>
+            <button class="interactive-btn" style="width: 100%; margin-top: 20px;" id="btnCloseShortcuts">Got It</button>
+        </div>
+    </div>
+
+    <!-- Mobile Portrait Orientation Warning & Auto-Rotate Trigger -->
+    <div class="mobile-portrait-prompt" id="mobilePortraitPrompt">
+        <svg class="rotate-icon-anim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="5" y="2" width="14" height="20" rx="2"/>
+            <path d="M12 18h.01"/>
+            <path d="M17 9l3-3-3-3"/>
+            <path d="M20 6H13"/>
+        </svg>
+        <div class="rotate-title">Please Rotate Your Device</div>
+        <p class="rotate-sub">This 16:9 master presentation is optimized for landscape viewing. Rotate your device or enter fullscreen.</p>
+        <button class="btn-rotate-fullscreen" id="btnLandscapeFullscreen">Enter Landscape Fullscreen</button>
+    </div>
+
+    <!-- Presentation Engine Controller Script -->
+    <script>
+        class PresentationEngine {
+            constructor() {
+                this.currentSlide = 0;
+                this.slides = Array.from(document.querySelectorAll('.slide-item'));
+                this.deckStage = document.getElementById('deckStage');
+                this.deckViewport = document.getElementById('deckViewport');
+                
+                this.prevBtn = document.getElementById('prevBtn');
+                this.nextBtn = document.getElementById('nextBtn');
+                this.toolbarCounter = document.getElementById('toolbarCounter');
+                this.footerCounter = document.getElementById('footerCounter');
+                this.toolbarTopicTag = document.getElementById('toolbarTopicTag');
+                this.footerSlideTopic = document.getElementById('footerSlideTopic');
+                
+                this.act1Tab = document.getElementById('act1Tab');
+                this.act2Tab = document.getElementById('act2Tab');
+                this.act3Tab = document.getElementById('act3Tab');
+                
+                this.deckToolbarWrapper = document.getElementById('deckToolbarWrapper');
+                this.collapseBtn = document.getElementById('collapseBtn');
+                this.expandBtn = document.getElementById('expandBtn');
+                this.fullscreenBtn = document.getElementById('fullscreenBtn');
+                this.shortcutsBtn = document.getElementById('shortcutsBtn');
+                this.shortcutsModal = document.getElementById('shortcutsModal');
+                this.btnCloseShortcuts = document.getElementById('btnCloseShortcuts');
+                
+                this.btnLandscapeFullscreen = document.getElementById('btnLandscapeFullscreen');
+                this.isControlsCollapsed = false;
+                this.isEditing = false;
+
+                this.init();
+            }
+
+            init() {
+                this.setupScaling();
+                this.setupNavigation();
+                this.setupInteractiveSimulators();
+                this.setupHashSync();
+                this.mountEditorHotkey();
+                
+                window.addEventListener('resize', () => this.setupScaling());
+                this.showSlide(this.getSlideFromHash());
+            }
+
+            setupScaling() {
+                if (!this.deckStage || !this.deckViewport) return;
+                const windowWidth = window.innerWidth;
+                const windowHeight = window.innerHeight;
+                const targetWidth = 1920;
+                const targetHeight = 1080;
+
+                const scale = Math.min(windowWidth / targetWidth, windowHeight / targetHeight);
+                const left = (windowWidth - targetWidth * scale) / 2;
+                const top = (windowHeight - targetHeight * scale) / 2;
+
+                this.deckStage.style.transform = `scale(${scale})`;
+                this.deckStage.style.left = `${left}px`;
+                this.deckStage.style.top = `${top}px`;
+            }
+
+            getSlideFromHash() {
+                const hash = window.location.hash;
+                if (hash && hash.startsWith('#slide-')) {
+                    const idx = parseInt(hash.replace('#slide-', ''), 10) - 1;
+                    if (!isNaN(idx) && idx >= 0 && idx < this.slides.length) {
+                        return idx;
+                    }
+                }
+                return 0;
+            }
+
+            setupHashSync() {
+                window.addEventListener('hashchange', () => {
+                    const targetIdx = this.getSlideFromHash();
+                    if (targetIdx !== this.currentSlide) {
+                        this.showSlide(targetIdx, false);
+                    }
+                });
+            }
+
+            showSlide(index, updateHash = true) {
+                this.currentSlide = Math.max(0, Math.min(index, this.slides.length - 1));
+
+                this.slides.forEach((slide, idx) => {
+                    slide.classList.toggle('active', idx === this.currentSlide);
+                });
+
+                const counterStr = `${String(this.currentSlide + 1).padStart(2, '0')} / ${String(this.slides.length).padStart(2, '0')}`;
+                if (this.toolbarCounter) this.toolbarCounter.textContent = counterStr;
+                if (this.footerCounter) this.footerCounter.textContent = counterStr;
+
+                if (this.prevBtn) this.prevBtn.disabled = (this.currentSlide === 0);
+                if (this.nextBtn) this.nextBtn.disabled = (this.currentSlide === this.slides.length - 1);
+
+                const currentEl = this.slides[this.currentSlide];
+                const act = currentEl.getAttribute('data-act');
+                const topic = currentEl.getAttribute('data-topic') || 'LECTURE OVERVIEW';
+
+                if (this.toolbarTopicTag) this.toolbarTopicTag.textContent = topic;
+                if (this.footerSlideTopic) this.footerSlideTopic.textContent = `TOPIC: ${topic}`;
+
+                // Update Act Tabs
+                if (this.act1Tab) this.act1Tab.classList.toggle('active', act === '1');
+                if (this.act2Tab) this.act2Tab.classList.toggle('active', act === '2');
+                if (this.act3Tab) this.act3Tab.classList.toggle('active', act === '3');
+
+                if (updateHash) {
+                    history.replaceState(null, '', `#slide-${this.currentSlide + 1}`);
+                }
+            }
+
+            next() {
+                if (this.currentSlide < this.slides.length - 1) {
+                    this.showSlide(this.currentSlide + 1);
+                }
+            }
+
+            prev() {
+                if (this.currentSlide > 0) {
+                    this.showSlide(this.currentSlide - 1);
+                }
+            }
+
+            toggleFullscreen() {
+                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                    if (document.documentElement.requestFullscreen) {
+                        document.documentElement.requestFullscreen().catch(() => {});
+                    } else if (document.documentElement.webkitRequestFullscreen) {
+                        document.documentElement.webkitRequestFullscreen();
+                    }
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen().catch(() => {});
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    }
+                }
+            }
+
+            toggleCollapse(forceState) {
+                if (typeof forceState === 'boolean') {
+                    this.isControlsCollapsed = forceState;
+                } else {
+                    this.isControlsCollapsed = !this.isControlsCollapsed;
+                }
+                if (this.deckToolbarWrapper) {
+                    this.deckToolbarWrapper.classList.toggle('collapsed', this.isControlsCollapsed);
+                }
+            }
+
+            toggleShortcutsModal() {
+                if (this.shortcutsModal) {
+                    this.shortcutsModal.classList.toggle('show');
+                }
+            }
+
+            setupNavigation() {
+                // Keyboard Controls
+                document.addEventListener('keydown', (e) => {
+                    if (this.isEditing && e.target.getAttribute('contenteditable')) return;
+
+                    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                        e.preventDefault();
+                        this.next();
+                    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                        e.preventDefault();
+                        this.prev();
+                    } else if (e.key === 'Home') {
+                        e.preventDefault();
+                        this.showSlide(0);
+                    } else if (e.key === 'End') {
+                        e.preventDefault();
+                        this.showSlide(this.slides.length - 1);
+                    } else if (e.key === 'f' || e.key === 'F') {
+                        e.preventDefault();
+                        this.toggleFullscreen();
+                    } else if (e.key === 'c' || e.key === 'C') {
+                        e.preventDefault();
+                        this.toggleCollapse();
+                    } else if (e.key === '?' || e.key === 'h' || e.key === 'H') {
+                        e.preventDefault();
+                        this.toggleShortcutsModal();
+                    } else if (e.key === 'Escape') {
+                        if (this.shortcutsModal && this.shortcutsModal.classList.contains('show')) {
+                            this.toggleShortcutsModal();
+                        }
+                    } else if (e.key >= '1' && e.key <= '9') {
+                        const target = parseInt(e.key, 10) - 1;
+                        if (target < this.slides.length) {
+                            this.showSlide(target);
+                        }
+                    }
+                });
+
+                // Button Clicks
+                if (this.prevBtn) this.prevBtn.addEventListener('click', () => this.prev());
+                if (this.nextBtn) this.nextBtn.addEventListener('click', () => this.next());
+                if (this.fullscreenBtn) this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+                if (this.shortcutsBtn) this.shortcutsBtn.addEventListener('click', () => this.toggleShortcutsModal());
+                if (this.btnCloseShortcuts) this.btnCloseShortcuts.addEventListener('click', () => this.toggleShortcutsModal());
+                if (this.collapseBtn) this.collapseBtn.addEventListener('click', () => this.toggleCollapse(true));
+                if (this.expandBtn) this.expandBtn.addEventListener('click', () => this.toggleCollapse(false));
+
+                // Act Breadcrumbs
+                [this.act1Tab, this.act2Tab, this.act3Tab].forEach(tab => {
+                    if (tab) {
+                        tab.addEventListener('click', () => {
+                            const startIdx = parseInt(tab.getAttribute('data-start'), 10);
+                            this.showSlide(startIdx);
+                        });
+                    }
+                });
+
+                // Landscape Fullscreen Prompt Button
+                if (this.btnLandscapeFullscreen) {
+                    this.btnLandscapeFullscreen.addEventListener('click', () => {
+                        this.toggleFullscreen();
+                        if (screen.orientation && screen.orientation.lock) {
+                            screen.orientation.lock('landscape').catch(() => {});
+                        }
+                    });
+                }
+
+                // Touch Swipe Gestures
+                let startX = 0, startY = 0, isInteractiveTouch = false;
+                document.addEventListener('touchstart', (e) => {
+                    isInteractiveTouch = !!e.target.closest('input, .styled-slider, button, a, table, svg, .shortcuts-card');
+                    startX = e.touches[0].clientX;
+                    startY = e.touches[0].clientY;
+                }, { passive: true });
+
+                document.addEventListener('touchend', (e) => {
+                    if (isInteractiveTouch) return;
+                    const diffX = e.changedTouches[0].clientX - startX;
+                    const diffY = e.changedTouches[0].clientY - startY;
+                    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+                        if (diffX < 0) this.next();
+                        else this.prev();
+                    }
+                }, { passive: true });
+            }
+
+            setupInteractiveSimulators() {
+                // Slide 2: Radar Pulse
+                const btnSweepRadar = document.getElementById('btnSweepRadar');
+                const radarDistText = document.getElementById('radarDistText');
+                if (btnSweepRadar && radarDistText) {
+                    btnSweepRadar.addEventListener('click', () => {
+                        const noise = (Math.random() * 0.4 - 0.2).toFixed(2);
+                        const val = (5.0 + parseFloat(noise)).toFixed(2);
+                        radarDistText.textContent = `d = ${val} m`;
+                        radarDistText.setAttribute('fill', Math.abs(noise) > 0.05 ? '#FF4D00' : '#0957D0');
+                    });
+                }
+
+                // Slide 3: Sensor Noise Slider
+                const sliderSensorNoise = document.getElementById('sliderSensorNoise');
+                const noiseLevelLabel = document.getElementById('noiseLevelLabel');
+                const tableObsDist = document.getElementById('tableObsDist');
+                const tableObsVel = document.getElementById('tableObsVel');
+                const tableObsHeading = document.getElementById('tableObsHeading');
+
+                if (sliderSensorNoise) {
+                    sliderSensorNoise.addEventListener('input', (e) => {
+                        const val = parseInt(e.target.value, 10);
+                        const sigma = (val / 100).toFixed(2);
+                        if (noiseLevelLabel) noiseLevelLabel.textContent = `σ = ${sigma} m`;
+
+                        const dNoise = (Math.random() * sigma * 2 - sigma).toFixed(2);
+                        const vNoise = (Math.random() * (sigma * 0.5) - (sigma * 0.25)).toFixed(2);
+                        const hNoise = (Math.random() * (sigma * 8) - (sigma * 4)).toFixed(2);
+
+                        if (tableObsDist) tableObsDist.textContent = `${(5.0 + parseFloat(dNoise)).toFixed(2)} m`;
+                        if (tableObsVel) tableObsVel.textContent = `${(1.5 + parseFloat(vNoise)).toFixed(2)} m/s`;
+                        if (tableObsHeading) tableObsHeading.textContent = `${(45.0 + parseFloat(hNoise)).toFixed(2)}°`;
+                    });
+                }
+
+                // Slide 5: Policy Curve Toggle
+                const btnToggleRobust = document.getElementById('btnToggleRobust');
+                const btnToggleFragile = document.getElementById('btnToggleFragile');
+                const pathFragilePolicy = document.getElementById('pathFragilePolicy');
+                const pathRobustPolicy = document.getElementById('pathRobustPolicy');
+
+                if (btnToggleRobust && btnToggleFragile && pathFragilePolicy && pathRobustPolicy) {
+                    btnToggleRobust.addEventListener('click', () => {
+                        btnToggleRobust.classList.add('active');
+                        btnToggleFragile.classList.remove('active');
+                        pathRobustPolicy.style.display = 'block';
+                        pathFragilePolicy.style.display = 'none';
+                    });
+                    btnToggleFragile.addEventListener('click', () => {
+                        btnToggleFragile.classList.add('active');
+                        btnToggleRobust.classList.remove('active');
+                        pathFragilePolicy.style.display = 'block';
+                        pathRobustPolicy.style.display = 'none';
+                    });
+                }
+
+                // Slide 6: Multi-Vector Random Perturbation Generator
+                const btnSampleNewNoise = document.getElementById('btnSampleNewNoise');
+                const stateVectorRows = document.getElementById('stateVectorRows');
+                if (btnSampleNewNoise && stateVectorRows) {
+                    btnSampleNewNoise.addEventListener('click', () => {
+                        const dEps = (Math.random() * 0.6 - 0.3).toFixed(2);
+                        const vEps = (Math.random() * 0.3 - 0.15).toFixed(2);
+                        const hEps = (Math.random() * 1.4 - 0.7).toFixed(2);
+
+                        const dVal = (10.0 + parseFloat(dEps)).toFixed(2);
+                        const vVal = (2.0 + parseFloat(vEps)).toFixed(2);
+                        const hVal = (30.0 + parseFloat(hEps)).toFixed(2);
+
+                        stateVectorRows.innerHTML = `
+                            <tr>
+                                <td><strong>Distance from obstacle</strong></td>
+                                <td>10.0 m</td>
+                                <td style="color: var(--accent-orange);">${dEps >= 0 ? '+' : ''}${dEps} m</td>
+                                <td style="font-weight: 800; color: var(--accent-blue);">${dVal} m</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Current Velocity</strong></td>
+                                <td>2.0 m/s</td>
+                                <td style="color: var(--accent-orange);">${vEps >= 0 ? '+' : ''}${vEps} m/s</td>
+                                <td style="font-weight: 800; color: var(--accent-blue);">${vVal} m/s</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Heading Direction</strong></td>
+                                <td>30.0°</td>
+                                <td style="color: var(--accent-orange);">${hEps >= 0 ? '+' : ''}${hEps}°</td>
+                                <td style="font-weight: 800; color: var(--accent-blue);">${hVal}°</td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                // Slide 8: Trajectory Run Step
+                const btnRunTraj = document.getElementById('btnRunTraj');
+                const trajRobotMarker = document.getElementById('trajRobotMarker');
+                const trajStatusText = document.getElementById('trajStatusText');
+                let trajStep = 0;
+
+                if (btnRunTraj && trajRobotMarker && trajStatusText) {
+                    const stepCoords = [
+                        { cx: 50, cy: 125, text: "EPOCH 1: Distance = 10.1m (Accelerating)" },
+                        { cx: 160, cy: 125, text: "EPOCH 2: Distance = 9.8m (Smooth Braking)" },
+                        { cx: 270, cy: 125, text: "EPOCH 3: Distance = 10.3m (Fine Correction)" },
+                        { cx: 360, cy: 125, text: "EPOCH 4: DOCKED AT TARGET (Within ±0.02m)" }
+                    ];
+
+                    btnRunTraj.addEventListener('click', () => {
+                        trajStep = (trajStep + 1) % stepCoords.length;
+                        const s = stepCoords[trajStep];
+                        trajRobotMarker.setAttribute('cx', s.cx);
+                        trajRobotMarker.setAttribute('cy', s.cy);
+                        trajStatusText.innerHTML = `SIMULATION: <strong>${s.text}</strong>`;
+                    });
+                }
+            }
+
+            mountEditorHotkey() {
+                const hotzone = document.createElement('div');
+                hotzone.className = 'edit-hotzone';
+                hotzone.title = 'Hover or press E to toggle edit mode';
+
+                const toggle = document.createElement('button');
+                toggle.className = 'edit-toggle';
+                toggle.innerHTML = '&#9998; Edit Mode';
+
+                document.body.appendChild(hotzone);
+                document.body.appendChild(toggle);
+
+                let timeout = null;
+                const showToggle = () => {
+                    clearTimeout(timeout);
+                    toggle.classList.add('show');
+                };
+
+                const hideToggle = () => {
+                    timeout = setTimeout(() => {
+                        if (!this.isEditing) toggle.classList.remove('show');
+                    }, 400);
+                };
+
+                hotzone.addEventListener('mouseenter', showToggle);
+                hotzone.addEventListener('mouseleave', hideToggle);
+                toggle.addEventListener('mouseenter', showToggle);
+                toggle.addEventListener('mouseleave', hideToggle);
+
+                const toggleEditMode = () => {
+                    this.isEditing = !this.isEditing;
+                    toggle.classList.toggle('active', this.isEditing);
+                    toggle.textContent = this.isEditing ? '✔ Save Changes' : '✏ Edit Mode';
+
+                    const editableTags = document.querySelectorAll('h1, h2, h3, p, span, .cat-tag, .card-title, .pullquote-text');
+                    editableTags.forEach(el => {
+                        el.setAttribute('contenteditable', this.isEditing ? 'true' : 'false');
+                    });
+
+                    if (!this.isEditing) {
+                        localStorage.setItem('drl_noise_deck_content', document.getElementById('deckStage').innerHTML);
+                    }
+                };
+
+                toggle.addEventListener('click', toggleEditMode);
+                hotzone.addEventListener('click', toggleEditMode);
+
+                document.addEventListener('keydown', (e) => {
+                    if ((e.key === 'e' || e.key === 'E') && !e.target.getAttribute('contenteditable')) {
+                        toggleEditMode();
+                    }
+                });
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            window.presentation = new PresentationEngine();
+        });
+
+        // Actively purge any Netlify preview drawer or badge injections
+        const purgeNetlifyInjections = () => {
+            const targets = document.querySelectorAll(
+                '#netlify-drawer, [data-netlify-drawer], [data-netlify-feedback], .netlify-feedback-widget, iframe[src*="netlify"], iframe[data-netlify], netlify-drawer'
+            );
+            targets.forEach(el => el.remove());
+        };
+        purgeNetlifyInjections();
+        new MutationObserver(purgeNetlifyInjections).observe(document.documentElement, { childList: true, subtree: true });
+    </script>
+</body>
+</html>

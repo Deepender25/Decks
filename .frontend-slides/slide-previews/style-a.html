@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Style 1: The Tech Review (Wired Feature Spread) — DRL Input Noise</title>
+    
+    <!-- Google Fonts & Fontshare: Clash Display, Newsreader (Italic), JetBrains Mono, Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400;1,6..72,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-page: #FBF9F5;
+            --bg-card: #FFFFFF;
+            --bg-card-tint: #F3EFE6;
+            --ink-primary: #0D131F;
+            --ink-secondary: #4F5D73;
+            --ink-faint: rgba(13, 19, 31, 0.12);
+            
+            --accent-orange: #FF4D00;
+            --accent-blue: #0957D0;
+            --accent-cyan: #0284C7;
+            --accent-green: #15803D;
+            --border-heavy: #0D131F;
+            
+            --font-display: 'Syne', sans-serif;
+            --font-editorial: 'Newsreader', Georgia, serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #E6E1D6;
+            font-family: var(--font-body);
+            color: var(--ink-primary);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .viewport-wrapper {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stage-16-9 {
+            width: 1920px;
+            height: 1080px;
+            background: var(--bg-page);
+            background-image: 
+                linear-gradient(to right, rgba(13, 19, 31, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(13, 19, 31, 0.04) 1px, transparent 1px);
+            background-size: 32px 32px;
+            position: absolute;
+            overflow: hidden;
+            border: 3.5px solid var(--border-heavy);
+            box-shadow: 0 30px 90px rgba(13, 19, 31, 0.22);
+            display: flex;
+            flex-direction: column;
+            padding: 44px 60px;
+        }
+
+        /* Magazine Masthead */
+        .mag-masthead {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2.5px solid var(--border-heavy);
+            padding-bottom: 14px;
+            margin-bottom: 28px;
+        }
+
+        .masthead-badge {
+            background: var(--border-heavy);
+            color: #FFFFFF;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 800;
+            padding: 6px 14px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .masthead-subject {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent-orange);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .barcode-patch {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--ink-secondary);
+        }
+
+        .barcode-bars {
+            height: 24px;
+            width: 90px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--border-heavy) 0px,
+                var(--border-heavy) 2px,
+                transparent 2px,
+                transparent 4px,
+                var(--border-heavy) 4px,
+                var(--border-heavy) 7px,
+                transparent 7px,
+                transparent 9px
+            );
+        }
+
+        /* 2-Column Feature Article Layout */
+        .mag-body {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1.18fr 0.98fr;
+            gap: 48px;
+            align-items: stretch;
+        }
+
+        .mag-left-col {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .article-category {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .cat-tag {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--accent-orange);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .article-headline {
+            font-family: var(--font-display);
+            font-size: 64px;
+            font-weight: 900;
+            line-height: 1.02;
+            letter-spacing: -0.035em;
+            text-transform: uppercase;
+            color: var(--ink-primary);
+        }
+
+        .article-headline .accent-orange {
+            color: var(--accent-orange);
+            background: rgba(255, 77, 0, 0.08);
+            padding: 0 8px;
+            border-left: 4px solid var(--accent-orange);
+        }
+
+        .article-dek {
+            font-size: 22px;
+            line-height: 1.45;
+            color: var(--ink-secondary);
+            margin-top: 16px;
+            font-weight: 500;
+        }
+
+        /* Editorial Pullquote Box with Serif */
+        .editorial-pullquote {
+            background: var(--bg-card);
+            border: 2px solid var(--border-heavy);
+            box-shadow: 6px 6px 0px var(--border-heavy);
+            padding: 22px 26px;
+            margin-top: 18px;
+            position: relative;
+        }
+
+        .pullquote-text {
+            font-family: var(--font-editorial);
+            font-size: 27px;
+            font-style: italic;
+            line-height: 1.35;
+            color: var(--ink-primary);
+        }
+
+        .pullquote-text strong {
+            font-style: normal;
+            color: var(--accent-orange);
+            font-family: var(--font-body);
+            font-weight: 700;
+            font-size: 0.9em;
+        }
+
+        /* 3 Mini Feature Bullets */
+        .feature-rows {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .feature-cell {
+            background: var(--bg-card-tint);
+            border: 1px solid var(--border-heavy);
+            padding: 10px 14px;
+            font-size: 14px;
+            line-height: 1.35;
+        }
+
+        .feature-cell strong {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--accent-orange);
+            margin-bottom: 2px;
+        }
+
+        /* Right Column: Lab Telemetry & Diagrams */
+        .mag-right-col {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            justify-content: space-between;
+        }
+
+        .formula-hero-card {
+            background: var(--bg-card);
+            border: 2.5px solid var(--border-heavy);
+            box-shadow: 7px 7px 0px var(--border-heavy);
+            padding: 24px 28px;
+        }
+
+        .card-header-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1.5px solid var(--border-heavy);
+            padding-bottom: 10px;
+            margin-bottom: 14px;
+        }
+
+        .card-title-text {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .formula-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .big-math {
+            font-family: var(--font-mono);
+            font-size: 38px;
+            font-weight: 900;
+            color: var(--accent-blue);
+            letter-spacing: -0.02em;
+        }
+
+        .math-annotation {
+            font-size: 14px;
+            color: var(--ink-secondary);
+            font-family: var(--font-mono);
+            text-align: right;
+        }
+
+        /* Real-World Sensor Comparison */
+        .sensor-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            background: #FAFBFD;
+            border: 1.5px solid var(--border-heavy);
+            margin-top: 10px;
+        }
+
+        .sensor-table th {
+            background: var(--border-heavy);
+            color: #FFFFFF;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            padding: 6px 10px;
+            text-align: left;
+            letter-spacing: 0.06em;
+        }
+
+        .sensor-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--ink-faint);
+            font-family: var(--font-mono);
+        }
+
+        .highlight-noisy {
+            color: var(--accent-orange);
+            font-weight: 800;
+        }
+
+        /* Diagram Feedforward Card */
+        .feedforward-card {
+            background: var(--bg-card);
+            border: 2.5px solid var(--border-heavy);
+            box-shadow: 7px 7px 0px var(--border-heavy);
+            padding: 22px 26px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .pipeline-strip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #FAF8F4;
+            border: 1.5px solid var(--border-heavy);
+            padding: 10px 14px;
+            margin: 10px 0;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .pipeline-tag {
+            padding: 4px 8px;
+            border: 1px solid var(--border-heavy);
+            background: #FFFFFF;
+        }
+
+        .pipeline-tag.orange-tag {
+            background: var(--accent-orange);
+            color: #FFFFFF;
+            border-color: var(--accent-orange);
+        }
+
+        .distinction-callout {
+            background: #EFF6FF;
+            border-left: 4px solid var(--accent-blue);
+            padding: 12px 16px;
+            font-size: 14px;
+            line-height: 1.4;
+            color: var(--ink-primary);
+        }
+
+        /* Footer */
+        .mag-footer {
+            border-top: 2.5px solid var(--border-heavy);
+            padding-top: 14px;
+            margin-top: 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--ink-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="viewport-wrapper">
+        <main class="stage-16-9" id="slideStage">
+            <!-- Masthead -->
+            <header class="mag-masthead">
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <span class="masthead-badge">TECH REVIEW // SPREAD 01</span>
+                    <span class="masthead-subject">DEEP AND REINFORCEMENT LEARNING</span>
+                </div>
+                <div class="barcode-patch">
+                    <div class="barcode-bars"></div>
+                    <span>FOLIO 01 / 10</span>
+                </div>
+            </header>
+
+            <!-- Main Body -->
+            <div class="mag-body">
+                <!-- Left Column -->
+                <div class="mag-left-col">
+                    <div>
+                        <div class="article-category">
+                            <span class="cat-tag">ROBUST POLICY LEARNING &bull; SIM2REAL</span>
+                        </div>
+
+                        <h1 class="article-headline">
+                            Injecting Noise<br>at <span class="accent-orange">Input in DRL</span>
+                        </h1>
+
+                        <p class="article-dek">
+                            Why adding controlled random variance to state observations prevents neural policies from collapsing when confronted with imperfect real-world sensors.
+                        </p>
+
+                        <div class="editorial-pullquote">
+                            <div class="pullquote-text">
+                                &ldquo;We deliberately perturb the agent's observation stream so that it learns to extract <strong>patterns</strong> rather than overfitting to exact, brittle numbers.&rdquo;
+                            </div>
+                        </div>
+
+                        <div class="feature-rows">
+                            <div class="feature-cell">
+                                <strong>01 / Sim2Real Gap</strong>
+                                Simulations are noise-free; real robot sensors oscillate by &plusmn;2–5%.
+                            </div>
+                            <div class="feature-cell">
+                                <strong>02 / Policy Smoothing</strong>
+                                Forces the actor network &pi;<sub>&theta;</sub> to remain invariant to small input jitter.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="font-family:var(--font-mono); font-size:13px; color:var(--ink-secondary);">
+                        MAGAZINE DESIGN SYSTEM 01 &bull; THE TECH REVIEW SPREAD
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="mag-right-col">
+                    <!-- Formula Hero Card -->
+                    <div class="formula-hero-card">
+                        <div class="card-header-line">
+                            <span class="card-title-text">OBSERVATION PERTURBATION MODEL</span>
+                            <span style="font-family:var(--font-mono); font-size:12px; font-weight:800; color:var(--accent-orange);">EQUATION</span>
+                        </div>
+
+                        <div class="formula-row">
+                            <div class="big-math">s' = s + &epsilon;</div>
+                            <div class="math-annotation">
+                                s: True State<br>
+                                &epsilon; &sim; &Nu;(0, &sigma;<sup>2</sup>) Noise
+                            </div>
+                        </div>
+
+                        <table class="sensor-table">
+                            <thead>
+                                <tr>
+                                    <th>Sensor Stream</th>
+                                    <th>True (s)</th>
+                                    <th>Observed (s')</th>
+                                    <th>Delta</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Obstacle Distance</td>
+                                    <td>10.0 m</td>
+                                    <td class="highlight-noisy">10.2 m</td>
+                                    <td>+0.2 m</td>
+                                </tr>
+                                <tr>
+                                    <td>Chassis Velocity</td>
+                                    <td>2.0 m/s</td>
+                                    <td class="highlight-noisy">1.9 m/s</td>
+                                    <td>-0.1 m/s</td>
+                                </tr>
+                                <tr>
+                                    <td>Steering Angle &theta;</td>
+                                    <td>30.0&deg;</td>
+                                    <td class="highlight-noisy">30.5&deg;</td>
+                                    <td>+0.5&deg;</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Diagram Feedforward Card -->
+                    <div class="feedforward-card">
+                        <div class="card-header-line">
+                            <span class="card-title-text">EXECUTION PIPELINE</span>
+                            <span style="font-family:var(--font-mono); font-size:12px; font-weight:800; color:var(--accent-blue);">FEEDFORWARD</span>
+                        </div>
+
+                        <div class="pipeline-strip">
+                            <span class="pipeline-tag">Environment</span>
+                            <span>&rarr;</span>
+                            <span class="pipeline-tag">Sensor (s)</span>
+                            <span>&rarr;</span>
+                            <span class="pipeline-tag orange-tag">+ Noise (&epsilon;)</span>
+                            <span>&rarr;</span>
+                            <span class="pipeline-tag">Network &pi;<sub>&theta;</sub></span>
+                            <span>&rarr;</span>
+                            <span class="pipeline-tag">Action (a)</span>
+                        </div>
+
+                        <div class="distinction-callout">
+                            <strong>Crucial Distinction to Remember:</strong><br>
+                            &bull; <strong>Input Noise</strong> alters what the agent <em>sees</em> (improves robustness).<br>
+                            &bull; <strong>Action Noise</strong> alters what the agent <em>does</em> (encourages exploration).
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="mag-footer">
+                <div>PRESENTED BY: CHANCHAL (ROLL NO. 13) &bull; DEEPAK (ROLL NO. 14) &bull; DEEPENDER (ROLL NO. 15)</div>
+                <div>DEEP AND REINFORCEMENT LEARNING &bull; FEATURE PRESENTATION</div>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        function resizeStage() {
+            const stage = document.getElementById('slideStage');
+            const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+            stage.style.transform = `scale(${scale})`;
+        }
+        window.addEventListener('resize', resizeStage);
+        window.addEventListener('DOMContentLoaded', resizeStage);
+    </script>
+</body>
+</html>

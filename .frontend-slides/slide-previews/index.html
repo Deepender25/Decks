@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DRL Input Noise — 3 Magazine & Editorial Style Demos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Cormorant+Garamond:ital,wght@1,600&family=Fraunces:wght@700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            background: #EFECE6;
+            color: #1A1715;
+            padding: 48px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 1360px;
+            width: 100%;
+        }
+        .header {
+            margin-bottom: 40px;
+            border-bottom: 3px solid #1A1715;
+            padding-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .tagline {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 700;
+            color: #7A1F35;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .title {
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(390px, 1fr));
+            gap: 32px;
+        }
+        .card {
+            background: #FFFFFF;
+            border: 3px solid #1A1715;
+            box-shadow: 8px 8px 0px #1A1715;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .card:hover {
+            transform: translate(-3px, -3px);
+            box-shadow: 12px 12px 0px #1A1715;
+        }
+        .card-preview-frame {
+            width: 100%;
+            height: 250px;
+            border-bottom: 3px solid #1A1715;
+            background: #D8D2C6;
+            position: relative;
+            overflow: hidden;
+        }
+        .card-preview-frame iframe {
+            width: 1920px;
+            height: 1080px;
+            transform: scale(0.208);
+            transform-origin: top left;
+            pointer-events: none;
+            border: none;
+        }
+        .card-body {
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex: 1;
+        }
+        .badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 800;
+            display: inline-block;
+            padding: 5px 12px;
+            margin-bottom: 12px;
+            width: fit-content;
+            border-radius: 999px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        .badge-a { background: #7A1F35; color: #F2D86A; }
+        .badge-b { background: #262019; color: #E9C0A9; }
+        .badge-c { background: #1D4ED8; color: #FDE047; }
+        .card-name {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+        .card-desc {
+            font-size: 15px;
+            color: #4A443E;
+            line-height: 1.45;
+            margin-bottom: 20px;
+        }
+        .card-specs {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            background: #F8F5EE;
+            border: 1.5px solid #1A1715;
+            padding: 12px 14px;
+            margin-bottom: 22px;
+            line-height: 1.5;
+        }
+        .btn-launch {
+            display: block;
+            text-align: center;
+            background: #1A1715;
+            color: #FFFFFF;
+            text-decoration: none;
+            padding: 14px 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            transition: all 0.15s ease;
+        }
+        .btn-launch:hover {
+            background: #7A1F35;
+            color: #F2D86A;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <div class="tagline">Deep and Reinforcement Learning &bull; High-Fashion &amp; Editorial Visual Discovery</div>
+                <h1 class="title">3 Magazine &amp; Editorial Style Previews</h1>
+            </div>
+            <div style="font-family:'JetBrains Mono', monospace; font-size:14px; font-weight:700;">
+                Topic: Injecting Noise at Input in DRL
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- Style A -->
+            <div class="card">
+                <div class="card-preview-frame">
+                    <iframe src="style-a.html" loading="lazy"></iframe>
+                </div>
+                <div class="card-body">
+                    <div>
+                        <span class="badge badge-a">STYLE 1 // EDITORIAL TRI-TONE</span>
+                        <h2 class="card-name">Fashion Magazine Spread (Bricolage + Instrument Serif)</h2>
+                        <p class="card-desc">
+                            Vogue/Monocle-inspired tri-tone palette: deep burgundy wine, golden butter, and blush pink with extreme serif/sans typography and pull-quotes.
+                        </p>
+                        <div class="card-specs">
+                            &bull; <strong>Display:</strong> Bricolage Grotesque (800) + Instrument Serif (Italic)<br>
+                            &bull; <strong>Labels:</strong> JetBrains Mono (700)<br>
+                            &bull; <strong>Palette:</strong> Burgundy (#7A1F35), Butter (#F2D86A), Pink (#F2B6C6)
+                        </div>
+                    </div>
+                    <a href="style-a.html" class="btn-launch" target="_blank">Open Style 1 (Editorial Tri-Tone) &rarr;</a>
+                </div>
+            </div>
+
+            <!-- Style B -->
+            <div class="card">
+                <div class="card-preview-frame">
+                    <iframe src="style-b.html" loading="lazy"></iframe>
+                </div>
+                <div class="card-body">
+                    <div>
+                        <span class="badge badge-b">STYLE 2 // SOFT EDITORIAL</span>
+                        <h2 class="card-name">Literary Quarterly Review (Cormorant Garamond)</h2>
+                        <p class="card-desc">
+                            Kinfolk/Architectural Review styling on warm washi paper with floating pastel cards (sage green, dusty peach) and grand classical serif display.
+                        </p>
+                        <div class="card-specs">
+                            &bull; <strong>Display:</strong> Cormorant Garamond (500/600 roman &amp; italic)<br>
+                            &bull; <strong>Body:</strong> Work Sans + DM Mono<br>
+                            &bull; <strong>Palette:</strong> Sage (#B4C8A8), Peach (#E9C0A9), Espresso (#262019)
+                        </div>
+                    </div>
+                    <a href="style-b.html" class="btn-launch" target="_blank">Open Style 2 (Soft Editorial) &rarr;</a>
+                </div>
+            </div>
+
+            <!-- Style C -->
+            <div class="card">
+                <div class="card-preview-frame">
+                    <iframe src="style-c.html" loading="lazy"></iframe>
+                </div>
+                <div class="card-body">
+                    <div>
+                        <span class="badge badge-c">STYLE 3 // BIENNALE POP-ZINE</span>
+                        <h2 class="card-name">Dutch Design &amp; Biennale Pop-Zine (Fraunces Serif)</h2>
+                        <p class="card-desc">
+                            High-energy exhibition poster magazine with optical-size Fraunces display serif, solar yellow highlight blocks, cobalt accents, and graphic data flows.
+                        </p>
+                        <div class="card-specs">
+                            &bull; <strong>Display:</strong> Fraunces (700/900 Variable Optical Serif)<br>
+                            &bull; <strong>Body:</strong> Plus Jakarta Sans + Space Mono<br>
+                            &bull; <strong>Palette:</strong> Solar Yellow (#FDE047), Cobalt (#1D4ED8), Obsidian (#111827)
+                        </div>
+                    </div>
+                    <a href="style-c.html" class="btn-launch" target="_blank">Open Style 3 (Biennale Pop-Zine) &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
