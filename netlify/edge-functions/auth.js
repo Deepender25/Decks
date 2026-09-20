@@ -321,20 +321,6 @@ function renderLoginPage() {
             cursor: not-allowed;
             box-shadow: none;
         }
-
-        .card-footer {
-            border-top: var(--border-w) solid var(--border);
-            background: #EFEFEF;
-            padding: 12px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #666;
-        }
     </style>
 </head>
 <body>
@@ -356,11 +342,6 @@ function renderLoginPage() {
             <div class="error-banner" id="errorBanner">Invalid master password. Access denied.</div>
 
             <button class="btn-unlock" id="unlockBtn" onclick="submitLogin()">[ Unlock Directory ]</button>
-        </div>
-
-        <div class="card-footer">
-            <span>Server-Enforced Auth</span>
-            <span>Netlify Edge Security</span>
         </div>
     </div>
 
