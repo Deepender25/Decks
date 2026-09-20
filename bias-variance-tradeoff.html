@@ -2,8 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>The Bias–Variance Tradeoff — Cobalt Grid Master Edition</title>
+    <meta name="description" content="A 10-slide 3-person interactive lecture on model complexity, underfitting, overfitting, and regularization in academic risograph style.">
+
+    <!-- OpenGraph & Twitter Social Meta Tags -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="The Bias–Variance Tradeoff — Cobalt Grid Master Edition">
+    <meta property="og:description" content="A 10-slide 3-person interactive lecture on model complexity, underfitting, overfitting, and regularization in academic risograph style.">
+    <meta property="og:image" content="assets/og-preview.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="The Bias–Variance Tradeoff — Cobalt Grid Master Edition">
+    <meta name="twitter:description" content="A 10-slide 3-person interactive lecture on model complexity with interactive math HUDs.">
+    <meta name="twitter:image" content="assets/og-preview.svg">
 
     <!-- Google Fonts: Newsreader (400/500/italic), Hanken Grotesk (400/600/700), DM Mono (400/500) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -46,6 +57,32 @@
             padding: 0;
             box-sizing: border-box;
             border-radius: 0 !important;
+        }
+
+        /* Permanently Hide Any Injected Netlify Badges/Drawers */
+        #netlify-drawer,
+        iframe[src*="netlify"],
+        iframe[data-netlify],
+        iframe[title*="Netlify"],
+        .netlify-feedback-widget,
+        [data-netlify-drawer],
+        [data-netlify-feedback],
+        [id*="netlify-drawer"],
+        [id*="netlify-feedback"],
+        [class*="netlify-feedback"],
+        [class*="netlify-drawer"],
+        netlify-drawer {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            position: absolute !important;
+            top: -9999px !important;
+            left: -9999px !important;
+            clip: rect(0, 0, 0, 0) !important;
+            z-index: -9999 !important;
         }
 
         html, body {
@@ -436,140 +473,80 @@
             margin-top: 2px;
         }
 
-        /* SLIDE 2: Interactive Equation Breakdown */
-        .decomp-equation-hero {
+        /* Common Badge & Definition Components */
+        .key-phrase-badge {
             background: var(--color-ink);
             color: var(--color-paper);
-            padding: 20px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1.5px solid var(--color-ink);
-            margin-bottom: 24px;
-            box-shadow: 6px 6px 0px rgba(0,0,0,0.15);
+            padding: 12px 20px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            display: inline-block;
+            box-shadow: 4px 4px 0px #000;
+            border: 1px solid var(--color-paper);
         }
 
-        .equation-term {
-            cursor: pointer;
-            padding: 2px 8px;
-            transition: all 0.2s ease;
-            border-bottom: 2px solid transparent;
-        }
-
-        .equation-term:hover, .equation-term.active {
-            background: var(--color-paper);
-            color: var(--color-ink);
-            border-bottom-color: var(--color-alert-red);
-        }
-
-        .decomp-equation-formula {
-            font-family: var(--font-display);
-            font-size: 32px;
-            font-style: italic;
-            letter-spacing: 0.02em;
-        }
-
-        .decomp-3tier-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 32px;
-        }
-
-        .tier-card {
-            background: var(--color-paper-card);
-            border: 1.5px solid var(--color-ink);
-            padding: 30px 26px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            position: relative;
-            box-shadow: 6px 6px 0px var(--color-ink);
-            transition: all 0.25s var(--ease-out-expo);
-            cursor: pointer;
-        }
-
-        .tier-card:hover, .tier-card.highlighted {
-            transform: translateY(-4px);
-            box-shadow: 10px 10px 0px var(--color-ink);
-            background: #EAE4D4;
-        }
-
-        .tier-tag-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1.5px solid var(--color-ink);
-            padding-bottom: 8px;
-        }
-
-        .tier-name {
-            font-size: 32px;
-        }
-
-        .tier-desc {
-            font-size: 16px;
-            line-height: 1.48;
-        }
-
-        .pixel-stack-container {
-            margin-top: auto;
-            padding-top: 12px;
-            border-top: 1px dashed var(--color-ink-faint);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .pixel-stack-bars {
-            display: flex;
-            gap: 4px;
-        }
-
-        .p-bar-cell {
-            width: 14px;
-            height: 20px;
-            background: var(--color-grid);
-            border: 1px solid var(--color-ink-faint);
-            transition: background 0.2s ease;
-        }
-
-        .p-bar-cell.on {
-            background: var(--color-ink);
-        }
-
-        .tier-card:hover .p-bar-cell.on {
+        .key-phrase-badge.alert-red {
             background: var(--color-alert-red);
+            color: #FFF;
         }
 
-        /* SLIDE 3 & 4: Interactive Simulators */
-        .interactive-sim-grid {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 48px;
-            align-items: center;
+        .key-phrase-badge.alert-cyan {
+            background: var(--color-alert-cyan);
+            color: #FFF;
         }
 
-        .sim-meta-col {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .callout-box {
-            border-left: 4px solid var(--color-ink);
+        .definition-card {
             background: var(--color-paper-card);
-            padding: 18px 22px;
+            border-left: 5px solid var(--color-ink);
+            border-top: 1.5px solid var(--color-ink);
+            border-right: 1.5px solid var(--color-ink);
+            border-bottom: 1.5px solid var(--color-ink);
+            padding: 20px 24px;
             font-family: var(--font-display);
-            font-size: 23px;
+            font-size: 24px;
             font-style: italic;
             line-height: 1.4;
+            box-shadow: 6px 6px 0px var(--color-ink);
         }
 
+        .bullet-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            font-size: 18px;
+            line-height: 1.5;
+        }
+
+        .bullet-item {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+        }
+
+        .bullet-dot {
+            color: var(--color-ink);
+            font-weight: 900;
+            font-size: 20px;
+        }
+
+        /* 2-Column Standard Presentation Layout */
+        .two-col-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.15fr;
+            gap: 48px;
+            align-items: center;
+            height: 100%;
+        }
+
+        /* SLIDE 2 & 3: Simulators & Canvases */
         .sim-canvas-card {
             background: var(--color-paper-card);
             border: 1.5px solid var(--color-ink);
             box-shadow: 10px 10px 0px var(--color-ink);
-            padding: 26px;
+            padding: 24px;
             display: flex;
             flex-direction: column;
             gap: 14px;
@@ -596,7 +573,7 @@
             font-size: 12px;
             padding: 5px 12px;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 700;
             transition: all 0.15s ease;
             text-transform: uppercase;
         }
@@ -609,7 +586,7 @@
 
         .svg-canvas-box {
             width: 100%;
-            height: 320px;
+            height: 310px;
             background: var(--color-paper);
             border: 1px solid var(--color-ink-faint);
             position: relative;
@@ -628,68 +605,88 @@
             font-size: 13px;
         }
 
-        /* SLIDE 5: 2x2 Target Matrix */
-        .target-matrix-2x2 {
+        /* SLIDE 4: 3-Column Comparison */
+        .comparison-3col-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 28px;
+            align-items: stretch;
         }
 
-        .target-card {
+        .comparison-card {
             background: var(--color-paper-card);
             border: 1.5px solid var(--color-ink);
-            padding: 22px 26px;
-            display: grid;
-            grid-template-columns: 130px 1fr;
-            gap: 24px;
-            align-items: center;
             box-shadow: 6px 6px 0px var(--color-ink);
-            transition: all 0.25s var(--ease-out-expo);
-            cursor: pointer;
+            padding: 22px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
         }
 
-        .target-card:hover {
-            transform: translateY(-4px) scale(1.01);
-            box-shadow: 10px 10px 0px var(--color-ink);
-        }
-
-        .target-card.ideal {
+        .comparison-card.card-highlight {
             background: var(--color-paper-highlight);
             border: 2px solid var(--color-ink);
             box-shadow: 8px 8px 0px var(--color-ink);
         }
 
-        .target-badge {
-            font-family: var(--font-mono);
-            font-size: 12px;
-            padding: 3px 8px;
-            border: 1px solid var(--color-ink);
-            width: fit-content;
-            text-transform: uppercase;
-        }
-
-        .target-badge.ideal-badge {
+        .spectrum-banner {
             background: var(--color-ink);
             color: var(--color-paper);
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 13px;
             font-weight: 700;
+            letter-spacing: 0.06em;
+            margin-top: 18px;
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.25);
         }
 
-        /* SLIDE 6: Complexity Lab */
-        .complexity-lab-grid {
+        .handover-box {
+            background: var(--color-paper-card);
+            border: 1.5px dashed var(--color-ink);
+            padding: 12px 18px;
+            font-size: 14px;
+            font-family: var(--font-mono);
+            color: var(--color-ink-soft);
+            margin-top: 10px;
+        }
+
+        /* SLIDE 5: The Problem & Complexity Spectrum */
+        .tradeoff-dilemma-grid {
             display: grid;
-            grid-template-columns: 0.95fr 1.05fr;
-            gap: 48px;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 40px;
             align-items: center;
         }
 
-        .lab-control-panel {
+        .complexity-flow-ledger {
             background: var(--color-paper-card);
             border: 1.5px solid var(--color-ink);
-            box-shadow: 10px 10px 0px var(--color-ink);
-            padding: 30px;
+            box-shadow: 8px 8px 0px var(--color-ink);
+            padding: 24px 26px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 12px;
+        }
+
+        .complexity-step-card {
+            background: var(--color-paper);
+            border: 1.5px solid var(--color-ink);
+            padding: 14px 18px;
+            box-shadow: 3px 3px 0px var(--color-ink);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .complexity-step-card.sweet-spot {
+            background: var(--color-paper-highlight);
+            border: 2px solid var(--color-ink);
+            font-weight: 700;
         }
 
         .styled-slider {
@@ -717,16 +714,7 @@
             transform: scale(1.15);
         }
 
-        .lab-state-badge {
-            background: var(--color-paper);
-            border: 1.5px solid var(--color-ink);
-            padding: 14px 18px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        /* SLIDE 7: Master U-Curve with Crosshair */
+        /* SLIDE 6: Master U-Curve */
         .master-ucurve-grid {
             display: grid;
             grid-template-columns: 1.35fr 0.65fr;
@@ -756,7 +744,7 @@
         .ucurve-sidebar {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 14px;
         }
 
         .zone-analysis-card {
@@ -781,36 +769,99 @@
             border: 2px solid var(--color-ink);
         }
 
-        /* SLIDE 8 & 9: Blueprints & Toolkit */
-        .blueprint-3col-grid {
+        /* SLIDE 7: Matrix & Classroom Analogy */
+        .matrix-analogy-grid {
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .perf-table-wrap {
+            background: var(--color-paper-card);
+            border: 1.5px solid var(--color-ink);
+            box-shadow: 8px 8px 0px var(--color-ink);
+            padding: 24px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .perf-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-mono);
+            font-size: 14px;
+        }
+
+        .perf-table th {
+            background: var(--color-ink);
+            color: var(--color-paper);
+            padding: 10px 14px;
+            text-align: left;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .perf-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--color-ink-faint);
+            font-family: var(--font-body);
+            font-size: 15px;
+        }
+
+        .perf-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .perf-table tr.highlight-row {
+            background: var(--color-paper-highlight);
+            font-weight: 700;
+        }
+
+        .analogy-card {
+            background: var(--color-paper);
+            border: 2px solid var(--color-ink);
+            box-shadow: 8px 8px 0px var(--color-ink);
+            padding: 28px 26px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* SLIDE 8: 3 Pillars of Balance */
+        .balance-pillars-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 28px;
+            align-items: stretch;
         }
 
-        .blueprint-card {
+        .pillar-card {
             background: var(--color-paper-card);
             border: 1.5px solid var(--color-ink);
             box-shadow: 6px 6px 0px var(--color-ink);
-            padding: 26px 22px;
+            padding: 28px 24px;
             display: flex;
             flex-direction: column;
             gap: 14px;
             transition: transform 0.2s ease;
         }
 
-        .blueprint-card:hover {
+        .pillar-card:hover {
             transform: translateY(-4px);
-            box-shadow: 8px 8px 0px var(--color-ink);
+            box-shadow: 10px 10px 0px var(--color-ink);
         }
 
-        .toolkit-ledger-grid {
+        /* SLIDE 9: Practical Toolkit 2x2 */
+        .toolkit-2x2-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 24px;
         }
 
-        .ledger-item-card {
+        .toolkit-card {
             background: var(--color-paper-card);
             border: 1.5px solid var(--color-ink);
             box-shadow: 6px 6px 0px var(--color-ink);
@@ -822,34 +873,68 @@
             cursor: pointer;
         }
 
-        .ledger-item-card:hover {
+        .toolkit-card:hover {
             transform: translateY(-3px);
             box-shadow: 8px 8px 0px var(--color-ink);
             background: #EAE4D4;
         }
 
-        /* SLIDE 10: Generalization Manifesto */
+        /* SLIDE 10: Big Picture Flow & Manifesto */
         .manifesto-grand-layout {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 28px;
+            gap: 24px;
+        }
+
+        .big-picture-flow {
+            background: var(--color-paper-card);
+            border: 2px solid var(--color-ink);
+            box-shadow: 10px 10px 0px var(--color-ink);
+            padding: 24px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .flow-nodes-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr auto 1fr;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .flow-node-box {
+            background: var(--color-paper);
+            border: 1.5px solid var(--color-ink);
+            padding: 16px 14px;
+            text-align: center;
+            box-shadow: 4px 4px 0px var(--color-ink);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .flow-node-box.highlight {
+            background: var(--color-paper-highlight);
+            border: 2px solid var(--color-ink);
+            box-shadow: 6px 6px 0px var(--color-ink);
         }
 
         .grand-quote-banner {
             border: 2px solid var(--color-ink);
-            background: var(--color-paper-card);
-            box-shadow: 12px 12px 0px var(--color-ink);
-            padding: 36px 46px;
+            background: var(--color-paper);
+            box-shadow: 10px 10px 0px var(--color-ink);
+            padding: 26px 36px;
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 8px;
             position: relative;
         }
 
         .grand-quote-text {
             font-family: var(--font-display);
-            font-size: 40px;
-            line-height: 1.22;
+            font-size: 34px;
+            line-height: 1.25;
             font-style: italic;
         }
 
@@ -861,17 +946,17 @@
         .conclusion-3points {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
+            gap: 20px;
         }
 
         .concl-card {
             background: var(--color-paper);
             border: 1.5px solid var(--color-ink);
-            padding: 18px 22px;
+            padding: 16px 20px;
             box-shadow: 4px 4px 0px var(--color-ink);
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
             transition: transform 0.2s ease;
         }
 
@@ -880,49 +965,231 @@
         }
 
         /* ===========================================
-           5. PRESENTATION CONTROLS & EDIT HOTZONE
+           5. PRESENTATION CONTROLS & PREVIEW AFFORDANCES
            =========================================== */
         .deck-controls {
             position: fixed;
             left: 50%;
-            bottom: 16px;
+            bottom: 18px;
             transform: translateX(-50%);
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
             background: var(--color-paper);
             border: 1.5px solid var(--color-ink);
-            padding: 6px 16px;
+            padding: 6px 14px;
             z-index: 1000;
             box-shadow: 4px 4px 0px var(--color-ink);
+            user-select: none;
+            transition: opacity 0.2s ease, transform 0.15s ease;
         }
 
         .ctrl-btn {
             background: none;
-            border: 1px solid var(--color-ink);
+            border: 1.5px solid var(--color-ink);
             color: var(--color-ink);
             font-family: var(--font-mono);
             font-size: 13px;
-            padding: 4px 10px;
+            padding: 6px 14px;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 700;
             transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            user-select: none;
         }
 
-        .ctrl-btn:hover {
+        .ctrl-btn:hover:not(:disabled) {
             background: var(--color-ink);
             color: var(--color-paper);
         }
 
-        .slide-progress-text {
-            font-family: var(--font-mono);
-            font-size: 14px;
-            font-weight: 500;
-            min-width: 60px;
-            text-align: center;
+        .ctrl-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
         }
 
-        /* Inline Edit Affordance */
+        .ctrl-btn-next {
+            background: var(--color-ink);
+            color: var(--color-paper);
+        }
+
+        .ctrl-btn-next:hover:not(:disabled) {
+            background: var(--color-ink-soft);
+        }
+
+        .ctrl-btn-fs {
+            background: rgba(31, 43, 224, 0.08);
+        }
+
+        .ctrl-btn-help {
+            padding: 6px 10px;
+            font-weight: 700;
+        }
+
+        .slide-progress-text {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 700;
+            padding: 0 6px;
+            min-width: 54px;
+            text-align: center;
+            color: var(--color-ink);
+        }
+
+        /* Mobile Portrait Topbar (Sits purely in blank space ABOVE the slide) */
+        .mobile-portrait-topbar {
+            display: none;
+            position: fixed;
+            top: max(16px, calc(var(--stage-top, 280px) / 2 - 28px));
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 32px);
+            max-width: 440px;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            pointer-events: auto;
+        }
+
+        .btn-rotate-landscape {
+            background: var(--color-ink);
+            color: var(--color-paper);
+            border: 1.5px solid var(--color-paper);
+            box-shadow: 4px 4px 0px #000;
+            padding: 10px 20px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.08s ease, background-color 0.1s ease, box-shadow 0.08s ease;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        .btn-rotate-landscape:hover {
+            background: var(--color-ink-soft);
+        }
+
+        .btn-rotate-landscape:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000;
+        }
+
+        .rotate-icon {
+            font-size: 15px;
+            display: inline-block;
+            animation: spinHint 2.4s infinite ease-in-out;
+        }
+
+        @keyframes spinHint {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(-90deg); }
+        }
+
+        .mobile-deck-topic {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-paper);
+            opacity: 0.75;
+        }
+
+        /* Keyboard Shortcuts Overlay Modal */
+        .shortcuts-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(9, 11, 18, 0.75);
+            backdrop-filter: blur(3px);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .shortcuts-modal.show {
+            display: flex;
+        }
+
+        .shortcuts-card {
+            background: var(--color-paper);
+            border: 2px solid var(--color-ink);
+            box-shadow: 6px 6px 0px var(--color-ink);
+            max-width: 460px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            animation: scAppear 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes scAppear {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .shortcuts-header {
+            background: var(--color-ink);
+            color: var(--color-paper);
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .shortcuts-close {
+            background: none;
+            border: none;
+            color: var(--color-paper);
+            font-size: 20px;
+            cursor: pointer;
+            font-family: monospace;
+            line-height: 1;
+        }
+
+        .shortcuts-grid {
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            font-family: var(--font-body);
+            font-size: 14px;
+        }
+
+        .sc-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed var(--color-ink-faint);
+        }
+
+        .sc-row kbd {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 700;
+            background: var(--color-paper-card);
+            border: 1px solid var(--color-ink);
+            padding: 2px 6px;
+            box-shadow: 1px 1px 0px var(--color-ink);
+        }
+
+        /* Inline Edit Affordance (Admin Only) */
         .edit-hotzone {
             position: fixed;
             top: 0;
@@ -962,24 +1229,125 @@
             outline: 2px dashed var(--color-ink-soft) !important;
             background: rgba(31, 43, 224, 0.05);
         }
+
+        /* Mobile Portrait Mode: Position Topbar and Bottombar in Blank Spaces */
+        @media (max-width: 900px) and (orientation: portrait) {
+            .mobile-portrait-topbar {
+                display: flex;
+            }
+
+            .deck-controls {
+                position: fixed;
+                top: calc(var(--stage-bottom, 540px) + 24px);
+                bottom: auto;
+                left: 50%;
+                transform: translateX(-50%);
+                width: calc(100% - 32px);
+                max-width: 440px;
+                display: flex;
+                align-items: stretch;
+                justify-content: space-between;
+                gap: 8px;
+                padding: 10px;
+                box-shadow: 5px 5px 0px var(--color-ink);
+                border: 2px solid var(--color-ink);
+            }
+
+            .ctrl-btn {
+                min-height: 48px;
+                font-size: 13px;
+                font-weight: 700;
+                padding: 8px 14px;
+                touch-action: manipulation;
+            }
+
+            .ctrl-btn-prev {
+                flex: 1;
+            }
+
+            .ctrl-btn-next {
+                flex: 1;
+                background: var(--color-ink);
+                color: var(--color-paper);
+            }
+
+            .ctrl-btn-fs {
+                min-width: 48px;
+                padding: 0 12px;
+            }
+
+            .ctrl-btn-fs .fs-label {
+                display: none;
+            }
+
+            .ctrl-btn-help {
+                display: none;
+            }
+
+            .slide-progress-text {
+                font-size: 14px;
+                font-weight: 900;
+                min-width: 54px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        /* Mobile Landscape Mode: Keep Controls Subtle at Bottom Edge */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .deck-controls {
+                bottom: max(6px, env(safe-area-inset-bottom));
+                top: auto;
+                padding: 4px 8px;
+                gap: 6px;
+                box-shadow: 2px 2px 0px var(--color-ink);
+                opacity: 0.85;
+            }
+
+            .deck-controls:hover,
+            .deck-controls:active {
+                opacity: 1;
+            }
+
+            .ctrl-btn {
+                padding: 4px 8px;
+                font-size: 11px;
+                min-height: 32px;
+            }
+
+            .ctrl-btn-fs .fs-label {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Mobile Portrait Top Bar (Located strictly in top blank area above 16:9 canvas) -->
+    <div class="mobile-portrait-topbar" id="mobilePortraitTopbar">
+        <button class="btn-rotate-landscape" id="btnRotateLandscape" onclick="window.deck.requestLandscape()">
+            <span class="rotate-icon">&#8635;</span> ROTATE TO LANDSCAPE
+        </button>
+        <span class="mobile-deck-topic">STATISTICAL LEARNING THEORY</span>
+    </div>
+
     <div class="deck-viewport">
         <!-- Main Fixed Stage Canvas (1920x1080) -->
         <main class="deck-stage" id="deckStage">
             <div class="stage-hairline-top"></div>
             <div class="stage-hairline-bottom"></div>
-
             <!-- Top Act Progression Breadcrumbs -->
             <div class="top-deck-progress-bar">
-                <span class="mono-text" style="font-weight:700;">ML THEORY SERIES &bull; 3-PRESENTER LECTURE</span>
-                <div class="progress-acts">
-                    <span class="progress-act active" id="act1Tab" data-start="0">ACT I: UNDERSTANDING ERROR</span>
-                    <span class="progress-act" id="act2Tab" data-start="4">ACT II: THE TRADEOFF &amp; U-CURVE</span>
-                    <span class="progress-act" id="act3Tab" data-start="7">ACT III: ENGINEERING GENERALIZATION</span>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <a href="index.html" id="hubNavBtn" style="display:none; color:var(--color-ink); text-decoration:none; border:1px solid var(--color-ink); padding:2px 8px; font-weight:700; background:rgba(31,43,224,0.06);">← HUB</a>
+                    <span class="mono-text" style="font-weight:700;">ML CLASSROOM &bull; 3-STUDENT LECTURE</span>
                 </div>
-                <span class="mono-text" id="liveTopicTag">DECK OVERVIEW</span>
+                <div class="progress-acts">
+                    <span class="progress-act active" id="act1Tab" data-start="0">STUDENT 1: THE TWO CONCEPTS</span>
+                    <span class="progress-act" id="act2Tab" data-start="4">STUDENT 2: THE TRADEOFF</span>
+                    <span class="progress-act" id="act3Tab" data-start="7">STUDENT 3: THE SOLUTION</span>
+                </div>
+                <span class="mono-text" id="liveTopicTag">INTRODUCTION</span>
             </div>
 
             <!-- Decorative Pixel Glitch Column Accent -->
@@ -995,12 +1363,12 @@
                 <rect x="52" y="820" width="18" height="260" fill="url(#scanlines)"/>
             </svg>
 
-            <!-- SLIDE 1: Cover / Editorial Manifesto -->
-            <section class="slide active visible" data-slide="0" data-act="1" data-topic="DECK OVERVIEW">
+            <!-- SLIDE 1: Introduction (Student 1) -->
+            <section class="slide active visible" data-slide="0" data-act="1" data-topic="INTRODUCTION">
                 <div class="slide-topbar reveal">
                     <div class="slide-topbar-left">
-                        <span class="presenter-pill">ALL PRESENTERS</span>
-                        <div class="mono-tag">STATISTICAL LEARNING THEORY &bull; THREE-PRESENTER LECTURE</div>
+                        <span class="presenter-pill">STUDENT 1</span>
+                        <div class="mono-tag">CLASSROOM PRESENTATION &bull; 10 SLIDES / 3 STUDENTS</div>
                     </div>
                     <div class="slide-topbar-right">SECTION 01 / 10</div>
                 </div>
@@ -1010,45 +1378,49 @@
                         <div class="cover-headline-block">
                             <div class="micro-label reveal reveal-delay-1">FOUNDATIONAL MACHINE LEARNING</div>
                             <h1 class="cover-h1 reveal reveal-delay-2">The Bias–Variance<br><em>Tradeoff</em></h1>
-                            <p class="cover-lede reveal reveal-delay-3">A systematic mathematical and empirical guide to model complexity, underfitting, overfitting, and the quest for true generalization.</p>
+                            <p class="cover-lede reveal reveal-delay-3" style="font-size:22px; line-height:1.45;">Understanding Underfitting, Overfitting, and Model Complexity</p>
+                            
+                            <div class="definition-card reveal reveal-delay-4" style="font-size:20px; line-height:1.45; padding:16px 20px;">
+                                "A machine learning model learns patterns from training data to make predictions on new data. But a model can make mistakes in different ways. Today, we will understand two important sources of error: bias and variance, and why finding a balance between them is essential."
+                            </div>
                         </div>
 
                         <div class="cover-agenda-ledger reveal reveal-delay-4">
                             <div class="agenda-header">
-                                <span>3-Act Presentation Structure</span>
+                                <span>Presentation Flow (3 Students)</span>
                                 <div class="qr-block-patch" title="Interactive Mosaic">
                                     <div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div>
                                     <div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div>
                                     <div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div>
-                                    <div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div>
+                                    <div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell"></div>
                                     <div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div>
-                                    <div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div>
-                                    <div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div>
+                                    <div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div>
+                                    <div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell on"></div>
                                     <div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell on"></div><div class="qr-cell on"></div>
                                 </div>
                             </div>
 
                             <div class="agenda-row" onclick="window.deck.showSlide(1)">
-                                <span class="agenda-row-num">ACT I</span>
+                                <span class="agenda-row-num">PART 1</span>
                                 <div>
-                                    <div class="agenda-row-title">The Two Sources of Error</div>
-                                    <div class="agenda-row-speaker">Student 1 &bull; Defining Bias, Variance &amp; Noise</div>
+                                    <div class="agenda-row-title">The Two Concepts</div>
+                                    <div class="agenda-row-speaker">Student 1 &bull; Bias &rarr; Underfitting &rarr; Variance &rarr; Overfitting</div>
                                 </div>
                             </div>
 
-                            <div class="agenda-row" onclick="window.deck.showSlide(5)">
-                                <span class="agenda-row-num">ACT II</span>
+                            <div class="agenda-row" onclick="window.deck.showSlide(4)">
+                                <span class="agenda-row-num">PART 2</span>
                                 <div>
-                                    <div class="agenda-row-title">The Inherent Tension</div>
-                                    <div class="agenda-row-speaker">Student 2 &bull; The U-Shaped Complexity Curve</div>
+                                    <div class="agenda-row-title">The Actual Problem</div>
+                                    <div class="agenda-row-speaker">Student 2 &bull; Why can't we minimize both? &bull; The Tradeoff Graph</div>
                                 </div>
                             </div>
 
                             <div class="agenda-row" style="border:none;" onclick="window.deck.showSlide(7)">
-                                <span class="agenda-row-num">ACT III</span>
+                                <span class="agenda-row-num">PART 3</span>
                                 <div>
-                                    <div class="agenda-row-title">Engineering Generalization</div>
-                                    <div class="agenda-row-speaker">Student 3 &bull; Regularization &amp; Cross-Validation</div>
+                                    <div class="agenda-row-title">The Solution</div>
+                                    <div class="agenda-row-speaker">Student 3 &bull; Finding the Balance &bull; Practical Toolkit</div>
                                 </div>
                             </div>
                         </div>
@@ -1061,137 +1433,66 @@
                 </div>
             </section>
 
-            <!-- SLIDE 2: Error Decomposition (Student 1) -->
-            <section class="slide" data-slide="1" data-act="1" data-topic="ERROR DECOMPOSITION">
+            <!-- SLIDE 2: What is Bias? (Student 1) -->
+            <section class="slide" data-slide="1" data-act="1" data-topic="WHAT IS BIAS?">
                 <div class="slide-topbar">
                     <div class="slide-topbar-left">
                         <span class="presenter-pill">STUDENT 1</span>
-                        <h2 class="slide-title">The Big Picture: Anatomy of Model Error</h2>
+                        <h2 class="slide-title">What is Bias? <em>When the Model is Too Simple</em></h2>
                     </div>
-                    <div class="slide-topbar-right">HOVER TERMS TO EXPLORE</div>
+                    <div class="slide-topbar-right">UNDERFITTING GRAPH</div>
                 </div>
 
                 <div class="slide-body">
-                    <div class="decomp-equation-hero reveal">
-                        <span class="micro-label" style="color:var(--color-paper-card);">EXPECTED GENERALIZATION LOSS</span>
-                        <div class="decomp-equation-formula">
-                            <span>&Epsilon;[(y &minus; &fnof;&#770;(x))&sup2;] = </span>
-                            <span class="equation-term" id="eqTermBias" data-target="cardBias">Bias&sup2;[&fnof;&#770;(x)]</span>
-                            <span> + </span>
-                            <span class="equation-term" id="eqTermVar" data-target="cardVar">Var[&fnof;&#770;(x)]</span>
-                            <span> + </span>
-                            <span class="equation-term" id="eqTermNoise" data-target="cardNoise">&sigma;&sup2;</span>
-                        </div>
-                        <span class="mono-tag" style="color:var(--color-paper-card);">MSE THEOREM</span>
-                    </div>
-
-                    <div class="decomp-3tier-grid">
-                        <div class="tier-card reveal reveal-delay-1" id="cardBias">
-                            <div class="tier-tag-row">
-                                <span class="mono-tag" style="color:var(--color-alert-red);">COMPONENT 01</span>
-                                <span class="micro-label">UNDERFITTING</span>
-                            </div>
-                            <h3 class="tier-name">Bias</h3>
-                            <p class="tier-desc">Error introduced by approximating complex real-world relationships with overly simplistic mathematical assumptions.</p>
-                            
-                            <div class="pixel-stack-container">
-                                <span class="mono-tag">IMPACT: RIGIDITY</span>
-                                <div class="pixel-stack-bars">
-                                    <div class="p-bar-cell on"></div><div class="p-bar-cell on"></div><div class="p-bar-cell on"></div><div class="p-bar-cell"></div><div class="p-bar-cell"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="tier-card reveal reveal-delay-2" id="cardVar">
-                            <div class="tier-tag-row">
-                                <span class="mono-tag" style="color:var(--color-alert-cyan);">COMPONENT 02</span>
-                                <span class="micro-label">OVERFITTING</span>
-                            </div>
-                            <h3 class="tier-name">Variance</h3>
-                            <p class="tier-desc">Error caused by excessive sensitivity to sample noise, outliers, and random fluctuations in the training dataset.</p>
-                            
-                            <div class="pixel-stack-container">
-                                <span class="mono-tag">IMPACT: VOLATILITY</span>
-                                <div class="pixel-stack-bars">
-                                    <div class="p-bar-cell on"></div><div class="p-bar-cell on"></div><div class="p-bar-cell on"></div><div class="p-bar-cell on"></div><div class="p-bar-cell"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="tier-card reveal reveal-delay-3" id="cardNoise">
-                            <div class="tier-tag-row">
-                                <span class="mono-tag" style="color:var(--color-ink-soft);">COMPONENT 03</span>
-                                <span class="micro-label">IRREDUCIBLE</span>
-                            </div>
-                            <h3 class="tier-name">Noise (&sigma;&sup2;)</h3>
-                            <p class="tier-desc">Inherent statistical randomness, unmeasured confounding variables, and sensor noise that cannot be eliminated by any algorithm.</p>
-                            
-                            <div class="pixel-stack-container">
-                                <span class="mono-tag">LOWER ERROR BOUND</span>
-                                <div class="pixel-stack-bars">
-                                    <div class="p-bar-cell on"></div><div class="p-bar-cell"></div><div class="p-bar-cell"></div><div class="p-bar-cell"></div><div class="p-bar-cell"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="slide-footer">
-                    <div class="footer-nav-hint">Student 1 &bull; Mathematical Decomposition of Expected Error</div>
-                    <div class="footer-pagenum">02 / 10</div>
-                </div>
-            </section>
-
-            <!-- SLIDE 3: What is Bias? (Student 1) -->
-            <section class="slide" data-slide="2" data-act="1" data-topic="WHAT IS BIAS?">
-                <div class="slide-topbar">
-                    <div class="slide-topbar-left">
-                        <span class="presenter-pill">STUDENT 1</span>
-                        <h2 class="slide-title">What is Bias? When the Model is Too Simple</h2>
-                    </div>
-                    <div class="slide-topbar-right">UNDERFITTING SIMULATOR</div>
-                </div>
-
-                <div class="slide-body">
-                    <div class="interactive-sim-grid">
-                        <div class="sim-meta-col reveal">
-                            <div class="callout-box">
-                                "Bias is the error from overly simplistic assumptions. The algorithm systematically misses the true relationship between features and targets."
+                    <div class="two-col-layout">
+                        <div style="display:flex; flex-direction:column; gap:16px;" class="reveal">
+                            <div class="definition-card">
+                                "Bias is the error that happens when a model is too simple to capture the important patterns in the data."
                             </div>
 
-                            <div style="display:flex; flex-direction:column; gap:12px; font-size:17px; line-height:1.45;">
-                                <div><strong>&bull; Inflexible Hypothesis:</strong> Forcing a linear line through non-linear physical phenomena.</div>
-                                <div><strong>&bull; High Training Error:</strong> Fails to achieve high accuracy even on the data used to train it.</div>
-                                <div><strong>&bull; Real-World Example:</strong> Predicting house price using only square footage while ignoring location, age, and schools.</div>
+                            <div class="bullet-list" style="margin-top:4px;">
+                                <div class="bullet-item"><span class="bullet-dot">&bull;</span><span><strong>Makes strong or overly simple assumptions</strong> about the data.</span></div>
+                                <div class="bullet-item"><span class="bullet-dot">&bull;</span><span><strong>Misses important patterns</strong> and fails to learn enough.</span></div>
+                                <div class="bullet-item"><span class="bullet-dot">&bull;</span><span>Consistently leads to <strong>Underfitting</strong>.</span></div>
+                            </div>
+
+                            <div style="background:var(--color-paper-card); border:1.5px solid var(--color-ink); padding:14px 18px; font-size:15px; line-height:1.45;">
+                                <strong>Simple Example:</strong> Imagine the true relationship is a curve. If we force a <strong>straight line</strong> through it, the model is too simple to follow reality.
+                            </div>
+
+                            <div>
+                                <div class="key-phrase-badge alert-red">High Bias = Too Simple = Underfitting</div>
                             </div>
                         </div>
 
                         <div class="sim-canvas-card reveal reveal-delay-2">
                             <div class="sim-header-bar">
-                                <span class="mono-tag" style="color:var(--color-alert-red); font-weight:700;">RIGID LINEAR FIT ON QUADRATIC MANIFOLD</span>
+                                <span class="mono-tag" style="color:var(--color-alert-red); font-weight:700;">UNDERFITTING VISUALIZATION</span>
                                 <div class="sim-button-group">
-                                    <button class="sim-btn active" id="btnBiasRigid">Linear Fit</button>
-                                    <button class="sim-btn" id="btnBiasTrue">True Trend</button>
+                                    <button class="sim-btn active" id="btnBiasRigid">Straight Line</button>
+                                    <button class="sim-btn" id="btnBiasTrue">True Curve</button>
                                 </div>
                             </div>
 
-                            <div class="svg-canvas-box" id="biasSvgWrap" title="Click to inspect residual errors">
+                            <div class="svg-canvas-box" id="biasSvgWrap">
                                 <svg width="100%" height="100%" viewBox="0 0 540 280">
                                     <line x1="50" y1="240" x2="500" y2="240" stroke="#1F2BE0" stroke-width="1.5"/>
-                                    <line x1="50" y1="20" x2="500" y2="20" stroke="#1F2BE0" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.3"/>
                                     <line x1="50" y1="20" x2="50" y2="240" stroke="#1F2BE0" stroke-width="1.5"/>
+                                    
+                                    <text x="500" y="260" text-anchor="end" font-family="'DM Mono', monospace" font-size="12" fill="#1F2BE0">Input / Feature (x) &rarr;</text>
+                                    <text x="25" y="40" text-anchor="middle" font-family="'DM Mono', monospace" font-size="12" fill="#1F2BE0" transform="rotate(-90 25 40)">Output (y)</text>
 
-                                    <!-- Parabolic Data Points with hover -->
+                                    <!-- Parabolic Data Points -->
                                     <g id="biasPointsGroup">
-                                        <circle cx="80" cy="200" r="5.5" fill="#1F2BE0"/>
-                                        <circle cx="120" cy="150" r="5.5" fill="#1F2BE0"/>
-                                        <circle cx="170" cy="100" r="5.5" fill="#1F2BE0"/>
-                                        <circle cx="220" cy="70" r="5.5" fill="#1F2BE0"/>
-                                        <circle cx="270" cy="60" r="5.5" fill="#1F2BE0"/>
-                                        <circle cx="320" cy="75" r="5.5" fill="#1F2BE0"/>
-                                        <circle cx="370" cy="115" r="5.5" fill="#1F2BE0"/>
-                                        <circle cx="420" cy="170" r="5.5" fill="#1F2BE0"/>
-                                        <circle cx="470" cy="230" r="5.5" fill="#1F2BE0"/>
+                                        <circle cx="80" cy="200" r="6" fill="#1F2BE0"/>
+                                        <circle cx="120" cy="150" r="6" fill="#1F2BE0"/>
+                                        <circle cx="170" cy="100" r="6" fill="#1F2BE0"/>
+                                        <circle cx="220" cy="70" r="6" fill="#1F2BE0"/>
+                                        <circle cx="270" cy="60" r="6" fill="#1F2BE0"/>
+                                        <circle cx="320" cy="75" r="6" fill="#1F2BE0"/>
+                                        <circle cx="370" cy="115" r="6" fill="#1F2BE0"/>
+                                        <circle cx="420" cy="170" r="6" fill="#1F2BE0"/>
+                                        <circle cx="470" cy="230" r="6" fill="#1F2BE0"/>
                                     </g>
 
                                     <!-- Residual lines -->
@@ -1201,228 +1502,237 @@
                                         <line x1="470" y1="230" x2="470" y2="135" stroke="#D9383A" stroke-width="1.5" stroke-dasharray="2 2"/>
                                     </g>
 
-                                    <!-- High Bias Linear Model Fit -->
+                                    <!-- Simple Straight Line (Fails to capture curve) -->
                                     <line id="biasModelLine" x1="60" y1="135" x2="490" y2="135" stroke="#D9383A" stroke-width="3.5"/>
                                     <path id="biasTrueCurve" d="M 60 220 Q 270 20 490 240" fill="none" stroke="#15803D" stroke-width="3" stroke-dasharray="4 4" style="display:none;"/>
                                 </svg>
                             </div>
 
-                            <div class="sim-metrics-bar">
-                                <div><strong>TRAIN LOSS:</strong> <span style="color:var(--color-alert-red); font-weight:700;">38.4% (HIGH)</span></div>
-                                <div><strong>TEST LOSS:</strong> <span style="color:var(--color-alert-red); font-weight:700;">41.2% (HIGH)</span></div>
-                                <div><strong>DIAGNOSIS:</strong> <span>UNDERFITTING</span></div>
+                            <div style="font-size:14px; line-height:1.4; color:var(--color-ink-soft); font-family:var(--font-body); padding:4px 2px;">
+                                "The dots represent actual data. The curved pattern is what the data is really doing. But our model uses a straight line and fails to follow the pattern."
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="slide-footer">
-                    <div class="footer-nav-hint">Student 1 &bull; Underfitting Dynamics &amp; Inflexible Models</div>
-                    <div class="footer-pagenum">03 / 10</div>
+                    <div class="footer-nav-hint">Student 1 &bull; Defining Bias and Underfitting</div>
+                    <div class="footer-pagenum">02 / 10</div>
                 </div>
             </section>
 
-            <!-- SLIDE 4: What is Variance? (Student 1) -->
-            <section class="slide" data-slide="3" data-act="1" data-topic="WHAT IS VARIANCE?">
+            <!-- SLIDE 3: What is Variance? (Student 1) -->
+            <section class="slide" data-slide="2" data-act="1" data-topic="WHAT IS VARIANCE?">
                 <div class="slide-topbar">
                     <div class="slide-topbar-left">
                         <span class="presenter-pill">STUDENT 1</span>
-                        <h2 class="slide-title">What is Variance? When the Model is Too Sensitive</h2>
+                        <h2 class="slide-title">What is Variance? <em>When the Model is Too Sensitive</em></h2>
                     </div>
-                    <div class="slide-topbar-right">OVERFITTING SIMULATOR</div>
+                    <div class="slide-topbar-right">OVERFITTING GRAPH</div>
                 </div>
 
                 <div class="slide-body">
-                    <div class="interactive-sim-grid">
-                        <div class="sim-meta-col reveal">
-                            <div class="callout-box">
-                                "Variance is the error caused by sensitivity to small fluctuations. The model memorizes training noise rather than discovering general laws."
+                    <div class="two-col-layout">
+                        <div style="display:flex; flex-direction:column; gap:16px;" class="reveal">
+                            <div class="definition-card">
+                                "Variance is the error that happens when a model learns the training data too closely, including its noise and small irregularities."
                             </div>
 
-                            <div style="display:flex; flex-direction:column; gap:12px; font-size:17px; line-height:1.45;">
-                                <div><strong>&bull; Over-Parametrization:</strong> Too many degrees of freedom, parameters, or tree depth.</div>
-                                <div><strong>&bull; The Generalization Trap:</strong> Near 100% training accuracy but catastrophic failure on new data.</div>
-                                <div><strong>&bull; High Instability:</strong> Retraining on a slightly different subset produces completely different predictions.</div>
+                            <div class="bullet-list" style="margin-top:4px;">
+                                <div class="bullet-item"><span class="bullet-dot">&bull;</span><span><strong>Model is too complex and overly flexible</strong>.</span></div>
+                                <div class="bullet-item"><span class="bullet-dot">&bull;</span><span><strong>Learns noise</strong> instead of discovering the general pattern.</span></div>
+                                <div class="bullet-item"><span class="bullet-dot">&bull;</span><span>Performs great on training data, but <strong>poorly on new data</strong>.</span></div>
+                                <div class="bullet-item"><span class="bullet-dot">&bull;</span><span>Directly leads to <strong>Overfitting</strong>.</span></div>
+                            </div>
+
+                            <div>
+                                <div class="key-phrase-badge alert-cyan">High Variance = Too Complex = Overfitting</div>
                             </div>
                         </div>
 
                         <div class="sim-canvas-card reveal reveal-delay-2">
                             <div class="sim-header-bar">
-                                <span class="mono-tag" style="color:var(--color-alert-cyan); font-weight:700;">15-DEGREE POLYNOMIAL OVERFIT</span>
+                                <span class="mono-tag" style="color:var(--color-alert-cyan); font-weight:700;">OVERFITTING VISUALIZATION</span>
                                 <div class="sim-button-group">
-                                    <button class="sim-btn active" id="btnVarOverfit">Overfit Wave</button>
-                                    <button class="sim-btn" id="btnVarTrue">General Law</button>
+                                    <button class="sim-btn active" id="btnVarOverfit">Wiggly Curve</button>
+                                    <button class="sim-btn" id="btnVarTrue">General Trend</button>
                                 </div>
                             </div>
 
-                            <div class="svg-canvas-box" id="varSvgWrap" title="Click anywhere to dynamically warp the curve!">
+                            <div class="svg-canvas-box" id="varSvgWrap" title="Click anywhere to add noise points!">
                                 <svg width="100%" height="100%" viewBox="0 0 540 280" id="varSvg">
                                     <line x1="50" y1="240" x2="500" y2="240" stroke="#1F2BE0" stroke-width="1.5"/>
                                     <line x1="50" y1="20" x2="50" y2="240" stroke="#1F2BE0" stroke-width="1.5"/>
 
+                                    <text x="500" y="260" text-anchor="end" font-family="'DM Mono', monospace" font-size="12" fill="#1F2BE0">Input / Feature (x) &rarr;</text>
+                                    <text x="25" y="40" text-anchor="middle" font-family="'DM Mono', monospace" font-size="12" fill="#1F2BE0" transform="rotate(-90 25 40)">Output (y)</text>
+
                                     <!-- Points with Noise -->
                                     <g id="varPointsGroup">
-                                        <circle cx="80" cy="190" r="5.5" fill="#1F2BE0"/>
-                                        <circle cx="130" cy="140" r="5.5" fill="#1F2BE0"/>
-                                        <circle cx="180" cy="170" r="5.5" fill="#1F2BE0"/>
-                                        <circle cx="230" cy="70" r="5.5" fill="#1F2BE0"/>
-                                        <circle cx="280" cy="120" r="5.5" fill="#1F2BE0"/>
-                                        <circle cx="330" cy="60" r="5.5" fill="#1F2BE0"/>
-                                        <circle cx="380" cy="160" r="5.5" fill="#1F2BE0"/>
-                                        <circle cx="430" cy="180" r="5.5" fill="#1F2BE0"/>
-                                        <circle cx="470" cy="80" r="5.5" fill="#1F2BE0"/>
+                                        <circle cx="80" cy="190" r="6" fill="#1F2BE0"/>
+                                        <circle cx="130" cy="140" r="6" fill="#1F2BE0"/>
+                                        <circle cx="180" cy="170" r="6" fill="#1F2BE0"/>
+                                        <circle cx="230" cy="70" r="6" fill="#1F2BE0"/>
+                                        <circle cx="280" cy="120" r="6" fill="#1F2BE0"/>
+                                        <circle cx="330" cy="60" r="6" fill="#1F2BE0"/>
+                                        <circle cx="380" cy="160" r="6" fill="#1F2BE0"/>
+                                        <circle cx="430" cy="180" r="6" fill="#1F2BE0"/>
+                                        <circle cx="470" cy="80" r="6" fill="#1F2BE0"/>
                                     </g>
 
-                                    <!-- Overfitting Curve -->
+                                    <!-- Overfitting Curve Bending Through Every Single Point -->
                                     <path id="varOverfitPath" d="M 60 220 Q 80 190 105 110 T 130 140 T 180 170 T 230 70 T 280 120 T 330 60 T 380 160 T 430 180 T 470 80 T 490 20" fill="none" stroke="#0284C7" stroke-width="3.5"/>
                                     <path id="varTruePath" d="M 60 210 Q 280 40 490 190" fill="none" stroke="#15803D" stroke-width="3" stroke-dasharray="4 4" style="display:none;"/>
                                 </svg>
                             </div>
 
-                            <div class="sim-metrics-bar">
-                                <div><strong>TRAIN LOSS:</strong> <span style="color:var(--color-alert-green); font-weight:700;">1.2% (PERFECT)</span></div>
-                                <div><strong>TEST LOSS:</strong> <span style="color:var(--color-alert-red); font-weight:700;">64.8% (DISASTER)</span></div>
-                                <div><strong>DIAGNOSIS:</strong> <span>OVERFITTING</span></div>
+                            <div style="font-size:14px; line-height:1.4; color:var(--color-ink-soft); font-family:var(--font-body); padding:4px 2px;">
+                                "The model is too flexible. Instead of learning the general pattern, it tries to match every training point. Predictions on new data become poor."
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="slide-footer">
-                    <div class="footer-nav-hint">Student 1 &bull; Overfitting Dynamics &amp; Memorization</div>
+                    <div class="footer-nav-hint">Student 1 &bull; Defining Variance and Overfitting</div>
+                    <div class="footer-pagenum">03 / 10</div>
+                </div>
+            </section>
+
+            <!-- SLIDE 4: Underfitting vs Good Fit vs Overfitting (Student 1) -->
+            <section class="slide" data-slide="3" data-act="1" data-topic="VISUAL COMPARISON">
+                <div class="slide-topbar">
+                    <div class="slide-topbar-left">
+                        <span class="presenter-pill">STUDENT 1</span>
+                        <h2 class="slide-title">Underfitting vs. Good Fit vs. Overfitting</h2>
+                    </div>
+                    <div class="slide-topbar-right">SIDE-BY-SIDE COMPARISON</div>
+                </div>
+
+                <div class="slide-body">
+                    <div class="comparison-3col-grid reveal">
+                        <!-- Card 1: Underfitting -->
+                        <div class="comparison-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid var(--color-ink); padding-bottom:8px;">
+                                <span class="mono-tag" style="color:var(--color-alert-red); font-weight:700;">1. UNDERFITTING</span>
+                                <span class="micro-label">TOO SIMPLE</span>
+                            </div>
+                            
+                            <svg width="100%" height="150" viewBox="0 0 300 150" style="background:var(--color-paper); border:1px solid var(--color-ink-faint);">
+                                <circle cx="40" cy="120" r="4.5" fill="#1F2BE0"/>
+                                <circle cx="90" cy="80" r="4.5" fill="#1F2BE0"/>
+                                <circle cx="150" cy="50" r="4.5" fill="#1F2BE0"/>
+                                <circle cx="210" cy="70" r="4.5" fill="#1F2BE0"/>
+                                <circle cx="260" cy="130" r="4.5" fill="#1F2BE0"/>
+                                <line x1="30" y1="85" x2="270" y2="85" stroke="#D9383A" stroke-width="3"/>
+                            </svg>
+
+                            <div style="font-size:16px; line-height:1.45;">
+                                <div><strong>&bull; Model is too simple</strong></div>
+                                <div>&bull; Misses the underlying pattern</div>
+                                <div style="color:var(--color-alert-red); font-weight:700; margin-top:4px;">&rarr; High Bias</div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Good Fit (Sweet Spot) -->
+                        <div class="comparison-card card-highlight">
+                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid var(--color-ink); padding-bottom:8px;">
+                                <span class="mono-tag" style="color:var(--color-ink); font-weight:700;">&star; 2. GOOD FIT</span>
+                                <span class="micro-label">BALANCED</span>
+                            </div>
+                            
+                            <svg width="100%" height="150" viewBox="0 0 300 150" style="background:var(--color-paper); border:1px solid var(--color-ink-faint);">
+                                <circle cx="40" cy="120" r="4.5" fill="#1F2BE0"/>
+                                <circle cx="90" cy="80" r="4.5" fill="#1F2BE0"/>
+                                <circle cx="150" cy="50" r="4.5" fill="#1F2BE0"/>
+                                <circle cx="210" cy="70" r="4.5" fill="#1F2BE0"/>
+                                <circle cx="260" cy="130" r="4.5" fill="#1F2BE0"/>
+                                <path d="M 30 130 Q 150 25 270 135" fill="none" stroke="#1F2BE0" stroke-width="3.5"/>
+                            </svg>
+
+                            <div style="font-size:16px; line-height:1.45;">
+                                <div><strong>&bull; Model captures main pattern</strong></div>
+                                <div>&bull; Generalizes well to new data</div>
+                                <div style="color:var(--color-ink); font-weight:700; margin-top:4px;">&rarr; Optimal Balance</div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Overfitting -->
+                        <div class="comparison-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid var(--color-ink); padding-bottom:8px;">
+                                <span class="mono-tag" style="color:var(--color-alert-cyan); font-weight:700;">3. OVERFITTING</span>
+                                <span class="micro-label">TOO COMPLEX</span>
+                            </div>
+                            
+                            <svg width="100%" height="150" viewBox="0 0 300 150" style="background:var(--color-paper); border:1px solid var(--color-ink-faint);">
+                                <circle cx="40" cy="120" r="4.5" fill="#1F2BE0"/>
+                                <circle cx="90" cy="80" r="4.5" fill="#1F2BE0"/>
+                                <circle cx="150" cy="50" r="4.5" fill="#1F2BE0"/>
+                                <circle cx="210" cy="70" r="4.5" fill="#1F2BE0"/>
+                                <circle cx="260" cy="130" r="4.5" fill="#1F2BE0"/>
+                                <path d="M 30 140 Q 40 120 65 30 T 90 80 T 120 130 T 150 50 T 180 110 T 210 70 T 240 40 T 270 130" fill="none" stroke="#0284C7" stroke-width="3"/>
+                            </svg>
+
+                            <div style="font-size:16px; line-height:1.45;">
+                                <div><strong>&bull; Model is too complex</strong></div>
+                                <div>&bull; Memorizes noise and outliers</div>
+                                <div style="color:var(--color-alert-cyan); font-weight:700; margin-top:4px;">&rarr; High Variance</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Spectrum Bar -->
+                    <div class="spectrum-banner reveal reveal-delay-2">
+                        <span>&larr; TOO SIMPLE (High Bias)</span>
+                        <span style="background:var(--color-paper); color:var(--color-ink); padding:4px 14px; border:1px solid var(--color-ink); font-weight:900;">&star; GOOD FIT (Balanced)</span>
+                        <span>TOO COMPLEX (High Variance) &rarr;</span>
+                    </div>
+
+                    <!-- Transition Handover -->
+                    <div class="handover-box reveal reveal-delay-3">
+                        <strong>Student 1 Handover:</strong> "If the model is too simple, we get underfitting and high bias. If it is too complex, we get overfitting and high variance. How do we find where our model should be? &rarr; <strong>Student 2 takes over.</strong>"
+                    </div>
+                </div>
+
+                <div class="slide-footer">
+                    <div class="footer-nav-hint">Student 1 &rarr; Student 2 Handover &bull; Connecting the Two Problems</div>
                     <div class="footer-pagenum">04 / 10</div>
                 </div>
             </section>
 
-            <!-- SLIDE 5: 2x2 Target Matrix (Transition) -->
-            <section class="slide" data-slide="4" data-act="2" data-topic="2x2 TARGET MATRIX">
-                <div class="slide-topbar">
-                    <div class="slide-topbar-left">
-                        <span class="presenter-pill">STUDENT 1 &rarr; STUDENT 2</span>
-                        <h2 class="slide-title">Bias vs. Variance: The 2&times;2 Target Matrix</h2>
-                    </div>
-                    <div class="slide-topbar-right">GEOMETRIC INTUITION</div>
-                </div>
-
-                <div class="slide-body">
-                    <div class="target-matrix-2x2">
-                        <!-- Q1: Low Bias + Low Variance (Ideal) -->
-                        <div class="target-card ideal reveal reveal-delay-1" title="Ideal Generalization">
-                            <svg width="125" height="125" viewBox="0 0 130 130">
-                                <circle cx="65" cy="65" r="54" fill="#E6E0CE" stroke="#1F2BE0" stroke-width="1.5"/>
-                                <circle cx="65" cy="65" r="38" fill="#F0EBDE" stroke="#1F2BE0" stroke-width="1"/>
-                                <circle cx="65" cy="65" r="22" fill="#1F2BE0" opacity="0.15"/>
-                                <circle cx="65" cy="65" r="8" fill="#1F2BE0"/>
-                                <line x1="10" y1="65" x2="120" y2="65" stroke="#1F2BE0" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.4"/>
-                                <line x1="65" y1="10" x2="65" y2="120" stroke="#1F2BE0" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.4"/>
-                                <!-- Clustered Darts at Bullseye -->
-                                <circle cx="66" cy="63" r="4" fill="#D9383A"/>
-                                <circle cx="63" cy="67" r="4" fill="#D9383A"/>
-                                <circle cx="68" cy="68" r="4" fill="#D9383A"/>
-                                <circle cx="62" cy="62" r="4" fill="#D9383A"/>
-                            </svg>
-                            <div>
-                                <span class="target-badge ideal-badge">&star; LOW BIAS + LOW VARIANCE</span>
-                                <h3 style="font-size:28px; margin:6px 0;">The Ideal Bullseye</h3>
-                                <p style="font-size:16px; line-height:1.4;">Accurate on average, highly stable across datasets. Generalizes reliably.</p>
-                            </div>
-                        </div>
-
-                        <!-- Q2: Low Bias + High Variance (Overfitting) -->
-                        <div class="target-card reveal reveal-delay-2" title="High Sensitivity">
-                            <svg width="125" height="125" viewBox="0 0 130 130">
-                                <circle cx="65" cy="65" r="54" fill="#E6E0CE" stroke="#1F2BE0" stroke-width="1.5"/>
-                                <circle cx="65" cy="65" r="38" fill="#F0EBDE" stroke="#1F2BE0" stroke-width="1"/>
-                                <circle cx="65" cy="65" r="8" fill="#1F2BE0"/>
-                                <line x1="10" y1="65" x2="120" y2="65" stroke="#1F2BE0" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.4"/>
-                                <line x1="65" y1="10" x2="65" y2="120" stroke="#1F2BE0" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.4"/>
-                                <!-- Scattered Darts -->
-                                <circle cx="46" cy="42" r="4" fill="#D9383A"/>
-                                <circle cx="84" cy="38" r="4" fill="#D9383A"/>
-                                <circle cx="88" cy="88" r="4" fill="#D9383A"/>
-                                <circle cx="42" cy="82" r="4" fill="#D9383A"/>
-                            </svg>
-                            <div>
-                                <span class="target-badge">LOW BIAS + HIGH VARIANCE</span>
-                                <h3 style="font-size:28px; margin:6px 0;">Overfitting</h3>
-                                <p style="font-size:16px; line-height:1.4;">Centered around the truth on average, but wildly unstable per training sample.</p>
-                            </div>
-                        </div>
-
-                        <!-- Q3: High Bias + Low Variance (Underfitting) -->
-                        <div class="target-card reveal reveal-delay-3" title="Systematic Error">
-                            <svg width="125" height="125" viewBox="0 0 130 130">
-                                <circle cx="65" cy="65" r="54" fill="#E6E0CE" stroke="#1F2BE0" stroke-width="1.5"/>
-                                <circle cx="65" cy="65" r="38" fill="#F0EBDE" stroke="#1F2BE0" stroke-width="1"/>
-                                <circle cx="65" cy="65" r="8" fill="#1F2BE0"/>
-                                <line x1="10" y1="65" x2="120" y2="65" stroke="#1F2BE0" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.4"/>
-                                <line x1="65" y1="10" x2="65" y2="120" stroke="#1F2BE0" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.4"/>
-                                <!-- Off-target Cluster -->
-                                <circle cx="32" cy="30" r="4" fill="#D9383A"/>
-                                <circle cx="36" cy="26" r="4" fill="#D9383A"/>
-                                <circle cx="28" cy="35" r="4" fill="#D9383A"/>
-                                <circle cx="38" cy="34" r="4" fill="#D9383A"/>
-                            </svg>
-                            <div>
-                                <span class="target-badge">HIGH BIAS + LOW VARIANCE</span>
-                                <h3 style="font-size:28px; margin:6px 0;">Underfitting</h3>
-                                <p style="font-size:16px; line-height:1.4;">Consistently wrong. Inflexible assumptions lead to predictable systematic error.</p>
-                            </div>
-                        </div>
-
-                        <!-- Q4: High Bias + High Variance -->
-                        <div class="target-card reveal reveal-delay-4" title="Total Failure">
-                            <svg width="125" height="125" viewBox="0 0 130 130">
-                                <circle cx="65" cy="65" r="54" fill="#E6E0CE" stroke="#1F2BE0" stroke-width="1.5"/>
-                                <circle cx="65" cy="65" r="38" fill="#F0EBDE" stroke="#1F2BE0" stroke-width="1"/>
-                                <circle cx="65" cy="65" r="8" fill="#1F2BE0"/>
-                                <line x1="10" y1="65" x2="120" y2="65" stroke="#1F2BE0" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.4"/>
-                                <line x1="65" y1="10" x2="65" y2="120" stroke="#1F2BE0" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.4"/>
-                                <!-- Wild Scatter -->
-                                <circle cx="22" cy="35" r="4" fill="#D9383A"/>
-                                <circle cx="38" cy="95" r="4" fill="#D9383A"/>
-                                <circle cx="95" cy="28" r="4" fill="#D9383A"/>
-                                <circle cx="105" cy="78" r="4" fill="#D9383A"/>
-                            </svg>
-                            <div>
-                                <span class="target-badge" style="background:var(--color-alert-red); color:#FFF;">HIGH BIAS + HIGH VARIANCE</span>
-                                <h3 style="font-size:28px; margin:6px 0;">Total Failure</h3>
-                                <p style="font-size:16px; line-height:1.4;">Both off-target and wildly erratic. Worst possible modeling outcome.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="slide-footer">
-                    <div class="footer-nav-hint">Student 1 &rarr; Student 2 Handover: "Why can't we simply minimize both?"</div>
-                    <div class="footer-pagenum">05 / 10</div>
-                </div>
-            </section>
-
-            <!-- SLIDE 6: Complexity Lab (Student 2) -->
-            <section class="slide" data-slide="5" data-act="2" data-topic="COMPLEXITY LAB">
+            <!-- SLIDE 5: Why Is There a Tradeoff? (Student 2) -->
+            <section class="slide" data-slide="4" data-act="2" data-topic="THE TRADEOFF">
                 <div class="slide-topbar">
                     <div class="slide-topbar-left">
                         <span class="presenter-pill">STUDENT 2</span>
-                        <h2 class="slide-title">The Tradeoff Dilemma: Live Complexity Lab</h2>
+                        <h2 class="slide-title">The Problem: <em>Why Is There a Tradeoff?</em></h2>
                     </div>
-                    <div class="slide-topbar-right">DRAG SLIDER TO TEST</div>
+                    <div class="slide-topbar-right">THE COMPLEXITY LEVER</div>
                 </div>
 
                 <div class="slide-body">
-                    <div class="complexity-lab-grid">
-                        <div class="sim-meta-col reveal">
-                            <h3 style="font-size:38px;">Model Capacity is the Single Control Lever</h3>
-                            <p style="font-size:19px; line-height:1.5;">When we expand model capacity to reduce bias, we inevitably expose it to higher variance. Reducing one causes the other to increase.</p>
-                            
-                            <div class="callout-box" style="margin-top:8px;">
-                                "You cannot simultaneously reduce both errors without changing the data distribution or using regularization techniques."
+                    <div class="tradeoff-dilemma-grid">
+                        <div style="display:flex; flex-direction:column; gap:16px;" class="reveal">
+                            <div class="definition-card">
+                                "We want both Low Bias and Low Variance. But changing model complexity pushes them in opposite directions."
+                            </div>
+
+                            <div class="bullet-list" style="margin-top:6px;">
+                                <div class="bullet-item"><span class="bullet-dot">&bull;</span><span><strong>As model complexity increases:</strong></span></div>
+                                <div style="margin-left:24px; display:flex; flex-direction:column; gap:8px;">
+                                    <div><strong>Bias decreases (&darr;)</strong> &mdash; the model gets better at capturing patterns.</div>
+                                    <div><strong>Variance increases (&uarr;)</strong> &mdash; the model becomes sensitive to training noise.</div>
+                                </div>
+                            </div>
+
+                            <div class="key-phrase-badge" style="font-size:15px; margin-top:8px;">
+                                Making a model more complex reduces bias, but increases variance.
                             </div>
                         </div>
 
-                        <div class="lab-control-panel reveal reveal-delay-2">
+                        <div class="complexity-flow-ledger reveal reveal-delay-2">
                             <div class="sim-header-bar">
-                                <span class="mono-tag" style="font-weight:700;">DYNAMIC POLYNOMIAL MORPHING</span>
+                                <span class="mono-tag" style="font-weight:700;">MODEL COMPLEXITY SPECTRUM</span>
                                 <span class="mono-tag" id="degreeDisplay" style="background:var(--color-ink); color:var(--color-paper); padding:2px 8px;">DEGREE d = 3</span>
                             </div>
 
@@ -1433,274 +1743,399 @@
                                 </div>
                                 <input type="range" min="1" max="10" value="3" class="styled-slider" id="labComplexitySlider">
                                 <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:12px; color:var(--color-ink-soft);">
-                                    <span>d=1 (Linear)</span>
-                                    <span>d=3 (Optimal)</span>
+                                    <span>d=1 (Simple)</span>
+                                    <span>d=3 (Sweet Spot)</span>
                                     <span>d=10 (Complex)</span>
                                 </div>
                             </div>
 
-                            <div style="width:100%; height:180px; background:var(--color-paper); border:1.5px solid var(--color-ink); position:relative;">
-                                <svg width="100%" height="100%" viewBox="0 0 440 180" id="labSvg">
-                                    <line x1="30" y1="155" x2="410" y2="155" stroke="#1F2BE0" stroke-width="1.5"/>
-                                    <line x1="30" y1="15" x2="30" y2="155" stroke="#1F2BE0" stroke-width="1.5"/>
+                            <div style="width:100%; height:160px; background:var(--color-paper); border:1.5px solid var(--color-ink); position:relative;">
+                                <svg width="100%" height="100%" viewBox="0 0 440 160" id="labSvg">
+                                    <line x1="30" y1="140" x2="410" y2="140" stroke="#1F2BE0" stroke-width="1.5"/>
+                                    <line x1="30" y1="15" x2="30" y2="140" stroke="#1F2BE0" stroke-width="1.5"/>
 
                                     <!-- Points -->
-                                    <circle cx="60" cy="130" r="4.5" fill="#1F2BE0"/>
-                                    <circle cx="110" cy="95" r="4.5" fill="#1F2BE0"/>
-                                    <circle cx="170" cy="55" r="4.5" fill="#1F2BE0"/>
-                                    <circle cx="230" cy="45" r="4.5" fill="#1F2BE0"/>
-                                    <circle cx="290" cy="65" r="4.5" fill="#1F2BE0"/>
-                                    <circle cx="350" cy="110" r="4.5" fill="#1F2BE0"/>
-                                    <circle cx="390" cy="140" r="4.5" fill="#1F2BE0"/>
+                                    <circle cx="60" cy="115" r="4.5" fill="#1F2BE0"/>
+                                    <circle cx="110" cy="80" r="4.5" fill="#1F2BE0"/>
+                                    <circle cx="170" cy="45" r="4.5" fill="#1F2BE0"/>
+                                    <circle cx="230" cy="35" r="4.5" fill="#1F2BE0"/>
+                                    <circle cx="290" cy="55" r="4.5" fill="#1F2BE0"/>
+                                    <circle cx="350" cy="95" r="4.5" fill="#1F2BE0"/>
+                                    <circle cx="390" cy="125" r="4.5" fill="#1F2BE0"/>
 
                                     <!-- Fitted Curve Path -->
-                                    <path id="labFittedCurve" d="M 40 145 Q 230 15 410 150" fill="none" stroke="#1F2BE0" stroke-width="3.5"/>
+                                    <path id="labFittedCurve" d="M 40 130 Q 230 10 410 135" fill="none" stroke="#1F2BE0" stroke-width="3.5"/>
                                 </svg>
                             </div>
 
-                            <div class="lab-state-badge" id="labStateBox">
-                                <span class="mono-tag" style="font-weight:700; color:var(--color-ink);" id="labRegimeText">&star; BALANCED SWEET SPOT (MINIMUM TEST ERROR)</span>
-                                <p style="font-size:14px; margin-top:2px;" id="labDescText">The 3rd-degree model captures the natural quadratic curvature without fitting random point noise.</p>
+                            <div style="background:var(--color-paper); border:1.5px solid var(--color-ink); padding:12px 14px;">
+                                <span class="mono-tag" style="font-weight:700; color:var(--color-ink);" id="labRegimeText">&star; BALANCED SWEET SPOT (OPTIMAL GENERALIZATION)</span>
+                                <p style="font-size:13px; margin-top:2px;" id="labDescText">Optimal model capacity captures natural quadratic structure while filtering noise.</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="slide-footer">
-                    <div class="footer-nav-hint">Student 2 &bull; Interactive Model Capacity Control</div>
-                    <div class="footer-pagenum">06 / 10</div>
+                    <div class="footer-nav-hint">Student 2 &bull; The Mechanics of Model Capacity</div>
+                    <div class="footer-pagenum">05 / 10</div>
                 </div>
             </section>
 
-            <!-- SLIDE 7: Master U-Curve with Crosshair Tracker (Student 2) -->
-            <section class="slide" data-slide="6" data-act="2" data-topic="U-SHAPED ERROR CURVE">
+            <!-- SLIDE 6: The Bias-Variance Tradeoff Graph (Student 2) -->
+            <section class="slide" data-slide="5" data-act="2" data-topic="THE MASTER GRAPH">
                 <div class="slide-topbar">
                     <div class="slide-topbar-left">
                         <span class="presenter-pill">STUDENT 2</span>
-                        <h2 class="slide-title">Model Complexity vs. Prediction Error</h2>
+                        <h2 class="slide-title">The Bias–Variance Tradeoff Graph</h2>
                     </div>
-                    <div class="slide-topbar-right">HOVER OVER GRAPH TO TRACK LOSS</div>
+                    <div class="slide-topbar-right">HOVER TO TRACK ERROR</div>
                 </div>
 
                 <div class="slide-body">
                     <div class="master-ucurve-grid">
                         <div class="ucurve-canvas-box reveal">
-                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid var(--color-ink); padding-bottom:10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid var(--color-ink); padding-bottom:8px;">
                                 <div style="display:flex; gap:16px; font-family:var(--font-mono); font-size:13px;">
-                                    <span style="display:flex; align-items:center; gap:6px;"><span style="width:16px; height:3px; background:#D9383A; display:inline-block;"></span> Bias&sup2;</span>
-                                    <span style="display:flex; align-items:center; gap:6px;"><span style="width:16px; height:3px; background:#0284C7; display:inline-block;"></span> Variance</span>
-                                    <span style="display:flex; align-items:center; gap:6px;"><span style="width:16px; height:4px; background:#1F2BE0; display:inline-block;"></span> Total Test Error</span>
+                                    <span style="display:flex; align-items:center; gap:6px;"><span style="width:16px; height:3px; background:#D9383A; display:inline-block;"></span> Bias (&darr;)</span>
+                                    <span style="display:flex; align-items:center; gap:6px;"><span style="width:16px; height:3px; background:#0284C7; display:inline-block;"></span> Variance (&uarr;)</span>
+                                    <span style="display:flex; align-items:center; gap:6px;"><span style="width:16px; height:4px; background:#1F2BE0; display:inline-block;"></span> Total Test Error (U-Curve)</span>
                                 </div>
                                 <span class="mono-tag" id="hudTrackerReadout">COMPLEXITY: 50% &bull; OPTIMAL</span>
                             </div>
 
                             <div class="ucurve-svg-container" id="ucurveTrackBox">
-                                <svg width="100%" height="100%" viewBox="0 0 640 340" id="ucurveSvg">
-                                    <line x1="60" y1="290" x2="600" y2="290" stroke="#1F2BE0" stroke-width="1.5"/>
-                                    <line x1="60" y1="30" x2="60" y2="290" stroke="#1F2BE0" stroke-width="1.5"/>
+                                <svg width="100%" height="100%" viewBox="0 0 640 330" id="ucurveSvg">
+                                    <line x1="60" y1="280" x2="600" y2="280" stroke="#1F2BE0" stroke-width="1.5"/>
+                                    <line x1="60" y1="20" x2="60" y2="280" stroke="#1F2BE0" stroke-width="1.5"/>
                                     
-                                    <text x="330" y="325" text-anchor="middle" font-family="'DM Mono', monospace" font-size="13" fill="#1F2BE0">MODEL COMPLEXITY &rarr;</text>
-                                    <text x="25" y="160" text-anchor="middle" font-family="'DM Mono', monospace" font-size="13" fill="#1F2BE0" transform="rotate(-90 25 160)">TOTAL ERROR &rarr;</text>
+                                    <text x="330" y="315" text-anchor="middle" font-family="'DM Mono', monospace" font-size="13" fill="#1F2BE0">MODEL COMPLEXITY &rarr;</text>
+                                    <text x="25" y="150" text-anchor="middle" font-family="'DM Mono', monospace" font-size="13" fill="#1F2BE0" transform="rotate(-90 25 150)">ERROR &rarr;</text>
 
-                                    <!-- Bias^2 Curve (Red) -->
-                                    <path d="M 70 50 Q 180 230 590 270" fill="none" stroke="#D9383A" stroke-width="2.5" stroke-dasharray="5 5"/>
+                                    <!-- Bias Curve (Red) Starts high, decreases -->
+                                    <path d="M 70 40 Q 180 220 590 260" fill="none" stroke="#D9383A" stroke-width="3" stroke-dasharray="5 5"/>
                                     
-                                    <!-- Variance Curve (Cyan) -->
-                                    <path d="M 70 280 Q 420 260 590 40" fill="none" stroke="#0284C7" stroke-width="2.5" stroke-dasharray="5 5"/>
+                                    <!-- Variance Curve (Cyan) Starts low, increases -->
+                                    <path d="M 70 270 Q 420 250 590 35" fill="none" stroke="#0284C7" stroke-width="3" stroke-dasharray="5 5"/>
 
-                                    <!-- Irreducible Noise Line -->
-                                    <line x1="60" y1="270" x2="600" y2="270" stroke="#1F2BE0" stroke-width="1" stroke-dasharray="3 3" opacity="0.4"/>
-                                    <text x="520" y="262" font-family="'DM Mono', monospace" font-size="11" fill="#1F2BE0" opacity="0.7">Noise (&sigma;&sup2;)</text>
-
-                                    <!-- Total Error U-Curve (Solid Blue thick) -->
-                                    <path d="M 70 85 Q 295 270 590 75" fill="none" stroke="#1F2BE0" stroke-width="4"/>
+                                    <!-- Total Test Error U-Curve (Solid Blue thick) -->
+                                    <path d="M 70 80 Q 295 260 590 70" fill="none" stroke="#1F2BE0" stroke-width="4.5"/>
 
                                     <!-- Sweet Spot Marker -->
-                                    <line x1="295" y1="30" x2="295" y2="290" stroke="#1F2BE0" stroke-width="1" stroke-dasharray="3 3"/>
-                                    <circle cx="295" cy="180" r="8" fill="#D9383A" stroke="#1F2BE0" stroke-width="2"/>
-                                    <rect x="240" y="198" width="110" height="26" fill="#1F2BE0"/>
-                                    <text x="295" y="215" text-anchor="middle" font-family="'DM Mono', monospace" font-size="11" font-weight="700" fill="#F0EBDE">&star; SWEET SPOT</text>
+                                    <line x1="295" y1="20" x2="295" y2="280" stroke="#1F2BE0" stroke-width="1" stroke-dasharray="3 3"/>
+                                    <circle cx="295" cy="170" r="8" fill="#D9383A" stroke="#1F2BE0" stroke-width="2"/>
+                                    <rect x="235" y="190" width="120" height="26" fill="#1F2BE0"/>
+                                    <text x="295" y="207" text-anchor="middle" font-family="'DM Mono', monospace" font-size="11" font-weight="700" fill="#F0EBDE">&star; SWEET SPOT</text>
 
-                                    <!-- Interactive Guideline (Follows mouse) -->
-                                    <line id="uGuideline" x1="295" y1="30" x2="295" y2="290" stroke="#D9383A" stroke-width="1.5" stroke-dasharray="2 2" style="display:none;"/>
+                                    <!-- Interactive Guideline -->
+                                    <line id="uGuideline" x1="295" y1="20" x2="295" y2="280" stroke="#D9383A" stroke-width="1.5" stroke-dasharray="2 2" style="display:none;"/>
                                 </svg>
                             </div>
                         </div>
 
                         <div class="ucurve-sidebar reveal reveal-delay-2">
                             <div class="zone-analysis-card" id="cardZoneUnderfit">
-                                <span class="micro-label" style="color:var(--color-alert-red);">ZONE 01 // UNDERFITTING</span>
-                                <p style="font-size:15px; line-height:1.4;">High bias dominates. Model is too rigid to capture the natural data pattern.</p>
+                                <span class="micro-label" style="color:var(--color-alert-red);">LEFT: MODEL TOO SIMPLE</span>
+                                <p style="font-size:14px; line-height:1.4;">High Bias dominates. Cannot capture enough patterns &rarr; <strong>Underfitting</strong>.</p>
                             </div>
 
                             <div class="zone-analysis-card zone-optimal active" id="cardZoneOpt">
-                                <span class="micro-label" style="color:var(--color-ink);">&star; ZONE 02 // OPTIMAL GENERALIZATION</span>
-                                <p style="font-size:15px; line-height:1.4; font-weight:600;">Global minimum of Total Test Error. Model captures signals and ignores noise.</p>
+                                <span class="micro-label" style="color:var(--color-ink);">&star; MIDDLE: RIGHT COMPLEXITY</span>
+                                <p style="font-size:14px; line-height:1.4; font-weight:600;">Lower Bias + Controlled Variance. Minimizes total error &rarr; <strong>Good Generalization</strong>.</p>
                             </div>
 
                             <div class="zone-analysis-card" id="cardZoneOverfit">
-                                <span class="micro-label" style="color:var(--color-alert-cyan);">ZONE 03 // OVERFITTING</span>
-                                <p style="font-size:15px; line-height:1.4;">High variance dominates. Model memorizes idiosyncratic training noise.</p>
+                                <span class="micro-label" style="color:var(--color-alert-cyan);">RIGHT: MODEL TOO COMPLEX</span>
+                                <p style="font-size:14px; line-height:1.4;">High Variance dominates. Learns noise and small fluctuations &rarr; <strong>Overfitting</strong>.</p>
+                            </div>
+
+                            <div style="background:var(--color-ink); color:var(--color-paper); padding:12px 14px; font-size:13px; line-height:1.4; font-family:var(--font-display); font-style:italic;">
+                                "The goal is not to make the model as simple or as complex as possible. The goal is to find the level of complexity that gives the best performance on unseen data."
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="slide-footer">
-                    <div class="footer-nav-hint">Student 2 &bull; Total Generalization Error Minimization</div>
+                    <div class="footer-nav-hint">Student 2 &bull; The Master U-Curve of Statistical Learning</div>
+                    <div class="footer-pagenum">06 / 10</div>
+                </div>
+            </section>
+
+            <!-- SLIDE 7: Training Performance ≠ Real-World Performance (Student 2) -->
+            <section class="slide" data-slide="6" data-act="2" data-topic="GENERALIZATION">
+                <div class="slide-topbar">
+                    <div class="slide-topbar-left">
+                        <span class="presenter-pill">STUDENT 2</span>
+                        <h2 class="slide-title">Training Performance &ne; Real-World Performance</h2>
+                    </div>
+                    <div class="slide-topbar-right">THE EXAM ANALOGY</div>
+                </div>
+
+                <div class="slide-body">
+                    <div class="matrix-analogy-grid">
+                        <div class="perf-table-wrap reveal">
+                            <span class="micro-label">MODEL PERFORMANCE MATRIX</span>
+                            <table class="perf-table">
+                                <thead>
+                                    <tr>
+                                        <th>Model Capacity</th>
+                                        <th>Training Data</th>
+                                        <th>New Data</th>
+                                        <th>Diagnosis</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Too Simple</strong></td>
+                                        <td style="color:var(--color-alert-red); font-weight:700;">Poor</td>
+                                        <td style="color:var(--color-alert-red); font-weight:700;">Poor</td>
+                                        <td>Underfitting (High Bias)</td>
+                                    </tr>
+                                    <tr class="highlight-row">
+                                        <td><strong>Good Fit</strong></td>
+                                        <td style="color:var(--color-ink); font-weight:700;">Good</td>
+                                        <td style="color:var(--color-ink); font-weight:700;">Good</td>
+                                        <td><strong>&star; True Generalization</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Too Complex</strong></td>
+                                        <td style="color:var(--color-alert-green); font-weight:700;">Excellent (100%)</td>
+                                        <td style="color:var(--color-alert-red); font-weight:700;">Poor</td>
+                                        <td>Overfitting (High Variance)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div style="font-size:16px; line-height:1.45; margin-top:8px;">
+                                A machine learning model is ultimately supposed to work on <strong>data it has never seen before</strong>. Our true goal is <strong>Good Generalization</strong>, not simply high training accuracy.
+                            </div>
+                        </div>
+
+                        <div class="analogy-card reveal reveal-delay-2">
+                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid var(--color-ink); padding-bottom:8px;">
+                                <span class="mono-tag" style="font-weight:700;">THE CLASSROOM ANALOGY</span>
+                                <span class="micro-label">INTUITION</span>
+                            </div>
+
+                            <div style="font-size:17px; line-height:1.5; display:flex; flex-direction:column; gap:12px;">
+                                <div>&bull; A student who <strong>memorizes every question</strong> from a practice sheet scores 100% on those exact questions.</div>
+                                <div>&bull; But on the final exam with new questions, they fail.</div>
+                                <div>&bull; A good student understands the <strong>underlying concept</strong>, not just the exact questions.</div>
+                            </div>
+
+                            <div class="key-phrase-badge" style="font-size:14px; margin-top:6px;">
+                                Memorizing Training Data &ne; Learning the Pattern
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide-footer">
+                    <div class="footer-nav-hint">Student 2 &bull; Generalization vs. Rote Memorization</div>
                     <div class="footer-pagenum">07 / 10</div>
                 </div>
             </section>
 
-            <!-- SLIDE 8: Balancing Strategies (Student 3) -->
-            <section class="slide" data-slide="7" data-act="3" data-topic="ENGINEERING STRATEGIES">
+            <!-- SLIDE 8: Finding the Right Balance (Student 3) -->
+            <section class="slide" data-slide="7" data-act="3" data-topic="FINDING BALANCE">
                 <div class="slide-topbar">
                     <div class="slide-topbar-left">
                         <span class="presenter-pill">STUDENT 3</span>
-                        <h2 class="slide-title">How Do We Balance Bias &amp; Variance?</h2>
+                        <h2 class="slide-title">How Do We Balance Bias and Variance?</h2>
                     </div>
-                    <div class="slide-topbar-right">PRACTICAL BLUEPRINTS</div>
+                    <div class="slide-topbar-right">THE THREE PILLARS</div>
                 </div>
 
                 <div class="slide-body">
-                    <div class="blueprint-3col-grid">
-                        <!-- Pillar 1: Cross-Validation with Step Button -->
-                        <div class="blueprint-card reveal reveal-delay-1">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span class="mono-tag" style="color:var(--color-ink-soft);">PILLAR 01 // ESTIMATION</span>
-                                <button class="sim-btn" id="btnStepFold" style="padding:2px 8px; font-size:11px;">Next Fold &rarr;</button>
-                            </div>
-                            <h3 style="font-size:30px;">Cross-Validation</h3>
-                            <p style="font-size:15px; line-height:1.45;">Evaluate model stability across $K$ independent splits to estimate true test error before deployment.</p>
-                            
-                            <svg class="kfold-svg-diagram" viewBox="0 0 260 80" id="kfoldSvg">
-                                <g id="foldRow1">
-                                    <rect x="10" y="15" width="44" height="22" fill="#D9383A"/>
-                                    <rect x="58" y="15" width="44" height="22" fill="#1F2BE0"/>
-                                    <rect x="106" y="15" width="44" height="22" fill="#1F2BE0"/>
-                                    <rect x="154" y="15" width="44" height="22" fill="#1F2BE0"/>
-                                    <rect x="202" y="15" width="44" height="22" fill="#1F2BE0"/>
-                                </g>
-                                <g id="foldRow2">
-                                    <rect x="10" y="44" width="44" height="22" fill="#1F2BE0"/>
-                                    <rect x="58" y="44" width="44" height="22" fill="#D9383A"/>
-                                    <rect x="106" y="44" width="44" height="22" fill="#1F2BE0"/>
-                                    <rect x="154" y="44" width="44" height="22" fill="#1F2BE0"/>
-                                    <rect x="202" y="44" width="44" height="22" fill="#1F2BE0"/>
-                                </g>
-                            </svg>
-                            <span class="mono-tag" style="font-size:11px;" id="kfoldStateText">ROTATING VALIDATION SPLITS (FOLD 1)</span>
+                    <div style="display:flex; flex-direction:column; gap:24px;">
+                        <div class="definition-card reveal">
+                            "There is no single perfect model for every dataset. We try to find a model that is <strong>complex enough to learn the important patterns</strong>, but <strong>simple enough not to learn unnecessary noise</strong>."
                         </div>
 
-                        <!-- Pillar 2: Regularization -->
-                        <div class="blueprint-card reveal reveal-delay-2">
-                            <span class="mono-tag" style="color:var(--color-ink-soft);">PILLAR 02 // CONSTRAINT</span>
-                            <h3 style="font-size:30px;">Regularization</h3>
-                            <p style="font-size:15px; line-height:1.45;">Penalize excessively large weight coefficients to constrain hypothesis space and suppress variance.</p>
-                            
-                            <div style="background:var(--color-paper); border:1px solid var(--color-ink); padding:12px; font-family:var(--font-mono); font-size:13px; margin:auto 0 0 0;">
-                                <div><strong>L1 (Lasso):</strong> Loss + &lambda;&Sigma;|w|</div>
-                                <div style="margin-top:4px;"><strong>L2 (Ridge):</strong> Loss + &lambda;&Sigma;w&sup2;</div>
+                        <div class="balance-pillars-grid reveal reveal-delay-2">
+                            <div class="pillar-card">
+                                <div style="display:flex; justify-content:space-between; border-bottom:1.5px solid var(--color-ink); padding-bottom:8px;">
+                                    <span class="mono-tag" style="color:var(--color-ink);">PILLAR 01</span>
+                                    <span class="micro-label">CAPACITY</span>
+                                </div>
+                                <h3 style="font-size:28px;">1. Choose Appropriate Model Complexity</h3>
+                                <p style="font-size:16px; line-height:1.45;">Don't use an unnecessarily simple or complicated model. Match algorithm capacity to the true scale of the problem.</p>
                             </div>
-                        </div>
 
-                        <!-- Pillar 3: Structural Tuning -->
-                        <div class="blueprint-card reveal reveal-delay-3">
-                            <span class="mono-tag" style="color:var(--color-ink-soft);">PILLAR 03 // ARCHITECTURE</span>
-                            <h3 style="font-size:30px;">Structural Pruning</h3>
-                            <p style="font-size:15px; line-height:1.45;">Enforce hard upper limits on model depth, early stopping epochs, and minimum samples per leaf.</p>
-                            
-                            <div style="background:var(--color-paper); border:1px solid var(--color-ink); padding:12px; font-family:var(--font-mono); font-size:13px; margin:auto 0 0 0;">
-                                <div>&bull; Max Tree Depth: 4–6</div>
-                                <div style="margin-top:4px;">&bull; Dropout Rate: 0.2–0.5</div>
+                            <div class="pillar-card" style="background:var(--color-paper-highlight); border:2px solid var(--color-ink);">
+                                <div style="display:flex; justify-content:space-between; border-bottom:1.5px solid var(--color-ink); padding-bottom:8px;">
+                                    <span class="mono-tag" style="color:var(--color-ink);">&star; PILLAR 02</span>
+                                    <span class="micro-label">VALIDATION</span>
+                                </div>
+                                <h3 style="font-size:28px;">2. Use Cross-Validation</h3>
+                                <p style="font-size:16px; line-height:1.45;">Test the model on different portions of data to see how consistently it performs on unseen samples.</p>
+                            </div>
+
+                            <div class="pillar-card">
+                                <div style="display:flex; justify-content:space-between; border-bottom:1.5px solid var(--color-ink); padding-bottom:8px;">
+                                    <span class="mono-tag" style="color:var(--color-ink);">PILLAR 03</span>
+                                    <span class="micro-label">PENALTY</span>
+                                </div>
+                                <h3 style="font-size:28px;">3. Use Regularization</h3>
+                                <p style="font-size:16px; line-height:1.45;">Add a mathematical penalty for unnecessary model complexity to prevent the model from overfitting to noise.</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="slide-footer">
-                    <div class="footer-nav-hint">Student 3 &bull; Practical Engineering Solutions</div>
+                    <div class="footer-nav-hint">Student 3 &bull; Strategic Framework for Generalization</div>
                     <div class="footer-pagenum">08 / 10</div>
                 </div>
             </section>
 
-            <!-- SLIDE 9: Practitioner's Toolkit (Student 3) -->
-            <section class="slide" data-slide="8" data-act="3" data-topic="PRACTITIONER TOOLKIT">
+            <!-- SLIDE 9: Practical Techniques (Student 3) -->
+            <section class="slide" data-slide="8" data-act="3" data-topic="PRACTICAL TOOLKIT">
                 <div class="slide-topbar">
                     <div class="slide-topbar-left">
                         <span class="presenter-pill">STUDENT 3</span>
-                        <h2 class="slide-title">The ML Practitioner's Control Toolkit</h2>
+                        <h2 class="slide-title">Practical Techniques: <em>The ML Toolkit</em></h2>
                     </div>
-                    <div class="slide-topbar-right">ACTIONABLE METHODS</div>
+                    <div class="slide-topbar-right">TOOLS WE USE</div>
                 </div>
 
                 <div class="slide-body">
-                    <div class="toolkit-ledger-grid">
-                        <div class="ledger-item-card reveal reveal-delay-1">
-                            <span class="mono-tag">METHOD 01 // SHRINKAGE</span>
-                            <h3 style="font-size:26px;">L1 / L2 Penalty Adjustment (&lambda;)</h3>
-                            <p style="font-size:15px; line-height:1.45;">Tuning hyperparameter &lambda; controls the tradeoff directly. Higher &lambda; drives variance down while tolerating slightly higher bias.</p>
+                    <div class="toolkit-2x2-grid reveal">
+                        <!-- Tool 1: Cross-Validation -->
+                        <div class="toolkit-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid var(--color-ink); padding-bottom:6px;">
+                                <span class="mono-tag" style="font-weight:700;">🔄 CROSS-VALIDATION</span>
+                                <button class="sim-btn" id="btnStepFold" style="padding:2px 8px; font-size:11px;">Next Fold &rarr;</button>
+                            </div>
+                            <p style="font-size:15px; line-height:1.45;">Split data into multiple parts ($K$-folds) and train/test in different combinations.</p>
+                            
+                            <svg class="kfold-svg-diagram" viewBox="0 0 260 50" id="kfoldSvg" style="width:100%; height:45px;">
+                                <g id="foldRow1">
+                                    <rect x="10" y="5" width="44" height="18" fill="#D9383A"/>
+                                    <rect x="58" y="5" width="44" height="18" fill="#1F2BE0"/>
+                                    <rect x="106" y="5" width="44" height="18" fill="#1F2BE0"/>
+                                    <rect x="154" y="5" width="44" height="18" fill="#1F2BE0"/>
+                                    <rect x="202" y="5" width="44" height="18" fill="#1F2BE0"/>
+                                </g>
+                                <g id="foldRow2">
+                                    <rect x="10" y="27" width="44" height="18" fill="#1F2BE0"/>
+                                    <rect x="58" y="27" width="44" height="18" fill="#D9383A"/>
+                                    <rect x="106" y="27" width="44" height="18" fill="#1F2BE0"/>
+                                    <rect x="154" y="27" width="44" height="18" fill="#1F2BE0"/>
+                                    <rect x="202" y="27" width="44" height="18" fill="#1F2BE0"/>
+                                </g>
+                            </svg>
+                            <div style="font-size:14px; font-weight:700; color:var(--color-ink);" id="kfoldStateText">Purpose: Check whether model performs consistently on unseen data.</div>
                         </div>
 
-                        <div class="ledger-item-card reveal reveal-delay-2">
-                            <span class="mono-tag">METHOD 02 // ENSEMBLE LEARNING</span>
-                            <h3 style="font-size:26px;">Bagging vs. Boosting</h3>
-                            <p style="font-size:15px; line-height:1.45;"><strong>Bagging</strong> (Random Forest) reduces variance by averaging diverse trees. <strong>Boosting</strong> (XGBoost) reduces bias sequentially.</p>
+                        <!-- Tool 2: Regularization -->
+                        <div class="toolkit-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid var(--color-ink); padding-bottom:6px;">
+                                <span class="mono-tag" style="font-weight:700;">⚙️ REGULARIZATION</span>
+                                <span class="micro-label">L1 / L2</span>
+                            </div>
+                            <p style="font-size:15px; line-height:1.45;">Add a mathematical penalty for unnecessary model complexity (e.g. Lasso &amp; Ridge).</p>
+                            <div style="background:var(--color-paper); border:1px solid var(--color-ink); padding:8px 12px; font-family:var(--font-mono); font-size:13px;">
+                                Loss + &lambda; &times; (Complexity Penalty)
+                            </div>
+                            <div style="font-size:14px; font-weight:700; color:var(--color-ink);">Purpose: Prevent the model from becoming too complex or wild.</div>
                         </div>
 
-                        <div class="ledger-item-card reveal reveal-delay-3">
-                            <span class="mono-tag">METHOD 03 // EARLY STOPPING</span>
-                            <h3 style="font-size:26px;">Validation-Based Halting</h3>
-                            <p style="font-size:15px; line-height:1.45;">Halt neural network training the exact epoch validation loss begins climbing, even if training loss continues plummeting.</p>
+                        <!-- Tool 3: Control Model Complexity -->
+                        <div class="toolkit-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid var(--color-ink); padding-bottom:6px;">
+                                <span class="mono-tag" style="font-weight:700;">🌳 CONTROL MODEL CAPACITY</span>
+                                <span class="micro-label">HYPERPARAMETERS</span>
+                            </div>
+                            <p style="font-size:15px; line-height:1.45;">Limit decision tree depth, choose appropriate polynomial degrees, select key features.</p>
+                            <div style="background:var(--color-paper); border:1px solid var(--color-ink); padding:8px 12px; font-family:var(--font-mono); font-size:13px;">
+                                &bull; Tree Depth Limits &bull; Feature Selection
+                            </div>
+                            <div style="font-size:14px; font-weight:700; color:var(--color-ink);">Purpose: Keep the model at an appropriate level of complexity.</div>
                         </div>
 
-                        <div class="ledger-item-card reveal reveal-delay-4">
-                            <span class="mono-tag">METHOD 04 // DATA EXPANSION</span>
-                            <h3 style="font-size:26px;">Gather More Training Data</h3>
-                            <p style="font-size:15px; line-height:1.45;">More diverse training examples directly shrinks variance without increasing bias — the only free lunch in statistical learning.</p>
+                        <!-- Tool 4: More Representative Data -->
+                        <div class="toolkit-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid var(--color-ink); padding-bottom:6px;">
+                                <span class="mono-tag" style="font-weight:700;">📚 MORE REPRESENTATIVE DATA</span>
+                                <span class="micro-label">DATASET</span>
+                            </div>
+                            <p style="font-size:15px; line-height:1.45;">More useful and representative training examples can help the model learn the real pattern.</p>
+                            <div style="background:var(--color-paper); border:1px solid var(--color-ink); padding:8px 12px; font-family:var(--font-mono); font-size:13px;">
+                                Diverse Samples &rarr; Noise Drowns Out
+                            </div>
+                            <div style="font-size:14px; font-weight:700; color:var(--color-ink);">Purpose: Learn the real underlying pattern rather than random noise.</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="slide-footer">
-                    <div class="footer-nav-hint">Student 3 &bull; Production Implementation Best Practices</div>
+                    <div class="footer-nav-hint">Student 3 &bull; Applied Machine Learning Techniques</div>
                     <div class="footer-pagenum">09 / 10</div>
                 </div>
             </section>
 
-            <!-- SLIDE 10: Conclusion & Manifesto (All Presenters) -->
-            <section class="slide" data-slide="9" data-act="3" data-topic="CONCLUSION & MANIFESTO">
+            <!-- SLIDE 10: Final Takeaway (Student 3 / All) -->
+            <section class="slide" data-slide="9" data-act="3" data-topic="FINAL TAKEAWAY">
                 <div class="slide-topbar">
                     <div class="slide-topbar-left">
                         <span class="presenter-pill">ALL PRESENTERS</span>
-                        <h2 class="slide-title">Conclusion: The Goal is Generalization</h2>
+                        <h2 class="slide-title">The Big Picture &amp; Final Takeaway</h2>
                     </div>
                     <div class="slide-topbar-right">SUMMARY &bull; Q&amp;A</div>
                 </div>
 
                 <div class="slide-body">
                     <div class="manifesto-grand-layout">
-                        <div class="grand-quote-banner reveal">
-                            <span class="micro-label">THE FUNDAMENTAL LAW OF MACHINE LEARNING</span>
-                            <div class="grand-quote-text">
-                                "The ultimate objective of machine learning is <strong>never</strong> to achieve 100% training accuracy. It is to find the optimal complexity that generalizes accurately to unseen future data."
+                        <!-- Big Picture Flow -->
+                        <div class="big-picture-flow reveal">
+                            <div class="micro-label" style="text-align:center;">MODEL COMPLEXITY SPECTRUM</div>
+                            
+                            <div class="flow-nodes-row">
+                                <div class="flow-node-box">
+                                    <span class="mono-tag" style="color:var(--color-alert-red); font-weight:700;">TOO SIMPLE</span>
+                                    <div style="font-size:14px; font-weight:700;">High Bias</div>
+                                    <div style="font-size:13px; color:var(--color-alert-red);">Underfitting</div>
+                                </div>
+                                <span style="font-size:24px; font-weight:900; color:var(--color-ink); text-align:center;">&rarr;</span>
+                                <div class="flow-node-box highlight">
+                                    <span class="mono-tag" style="color:var(--color-ink); font-weight:900;">&star; JUST RIGHT</span>
+                                    <div style="font-size:14px; font-weight:900;">Balanced</div>
+                                    <div style="font-size:13px; font-weight:700; color:var(--color-ink);">Good Fit</div>
+                                </div>
+                                <span style="font-size:24px; font-weight:900; color:var(--color-ink); text-align:center;">&rarr;</span>
+                                <div class="flow-node-box">
+                                    <span class="mono-tag" style="color:var(--color-alert-cyan); font-weight:700;">TOO COMPLEX</span>
+                                    <div style="font-size:14px; font-weight:700;">High Variance</div>
+                                    <div style="font-size:13px; color:var(--color-alert-cyan);">Overfitting</div>
+                                </div>
                             </div>
                         </div>
 
+                        <!-- 3 Core Things to Remember -->
                         <div class="conclusion-3points reveal reveal-delay-2">
                             <div class="concl-card">
-                                <span class="mono-tag" style="color:var(--color-alert-red); font-weight:700;">1. HIGH BIAS</span>
-                                <p style="font-size:15px; line-height:1.4;">Model is too rigid. Fix by adding features, relaxing constraints, or increasing capacity.</p>
+                                <span class="mono-tag" style="color:var(--color-alert-red); font-weight:700;">1. BIAS</span>
+                                <p style="font-size:15px; line-height:1.4;">Model is too simple &rarr; misses patterns in the data.</p>
                             </div>
 
                             <div class="concl-card">
-                                <span class="mono-tag" style="color:var(--color-alert-cyan); font-weight:700;">2. HIGH VARIANCE</span>
-                                <p style="font-size:15px; line-height:1.4;">Model is over-sensitive. Fix with cross-validation, regularization, and gathering more data.</p>
+                                <span class="mono-tag" style="color:var(--color-alert-cyan); font-weight:700;">2. VARIANCE</span>
+                                <p style="font-size:15px; line-height:1.4;">Model is too sensitive &rarr; learns noise instead of pattern.</p>
                             </div>
 
                             <div class="concl-card" style="background:var(--color-paper-highlight); border:2px solid var(--color-ink);">
-                                <span class="mono-tag" style="color:var(--color-ink); font-weight:700;">&star; 3. THE SWEET SPOT</span>
-                                <p style="font-size:15px; line-height:1.4; font-weight:600;">The empirical balance that minimizes total test loss on real-world unseen distributions.</p>
+                                <span class="mono-tag" style="color:var(--color-ink); font-weight:700;">&star; 3. TRADEOFF</span>
+                                <p style="font-size:15px; line-height:1.4; font-weight:600;">Find the right complexity &rarr; better generalization.</p>
+                            </div>
+                        </div>
+
+                        <!-- Grand Punchline Banner -->
+                        <div class="grand-quote-banner reveal reveal-delay-3">
+                            <span class="micro-label">KEY PRESENTATION TAKEAWAY</span>
+                            <div class="grand-quote-text">
+                                "A good machine learning model learns the <strong>pattern</strong>, not the <strong>noise</strong>."
                             </div>
                         </div>
                     </div>
@@ -1714,16 +2149,32 @@
         </main>
     </div>
 
-    <!-- On-screen Navigation Controls -->
-    <div class="deck-controls">
-        <button class="ctrl-btn" id="prevBtn" title="Previous Slide (Left Arrow)">&larr; Prev</button>
-        <span class="slide-progress-text" id="progressIndicator">1 / 10</span>
-        <button class="ctrl-btn" id="nextBtn" title="Next Slide (Right Arrow, Space)">Next &rarr;</button>
+    <!-- On-screen Navigation Controls (Desktop & Mobile) -->
+    <div class="deck-controls" id="deckControls">
+        <button class="ctrl-btn ctrl-btn-prev" id="prevBtn" title="Previous Slide (← / PageUp)">&larr; Prev</button>
+        <span class="slide-progress-text" id="progressIndicator" title="Current Slide">1 / 10</span>
+        <button class="ctrl-btn ctrl-btn-next" id="nextBtn" title="Next Slide (→ / Space / PageDown)">Next &rarr;</button>
+        <button class="ctrl-btn ctrl-btn-fs" id="fullscreenBtn" title="Toggle Fullscreen (F)">⛶ <span class="fs-label">Fullscreen</span></button>
+        <button class="ctrl-btn ctrl-btn-help" id="shortcutsBtn" title="Keyboard Shortcuts (?)">⌨</button>
     </div>
 
-    <!-- Inline Editing Hotzone & Toggle -->
-    <div class="edit-hotzone" id="editHotzone" title="Hover or press E to edit text"></div>
-    <button class="edit-toggle" id="editToggle" title="Edit Mode (Shortcut: E)">&#9998; Edit Mode</button>
+    <!-- Keyboard Shortcuts Modal -->
+    <div class="shortcuts-modal" id="shortcutsModal" onclick="if(event.target===this) window.deck.toggleShortcutsModal()">
+        <div class="shortcuts-card">
+            <div class="shortcuts-header">
+                <span>Presentation Controls</span>
+                <button class="shortcuts-close" onclick="window.deck.toggleShortcutsModal()">&times;</button>
+            </div>
+            <div class="shortcuts-grid">
+                <div class="sc-row"><kbd>&rarr;</kbd> / <kbd>Space</kbd> / <kbd>PgDn</kbd><span>Next Slide</span></div>
+                <div class="sc-row"><kbd>&larr;</kbd> / <kbd>PgUp</kbd><span>Previous Slide</span></div>
+                <div class="sc-row"><kbd>1</kbd> &ndash; <kbd>9</kbd><span>Jump directly to slide</span></div>
+                <div class="sc-row"><kbd>F</kbd><span>Toggle Fullscreen Mode</span></div>
+                <div class="sc-row"><kbd>Home</kbd> / <kbd>End</kbd><span>First / Last Slide</span></div>
+                <div class="sc-row"><kbd>Swipe &larr;&rarr;</kbd><span>Touch gesture slide change</span></div>
+            </div>
+        </div>
+    </div>
 
     <!-- ===========================================
        6. SLIDE PRESENTATION CONTROLLER JS
@@ -1737,6 +2188,9 @@
                 this.progressText = document.getElementById('progressIndicator');
                 this.prevBtn = document.getElementById('prevBtn');
                 this.nextBtn = document.getElementById('nextBtn');
+                this.fullscreenBtn = document.getElementById('fullscreenBtn');
+                this.shortcutsBtn = document.getElementById('shortcutsBtn');
+                this.shortcutsModal = document.getElementById('shortcutsModal');
                 this.topicTag = document.getElementById('liveTopicTag');
                 this.act1Tab = document.getElementById('act1Tab');
                 this.act2Tab = document.getElementById('act2Tab');
@@ -1747,19 +2201,41 @@
                 this.initScaling();
                 this.initNavigation();
                 this.initInteractiveSimulators();
-                this.initEditor();
+                this.checkAdminPrivileges();
                 this.showSlide(0);
             }
 
             initScaling() {
                 const scale = () => {
                     const factor = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
-                    const x = (window.innerWidth - 1920 * factor) / 2;
-                    const y = (window.innerHeight - 1080 * factor) / 2;
+                    const stageW = 1920 * factor;
+                    const stageH = 1080 * factor;
+                    const x = (window.innerWidth - stageW) / 2;
+                    const y = (window.innerHeight - stageH) / 2;
                     this.stage.style.transform = `translate(${x}px, ${y}px) scale(${factor})`;
+
+                    // Write dynamic CSS variables for mobile layout placement in blank areas
+                    document.documentElement.style.setProperty('--stage-top', `${y}px`);
+                    document.documentElement.style.setProperty('--stage-bottom', `${y + stageH}px`);
+                    document.documentElement.style.setProperty('--stage-height', `${stageH}px`);
                 };
                 scale();
                 window.addEventListener('resize', scale);
+                window.addEventListener('orientationchange', () => setTimeout(scale, 150));
+            }
+
+            requestLandscape() {
+                // Try Fullscreen API
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(() => {});
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen();
+                }
+
+                // Try Screen Orientation Lock API
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape').catch(() => {});
+                }
             }
 
             initNavigation() {
@@ -1778,34 +2254,77 @@
                     } else if (e.key === 'End') {
                         e.preventDefault();
                         this.showSlide(this.slides.length - 1);
+                    } else if (e.key === 'f' || e.key === 'F') {
+                        e.preventDefault();
+                        this.toggleFullscreen();
+                    } else if (e.key === '?' || e.key === 'h' || e.key === 'H') {
+                        e.preventDefault();
+                        this.toggleShortcutsModal();
+                    } else if (e.key === 'Escape') {
+                        if (this.shortcutsModal && this.shortcutsModal.classList.contains('show')) {
+                            this.toggleShortcutsModal();
+                        }
+                    } else if (e.key >= '1' && e.key <= '9') {
+                        const num = parseInt(e.key) - 1;
+                        if (num < this.slides.length) {
+                            this.showSlide(num);
+                        }
                     }
                 });
 
-                this.prevBtn.addEventListener('click', () => this.prev());
-                this.nextBtn.addEventListener('click', () => this.next());
+                if (this.prevBtn) this.prevBtn.addEventListener('click', () => this.prev());
+                if (this.nextBtn) this.nextBtn.addEventListener('click', () => this.next());
+                if (this.fullscreenBtn) this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+                if (this.shortcutsBtn) this.shortcutsBtn.addEventListener('click', () => this.toggleShortcutsModal());
 
                 // Breadcrumb Clicks
                 [this.act1Tab, this.act2Tab, this.act3Tab].forEach(tab => {
-                    tab.addEventListener('click', () => {
-                        const targetSlide = parseInt(tab.getAttribute('data-start'));
-                        this.showSlide(targetSlide);
-                    });
+                    if (tab) {
+                        tab.addEventListener('click', () => {
+                            const targetSlide = parseInt(tab.getAttribute('data-start'));
+                            this.showSlide(targetSlide);
+                        });
+                    }
                 });
 
-                let startX = 0, startY = 0;
+                let startX = 0, startY = 0, isInteractiveTouch = false;
                 document.addEventListener('touchstart', (e) => {
+                    isInteractiveTouch = !!e.target.closest('input, .styled-slider, button, a, #ucurveTrackBox, #varPointsGroup, .shortcuts-card');
                     startX = e.touches[0].clientX;
                     startY = e.touches[0].clientY;
                 }, { passive: true });
 
                 document.addEventListener('touchend', (e) => {
+                    if (isInteractiveTouch) return;
                     const diffX = e.changedTouches[0].clientX - startX;
                     const diffY = e.changedTouches[0].clientY - startY;
-                    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
                         if (diffX < 0) this.next();
                         else this.prev();
                     }
                 }, { passive: true });
+            }
+
+            toggleFullscreen() {
+                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                    if (document.documentElement.requestFullscreen) {
+                        document.documentElement.requestFullscreen().catch(() => {});
+                    } else if (document.documentElement.webkitRequestFullscreen) {
+                        document.documentElement.webkitRequestFullscreen();
+                    }
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen().catch(() => {});
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    }
+                }
+            }
+
+            toggleShortcutsModal() {
+                if (this.shortcutsModal) {
+                    this.shortcutsModal.classList.toggle('show');
+                }
             }
 
             showSlide(index) {
@@ -1845,31 +2364,7 @@
             }
 
             initInteractiveSimulators() {
-                // Slide 2: Equation Linked Hover
-                const terms = [
-                    { term: document.getElementById('eqTermBias'), card: document.getElementById('cardBias') },
-                    { term: document.getElementById('eqTermVar'), card: document.getElementById('cardVar') },
-                    { term: document.getElementById('eqTermNoise'), card: document.getElementById('cardNoise') }
-                ];
-
-                terms.forEach(item => {
-                    if (item.term && item.card) {
-                        item.term.addEventListener('mouseenter', () => {
-                            item.card.classList.add('highlighted');
-                        });
-                        item.term.addEventListener('mouseleave', () => {
-                            item.card.classList.remove('highlighted');
-                        });
-                        item.card.addEventListener('mouseenter', () => {
-                            item.term.classList.add('active');
-                        });
-                        item.card.addEventListener('mouseleave', () => {
-                            item.term.classList.remove('active');
-                        });
-                    }
-                });
-
-                // Slide 3: Bias Simulator
+                // Slide 2: Bias Underfitting Simulator
                 const btnBiasRigid = document.getElementById('btnBiasRigid');
                 const btnBiasTrue = document.getElementById('btnBiasTrue');
                 const biasModelLine = document.getElementById('biasModelLine');
@@ -2057,11 +2552,38 @@
                 }
             }
 
-            initEditor() {
-                const hotzone = document.getElementById('editHotzone');
-                const toggle = document.getElementById('editToggle');
-                let timeout = null;
+            async checkAdminPrivileges() {
+                try {
+                    const res = await fetch('/api/auth-status', { cache: 'no-store' });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data && data.authenticated) {
+                            const hubBtn = document.getElementById('hubNavBtn');
+                            if (hubBtn) hubBtn.style.display = 'inline-block';
+                            this.mountEditor();
+                        }
+                    }
+                } catch (err) {
+                    // Public viewer or non-edge environment: strictly read-only mode
+                }
+            }
 
+            mountEditor() {
+                const hotzone = document.createElement('div');
+                hotzone.className = 'edit-hotzone';
+                hotzone.id = 'editHotzone';
+                hotzone.title = 'Hover or press E to edit text';
+
+                const toggle = document.createElement('button');
+                toggle.className = 'edit-toggle';
+                toggle.id = 'editToggle';
+                toggle.title = 'Edit Mode (Shortcut: E)';
+                toggle.innerHTML = '&#9998; Edit Mode';
+
+                document.body.appendChild(hotzone);
+                document.body.appendChild(toggle);
+
+                let timeout = null;
                 const showToggle = () => {
                     clearTimeout(timeout);
                     toggle.classList.add('show');
@@ -2107,6 +2629,16 @@
         window.addEventListener('DOMContentLoaded', () => {
             window.deck = new PresentationController();
         });
+
+        // Actively purge any Netlify preview drawer or badge injections
+        const purgeNetlifyInjections = () => {
+            const targets = document.querySelectorAll(
+                '#netlify-drawer, [data-netlify-drawer], [data-netlify-feedback], .netlify-feedback-widget, iframe[src*="netlify"], iframe[data-netlify], netlify-drawer'
+            );
+            targets.forEach(el => el.remove());
+        };
+        purgeNetlifyInjections();
+        new MutationObserver(purgeNetlifyInjections).observe(document.documentElement, { childList: true, subtree: true });
     </script>
 </body>
 </html>
