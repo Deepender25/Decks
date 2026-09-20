@@ -345,23 +345,71 @@
             z-index: -9999 !important;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
             body {
-                padding: 16px;
+                padding: 24px 20px;
+            }
+            .bauhaus-header {
+                margin-bottom: 24px;
+                padding-bottom: 14px;
+            }
+            .cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+                gap: 24px;
+                min-height: auto;
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 16px 12px;
+            }
+            .bauhaus-header {
+                margin-bottom: 16px;
+                padding-bottom: 12px;
+            }
+            .brand-text {
+                font-size: 17px;
+                letter-spacing: 0.04em;
             }
             .cards-grid {
                 grid-template-columns: 1fr;
-                gap: 24px;
+                gap: 20px;
+                min-height: auto;
+            }
+            .slide-card {
+                box-shadow: 4px 4px 0px 0px #121212;
+            }
+            .card-topbar {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+            .btn-action {
+                padding: 12px 6px;
+                font-size: 12px;
+                min-height: 44px;
             }
             .pagination-container {
+                padding-top: 20px;
                 flex-wrap: wrap;
                 gap: 6px;
             }
             .page-btn {
-                min-width: 38px;
-                height: 38px;
-                padding: 0 10px;
+                min-width: 40px;
+                height: 40px;
+                padding: 0 12px;
                 font-size: 13px;
+                box-shadow: 2px 2px 0px 0px #121212;
+            }
+            .bauhaus-toast {
+                left: 12px;
+                right: 12px;
+                bottom: 16px;
+                text-align: center;
+                justify-content: center;
+                padding: 12px 16px;
+                font-size: 13px;
+                box-shadow: 4px 4px 0px 0px #121212;
             }
         }
     </style>
@@ -392,40 +440,6 @@
                     <a href="decks/bias-variance-cobalt/index.html" class="btn-action btn-open">Open</a>
                     <a href="decks/bias-variance-cobalt/index.html" download="bias-variance-cobalt-deck.html" class="btn-action btn-download">Download</a>
                     <button class="btn-action btn-share" onclick="shareSlideLink('decks/bias-variance-cobalt/index.html')">Share</button>
-                </div>
-            </div>
-
-            <!-- CARD 02 -->
-            <div class="slide-card">
-                <a href="decks/bias-variance-editorial/index.html" class="card-main-link" title="Open 02. The Bias–Variance Tradeoff (Soft Editorial)">
-                    <div class="card-topbar">
-                        <span>02. The Bias–Variance Tradeoff (Soft Editorial)</span>
-                    </div>
-                    <div class="slide-viewport-box">
-                        <iframe src="decks/bias-variance-editorial/index.html" class="slide-iframe-preview" loading="lazy" tabindex="-1"></iframe>
-                    </div>
-                </a>
-                <div class="card-bottom-strip">
-                    <a href="decks/bias-variance-editorial/index.html" class="btn-action btn-open">Open</a>
-                    <a href="decks/bias-variance-editorial/index.html" download="bias-variance-editorial-deck.html" class="btn-action btn-download">Download</a>
-                    <button class="btn-action btn-share" onclick="shareSlideLink('decks/bias-variance-editorial/index.html')">Share</button>
-                </div>
-            </div>
-
-            <!-- CARD 03 -->
-            <div class="slide-card">
-                <a href="decks/bias-variance-neogrid/index.html" class="card-main-link" title="Open 03. The Bias–Variance Tradeoff (Neo-Grid Bold)">
-                    <div class="card-topbar">
-                        <span>03. The Bias–Variance Tradeoff (Neo-Grid Bold)</span>
-                    </div>
-                    <div class="slide-viewport-box">
-                        <iframe src="decks/bias-variance-neogrid/index.html" class="slide-iframe-preview" loading="lazy" tabindex="-1"></iframe>
-                    </div>
-                </a>
-                <div class="card-bottom-strip">
-                    <a href="decks/bias-variance-neogrid/index.html" class="btn-action btn-open">Open</a>
-                    <a href="decks/bias-variance-neogrid/index.html" download="bias-variance-neogrid-deck.html" class="btn-action btn-download">Download</a>
-                    <button class="btn-action btn-share" onclick="shareSlideLink('decks/bias-variance-neogrid/index.html')">Share</button>
                 </div>
             </div>
 
@@ -540,8 +554,28 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        function scaleIframePreviews() {
+            const boxes = document.querySelectorAll('.slide-viewport-box');
+            boxes.forEach(box => {
+                const iframe = box.querySelector('.slide-iframe-preview');
+                if (iframe && box.clientWidth > 0) {
+                    const scale = box.clientWidth / 1920;
+                    iframe.style.transform = `scale(${scale})`;
+                    iframe.style.transformOrigin = '0 0';
+                    iframe.style.left = '0';
+                    iframe.style.top = '0';
+                }
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             renderPage(1);
+            scaleIframePreviews();
+            window.addEventListener('resize', scaleIframePreviews);
+            if (window.ResizeObserver) {
+                const ro = new ResizeObserver(scaleIframePreviews);
+                document.querySelectorAll('.slide-viewport-box').forEach(b => ro.observe(b));
+            }
         });
 
         // Actively purge any Netlify preview drawer or badge injections
