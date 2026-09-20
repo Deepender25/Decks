@@ -319,6 +319,32 @@
             pointer-events: auto;
         }
 
+        /* Permanently Hide Any Injected Netlify Badges/Drawers */
+        #netlify-drawer,
+        iframe[src*="netlify"],
+        iframe[data-netlify],
+        iframe[title*="Netlify"],
+        .netlify-feedback-widget,
+        [data-netlify-drawer],
+        [data-netlify-feedback],
+        [id*="netlify-drawer"],
+        [id*="netlify-feedback"],
+        [class*="netlify-feedback"],
+        [class*="netlify-drawer"],
+        netlify-drawer {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            position: absolute !important;
+            top: -9999px !important;
+            left: -9999px !important;
+            clip: rect(0, 0, 0, 0) !important;
+            z-index: -9999 !important;
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 16px;
@@ -517,6 +543,16 @@
         document.addEventListener('DOMContentLoaded', () => {
             renderPage(1);
         });
+
+        // Actively purge any Netlify preview drawer or badge injections
+        const purgeNetlifyInjections = () => {
+            const targets = document.querySelectorAll(
+                '#netlify-drawer, [data-netlify-drawer], [data-netlify-feedback], .netlify-feedback-widget, iframe[src*="netlify"], iframe[data-netlify], netlify-drawer'
+            );
+            targets.forEach(el => el.remove());
+        };
+        purgeNetlifyInjections();
+        new MutationObserver(purgeNetlifyInjections).observe(document.documentElement, { childList: true, subtree: true });
     </script>
 
 </body>
