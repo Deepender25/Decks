@@ -88,6 +88,59 @@
             letter-spacing: 0.05em;
         }
 
+        .header-admin-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            background: var(--fg);
+            color: var(--white);
+            padding: 5px 10px;
+        }
+
+        .admin-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--yellow);
+            display: inline-block;
+        }
+
+        .btn-logout {
+            font-family: var(--font-main);
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: var(--white);
+            color: var(--fg);
+            border: 2px solid var(--border);
+            box-shadow: 2px 2px 0px 0px #121212;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: transform 0.05s ease, background-color 0.1s ease, color 0.1s ease, box-shadow 0.05s ease;
+        }
+
+        .btn-logout:hover {
+            background: var(--red);
+            color: var(--white);
+            transform: translate(-1px, -1px);
+            box-shadow: 3px 3px 0px 0px #121212;
+        }
+
+        .btn-logout:active {
+            transform: translate(1px, 1px);
+            box-shadow: none;
+        }
+
         /* Presentation Cards Grid */
         .cards-grid {
             display: grid;
@@ -418,9 +471,13 @@
 
     <div class="bauhaus-container">
 
-        <!-- Top Minimal Bauhaus Header (No Shapes) -->
+        <!-- Top Minimal Bauhaus Header with Admin Control -->
         <header class="bauhaus-header">
             <span class="brand-text">Slides Directory</span>
+            <div class="header-admin-controls">
+                <span class="admin-badge"><span class="admin-dot"></span> ADMIN MODE</span>
+                <button class="btn-logout" onclick="logoutSession()" title="Lock Lobby and Sign Out">[ LOGOUT ]</button>
+            </div>
         </header>
 
         <!-- Rectangular Slide Cards Grid (3 Presentation Decks) -->
@@ -566,6 +623,13 @@
                     iframe.style.top = '0';
                 }
             });
+        }
+
+        async function logoutSession() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+            } catch (err) {}
+            window.location.reload();
         }
 
         document.addEventListener('DOMContentLoaded', () => {

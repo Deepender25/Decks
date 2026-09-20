@@ -1,6 +1,20 @@
 # Netlify Configuration for Slide Decks
 [build]
   publish = "."
+  edge_functions = "netlify/edge-functions"
+
+# Edge Function Authentication Routing
+[[edge_functions]]
+  path = "/"
+  function = "auth"
+
+[[edge_functions]]
+  path = "/index.html"
+  function = "auth"
+
+[[edge_functions]]
+  path = "/api/*"
+  function = "auth"
 
 # Clean URL and Security Headers
 [[headers]]

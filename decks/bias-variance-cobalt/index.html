@@ -1813,10 +1813,6 @@
         <button class="ctrl-btn" id="nextBtn" title="Next Slide (Right Arrow, Space)">Next &rarr;</button>
     </div>
 
-    <!-- Inline Editing Hotzone & Toggle -->
-    <div class="edit-hotzone" id="editHotzone" title="Hover or press E to edit text"></div>
-    <button class="edit-toggle" id="editToggle" title="Edit Mode (Shortcut: E)">&#9998; Edit Mode</button>
-
     <!-- ===========================================
        6. SLIDE PRESENTATION CONTROLLER JS
        =========================================== -->
@@ -1839,7 +1835,7 @@
                 this.initScaling();
                 this.initNavigation();
                 this.initInteractiveSimulators();
-                this.initEditor();
+                this.checkAdminPrivileges();
                 this.showSlide(0);
             }
 
@@ -2151,11 +2147,36 @@
                 }
             }
 
-            initEditor() {
-                const hotzone = document.getElementById('editHotzone');
-                const toggle = document.getElementById('editToggle');
-                let timeout = null;
+            async checkAdminPrivileges() {
+                try {
+                    const res = await fetch('/api/auth-status', { cache: 'no-store' });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data && data.authenticated) {
+                            this.mountEditor();
+                        }
+                    }
+                } catch (err) {
+                    // Public viewer or non-edge environment: strictly read-only mode
+                }
+            }
 
+            mountEditor() {
+                const hotzone = document.createElement('div');
+                hotzone.className = 'edit-hotzone';
+                hotzone.id = 'editHotzone';
+                hotzone.title = 'Hover or press E to edit text';
+
+                const toggle = document.createElement('button');
+                toggle.className = 'edit-toggle';
+                toggle.id = 'editToggle';
+                toggle.title = 'Edit Mode (Shortcut: E)';
+                toggle.innerHTML = '&#9998; Edit Mode';
+
+                document.body.appendChild(hotzone);
+                document.body.appendChild(toggle);
+
+                let timeout = null;
                 const showToggle = () => {
                     clearTimeout(timeout);
                     toggle.classList.add('show');
